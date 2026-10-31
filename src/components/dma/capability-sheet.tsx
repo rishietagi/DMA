@@ -26,6 +26,8 @@ import { seed } from "@/lib/seed";
 import { useSession } from "@/lib/store/session";
 import { cn } from "@/lib/utils";
 import { BAND_LABEL, ConfidenceRing } from "./confidence-ring";
+import { useDetailed } from "./explain";
+import { explainScore } from "@/lib/explain-score";
 import { FlagRow } from "./flags";
 import { MaturityChip } from "./maturity";
 import { ProvenanceLabel } from "./provenance";
@@ -274,6 +276,9 @@ export function CapabilitySheet({
   const audit = useSession((s) => s.audit);
   const evidence = useSession((s) => s.evidence);
   const [tab, setTab] = React.useState("breakdown");
+  const detailed = useDetailed();
+  const [showFull, setShowFull] = React.useState(false);
+  React.useEffect(() => setShowFull(false), [c?.capability.id]);
   React.useEffect(() => {
     if (open) setTab(focusDimension ? "evidence" : "breakdown");
   }, [open, focusDimension, c?.capability.id]);
@@ -300,7 +305,7 @@ export function CapabilitySheet({
         <div className={cn("mx-6 mt-4 grid grid-cols-[1fr_auto] gap-4 rounded-xl p-4", c.status === "suggested" ? "ai-surface" : "border border-validated/60")}>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
             <div>
-              <p className="text-[11px] text-muted-foreground">2025 self</p>
+              <p className="text-[11px] text-muted-foreground">2025 rating</p>
               <MaturityChip score={c.self} size="lg" provenance="self" />
             </div>
             <div>
@@ -315,11 +320,13 @@ export function CapabilitySheet({
             )}
             <div className="text-xs text-muted-foreground">
               <p>
-                Δ vs self <span className="font-semibold text-foreground tabular">{formatDelta(c.evidenceScore - c.self)}</span>
+                vs 2025 <span className="font-semibold text-foreground tabular">{formatDelta(c.evidenceScore - c.self)}</span>
               </p>
-              <p>
-                Engine value <span className="tabular">{c.evidenceScore.toFixed(2)}</span> · index {Math.round(c.index)}
-              </p>
+              {detailed && (
+                <p>
+                  Engine value <span className="tabular">{c.evidenceScore.toFixed(2)}</span> · index {Math.round(c.index)}
+                </p>
+              )}
               <ProvenanceLabel status={c.status} validation={c.validation} className="mt-1" />
             </div>
           </div>
@@ -329,14 +336,37 @@ export function CapabilitySheet({
           </div>
         </div>
 
+        {(() => {
+          const ex = explainScore(c);
+          return (
+            <section aria-label="Why this score" className="mx-6 mt-4 rounded-xl bg-muted/50 px-4 py-3">
+              <h3 className="text-[13px] font-semibold">Why this score</h3>
+              <p className="mt-1 text-[14px] leading-relaxed">{ex.headline}</p>
+              <ul className="mt-1.5 flex list-disc flex-col gap-1 pl-5 text-[13px] leading-relaxed text-foreground/85">
+                {ex.reasons.map((r, i) => (
+                  <li key={i}>{r}</li>
+                ))}
+              </ul>
+              <p className="mt-2 text-[13px] font-medium">{ex.next}</p>
+            </section>
+          );
+        })()}
+
+        {!detailed && !showFull ? (
+          <div className="mx-6 mt-3 flex-1">
+            <Button variant="outline" size="sm" onClick={() => setShowFull(true)}>
+              Show the evidence and calculation
+            </Button>
+          </div>
+        ) : (
         <Tabs value={tab} onValueChange={setTab} className="mt-4 min-h-0 flex-1 px-6">
           <TabsList>
-            <TabsTrigger value="breakdown">Score breakdown</TabsTrigger>
+            <TabsTrigger value="breakdown">Calculation</TabsTrigger>
             <TabsTrigger value="evidence">
               <MessageSquareQuote />
               Evidence ({evidenceCount})
             </TabsTrigger>
-            <TabsTrigger value="flags">Flags ({c.flags.length})</TabsTrigger>
+            <TabsTrigger value="flags">Needs attention ({c.flags.length})</TabsTrigger>
             <TabsTrigger value="history">
               <History />
               History
@@ -427,10 +457,11 @@ export function CapabilitySheet({
             </TabsContent>
           </div>
         </Tabs>
+        )}
 
         <div className="border-t bg-card px-6 py-4" data-tour="validation">
           <ValidationPanel c={c} />
-          <p className="mt-2 text-[11px] text-muted-foreground">
+          <p className={cn("mt-2 text-[11px] text-muted-foreground", !detailed && "hidden")}>
             Evidence categories: {[...new Set(DIMENSIONS.flatMap((d) => c.dimensions[d]?.contributing.map((i) => i.category).filter(Boolean) ?? []))].map((x) => EVIDENCE_CATEGORY_LABELS[x!]).join(", ") || "none"}
           </p>
         </div>

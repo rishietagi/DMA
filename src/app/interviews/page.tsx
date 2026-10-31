@@ -2,17 +2,32 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { AlertTriangle, FileStack, Lock, MessageSquarePlus, Sparkles, ThumbsDown, ThumbsUp } from "lucide-react";
+import {
+  AlertTriangle,
+  FileStack,
+  Lock,
+  MessageSquarePlus,
+  Sparkles,
+  ThumbsDown,
+  ThumbsUp,
+} from "lucide-react";
 import { useAssessment } from "@/components/providers/assessment-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Textarea } from "@/components/ui/form-controls";
 import { Label } from "@/components/ui/misc";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/overlays";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/overlays";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HighlightedQuote } from "@/components/dma/capability-sheet";
 import { MaturityChip, maturityStyle } from "@/components/dma/maturity";
 import { Page, PageHeader } from "@/components/dma/page-header";
+import { PageIntro } from "@/components/dma/explain";
 import { ingest, loadDemoEvidence } from "@/lib/actions";
 import { runAgent } from "@/lib/ai/client";
 import { findContradictions, themeMatrix, THEMES } from "@/lib/classifier";
@@ -28,28 +43,38 @@ const crossCutting = seed.questionBank.functions.find((f) => f.functionId === "*
 
 function QuestionCard({ q, fn }: { q: Question; fn: FunctionId }) {
   const { result } = useAssessment();
-  const response = useSession((s) => s.responses.find((r) => r.questionId === q.id && r.functionId === fn));
+  const response = useSession((s) =>
+    s.responses.find((r) => r.questionId === q.id && r.functionId === fn),
+  );
   const setResponse = useSession((s) => s.setResponse);
   const [notes, setNotes] = React.useState(response?.notes ?? "");
   const caps = questionCapabilities(q, fn, seed.baseline.capabilities);
   const answered = response !== undefined;
 
   const save = (level: Level | null, extra: { notes?: string } = {}) =>
-    setResponse({ questionId: q.id, functionId: fn, level, notes: extra.notes ?? notes, answeredBy: response?.answeredBy ?? "Workshop" });
+    setResponse({
+      questionId: q.id,
+      functionId: fn,
+      level,
+      notes: extra.notes ?? notes,
+      answeredBy: response?.answeredBy ?? "Workshop",
+    });
 
   return (
-    <article className="rounded-xl border bg-card p-4" aria-labelledby={`${q.id}-${fn}-t`}>
-      <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-        <span className="font-medium tabular text-foreground/70">{q.id.toUpperCase()}</span>
+    <article className="bg-card rounded-xl border p-4" aria-labelledby={`${q.id}-${fn}-t`}>
+      <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-[11px]">
+        <span className="tabular text-foreground/70 font-medium">{q.id.toUpperCase()}</span>
         <span className="rounded border px-1">{DIMENSION_LABELS[q.dimension]}</span>
         <span>weight {q.weight}</span>
         {q.gateKey && (
-          <span className="inline-flex items-center gap-1 rounded bg-muted px-1">
+          <span className="bg-muted inline-flex items-center gap-1 rounded px-1">
             <Lock className="size-3" aria-hidden />
             gate: {q.gateKey.split(".")[1]?.replace(/_/g, " ")}
           </span>
         )}
-        {answered && response?.answeredBy && <span className="ml-auto">Answered by {response.answeredBy}</span>}
+        {answered && response?.answeredBy && (
+          <span className="ml-auto">Answered by {response.answeredBy}</span>
+        )}
       </div>
       <h3 id={`${q.id}-${fn}-t`} className="mt-1.5 text-sm font-medium">
         {q.text}
@@ -65,14 +90,19 @@ function QuestionCard({ q, fn }: { q: Question; fn: FunctionId }) {
               aria-checked={selected}
               onClick={() => save(o.level)}
               className={cn(
-                "flex max-w-[260px] items-start gap-2 rounded-lg border px-2.5 py-1.5 text-left text-xs transition-colors outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring",
-                selected && "border-transparent shadow-sm ring-2 ring-primary/70",
+                "hover:bg-accent focus-visible:ring-ring flex max-w-[260px] items-start gap-2 rounded-lg border px-2.5 py-1.5 text-left text-xs transition-colors outline-none focus-visible:ring-2",
+                selected && "ring-primary/70 border-transparent shadow-sm ring-2",
                 o.level === null && "text-muted-foreground",
               )}
               style={selected && o.level !== null ? maturityStyle(o.level) : undefined}
             >
               {o.level !== null && (
-                <span className={cn("mt-px inline-grid size-4 shrink-0 place-items-center rounded text-[10px] font-semibold tabular", !selected && "bg-muted")}>
+                <span
+                  className={cn(
+                    "tabular mt-px inline-grid size-4 shrink-0 place-items-center rounded text-[10px] font-semibold",
+                    !selected && "bg-muted",
+                  )}
+                >
                   {o.level}
                 </span>
               )}
@@ -85,20 +115,32 @@ function QuestionCard({ q, fn }: { q: Question; fn: FunctionId }) {
         <Textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          onBlur={() => answered && notes !== (response?.notes ?? "") && save(response!.level, { notes })}
+          onBlur={() =>
+            answered && notes !== (response?.notes ?? "") && save(response!.level, { notes })
+          }
           placeholder="Notes and examples heard in the workshop"
           className="min-h-9 text-[13px]"
           aria-label="Notes"
         />
         <div className="flex flex-wrap items-center gap-1.5 md:max-w-[280px] md:justify-end">
-          <span className="text-[11px] text-muted-foreground">Feeds</span>
+          <span className="text-muted-foreground text-[11px]">Feeds</span>
           {caps.slice(0, 4).map((id) => (
-            <Link key={id} href={`/scoring?cap=${id}&dim=${q.dimension}`} className="inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[11px] hover:bg-accent">
+            <Link
+              key={id}
+              href={`/scoring?cap=${id}&dim=${q.dimension}`}
+              className="hover:bg-accent inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[11px]"
+            >
               {capabilityLabel(id)}
-              <MaturityChip score={result.byId[id]?.dimensions[q.dimension]?.final} size="sm" className="h-4 min-w-6 text-[10px]" />
+              <MaturityChip
+                score={result.byId[id]?.dimensions[q.dimension]?.final}
+                size="sm"
+                className="h-4 min-w-6 text-[10px]"
+              />
             </Link>
           ))}
-          {caps.length > 4 && <span className="text-[11px] text-muted-foreground">+{caps.length - 4}</span>}
+          {caps.length > 4 && (
+            <span className="text-muted-foreground text-[11px]">+{caps.length - 4}</span>
+          )}
         </div>
       </div>
     </article>
@@ -111,8 +153,13 @@ function Questionnaire() {
   const responses = useSession((s) => s.responses);
   const bank = bankFor(fn);
   const all = [...bank.questions, ...crossCutting.questions];
-  const answered = all.filter((q) => responses.some((r) => r.questionId === q.id && r.functionId === fn)).length;
-  const sections = [...bank.l1Chain, ...bank.questions.map((q) => q.l2).filter((l) => !bank.l1Chain.includes(l))].filter((v, i, a) => a.indexOf(v) === i);
+  const answered = all.filter((q) =>
+    responses.some((r) => r.questionId === q.id && r.functionId === fn),
+  ).length;
+  const sections = [
+    ...bank.l1Chain,
+    ...bank.questions.map((q) => q.l2).filter((l) => !bank.l1Chain.includes(l)),
+  ].filter((v, i, a) => a.indexOf(v) === i);
   const levelFor = (l2: string) => {
     const ls = bank.questions
       .filter((q) => q.l2 === l2 && q.dimension === "process")
@@ -145,18 +192,21 @@ function Questionnaire() {
             ))}
           </SelectContent>
         </Select>
-        <span className="text-xs text-muted-foreground tabular">
+        <span className="text-muted-foreground tabular text-xs">
           {answered} of {all.length} answered · changes rescore immediately
         </span>
       </div>
 
-      <nav aria-label="L1 process chain" className="rounded-xl border bg-card p-3">
+      <nav aria-label="L1 process chain" className="bg-card rounded-xl border p-3">
         <ol className="flex items-stretch gap-1 overflow-x-auto">
           <li>
             <button
               type="button"
               onClick={() => setStep("all")}
-              className={cn("h-full rounded-lg px-3 py-2 text-xs font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring", step === "all" ? "bg-secondary" : "text-muted-foreground hover:bg-accent")}
+              className={cn(
+                "focus-visible:ring-ring h-full rounded-lg px-3 py-2 text-xs font-medium outline-none focus-visible:ring-2",
+                step === "all" ? "bg-secondary" : "text-muted-foreground hover:bg-accent",
+              )}
               aria-pressed={step === "all"}
             >
               All steps
@@ -166,19 +216,25 @@ function Questionnaire() {
             const lvl = levelFor(s);
             return (
               <li key={s} className="flex items-center gap-1">
-                <span aria-hidden className="text-muted-foreground/50">›</span>
+                <span aria-hidden className="text-muted-foreground/50">
+                  ›
+                </span>
                 <button
                   type="button"
                   onClick={() => setStep(s)}
                   aria-pressed={step === s}
                   className={cn(
-                    "flex min-w-[120px] flex-col items-start gap-1 rounded-lg px-3 py-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    "focus-visible:ring-ring flex min-w-[120px] flex-col items-start gap-1 rounded-lg px-3 py-2 text-left outline-none focus-visible:ring-2",
                     step === s ? "bg-secondary" : "hover:bg-accent",
                   )}
                 >
-                  <span className="text-[10px] text-muted-foreground tabular">Step {i + 1}</span>
+                  <span className="text-muted-foreground tabular text-[10px]">Step {i + 1}</span>
                   <span className="text-xs leading-tight font-medium">{s}</span>
-                  {lvl !== null ? <MaturityChip score={lvl} size="sm" className="h-4 min-w-7 text-[10px]" /> : <span className="h-4 text-[10px] text-muted-foreground">—</span>}
+                  {lvl !== null ? (
+                    <MaturityChip score={lvl} size="sm" className="h-4 min-w-7 text-[10px]" />
+                  ) : (
+                    <span className="text-muted-foreground h-4 text-[10px]">—</span>
+                  )}
                 </button>
               </li>
             );
@@ -205,7 +261,9 @@ function Questionnaire() {
         <section className="flex flex-col gap-3">
           <h2 className="text-sm font-semibold">
             People and AI — asked of every function
-            <span className="ml-2 text-xs font-normal text-muted-foreground">applies to all {FUNCTION_SHORT[fn]} capabilities</span>
+            <span className="text-muted-foreground ml-2 text-xs font-normal">
+              applies to all {FUNCTION_SHORT[fn]} capabilities
+            </span>
           </h2>
           {crossCutting.questions.map((q) => (
             <QuestionCard key={q.id} q={q} fn={fn} />
@@ -218,19 +276,22 @@ function Questionnaire() {
 
 function BoardItem({ e, tone }: { e: EvidenceItem; tone: "pain" | "strength" }) {
   return (
-    <li className="rounded-lg border bg-card p-3">
+    <li className="bg-card rounded-lg border p-3">
       <p className="text-[13px] leading-relaxed">
         “<HighlightedQuote text={e.quote} cues={e.cues} />”
       </p>
-      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
-        <span className="font-medium text-foreground/80">{e.stakeholder}</span>
+      <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
+        <span className="text-foreground/80 font-medium">{e.stakeholder}</span>
         {e.capabilityId && (
           <Link href={`/scoring?cap=${e.capabilityId}`} className="hover:underline">
             {capabilityLabel(e.capabilityId)}
           </Link>
         )}
         {e.themes?.map((t) => (
-          <span key={t} className={cn("rounded px-1", tone === "pain" ? "bg-conf-low/10" : "bg-validated/10")}>
+          <span
+            key={t}
+            className={cn("rounded px-1", tone === "pain" ? "bg-conf-low/10" : "bg-validated/10")}
+          >
             {THEMES.find((x) => x.id === t)?.label}
           </span>
         ))}
@@ -290,7 +351,9 @@ function NotesBoard() {
         <Card>
           <CardHeader>
             <CardTitle>Notes</CardTitle>
-            <CardDescription>{notes.length ? `${notes.length} stakeholders` : "No notes yet"}</CardDescription>
+            <CardDescription>
+              {notes.length ? `${notes.length} stakeholders` : "No notes yet"}
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-2 pt-3">
             {notes.length === 0 && (
@@ -301,13 +364,16 @@ function NotesBoard() {
             )}
             {notes.map((n) => (
               <details key={n.id} className="group rounded-lg border px-3 py-2">
-                <summary className="cursor-pointer list-none text-[13px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring rounded">
+                <summary className="focus-visible:ring-ring cursor-pointer list-none rounded text-[13px] font-medium outline-none focus-visible:ring-2">
                   {n.stakeholder}
-                  <span className="block text-[11px] font-normal text-muted-foreground">
-                    {FUNCTION_SHORT[n.functionId]} · {n.date} · {n.source === "demo" ? "Illustrative" : "Added"}
+                  <span className="text-muted-foreground block text-[11px] font-normal">
+                    {FUNCTION_SHORT[n.functionId]} · {n.date} ·{" "}
+                    {n.source === "demo" ? "Illustrative" : "Added"}
                   </span>
                 </summary>
-                <p className="mt-2 text-xs leading-relaxed whitespace-pre-line text-muted-foreground">{n.text}</p>
+                <p className="text-muted-foreground mt-2 text-xs leading-relaxed whitespace-pre-line">
+                  {n.text}
+                </p>
               </details>
             ))}
           </CardContent>
@@ -315,13 +381,22 @@ function NotesBoard() {
         <Card>
           <CardHeader>
             <CardTitle>Add notes</CardTitle>
-            <CardDescription>Paste notes from an interview or workshop. They are classified like any other evidence.</CardDescription>
+            <CardDescription>
+              Paste notes from an interview or workshop. They are classified like any other
+              evidence.
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3 pt-3">
             <div className="grid grid-cols-2 gap-2">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="note-who">Stakeholder role</Label>
-                <Input id="note-who" value={stakeholder} onChange={(e) => setStakeholder(e.target.value)} placeholder="e.g. MT KAM lead" className="h-8 text-[13px]" />
+                <Input
+                  id="note-who"
+                  value={stakeholder}
+                  onChange={(e) => setStakeholder(e.target.value)}
+                  placeholder="e.g. MT KAM lead"
+                  className="h-8 text-[13px]"
+                />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="note-fn">Function</Label>
@@ -339,8 +414,18 @@ function NotesBoard() {
                 </Select>
               </div>
             </div>
-            <Textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="One point per line works best." className="min-h-28 text-[13px]" aria-label="Interview notes" />
-            <Button size="sm" onClick={() => void addNote()} disabled={busy || text.trim().length < 20 || !stakeholder.trim()}>
+            <Textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="One point per line works best."
+              className="min-h-28 text-[13px]"
+              aria-label="Interview notes"
+            />
+            <Button
+              size="sm"
+              onClick={() => void addNote()}
+              disabled={busy || text.trim().length < 20 || !stakeholder.trim()}
+            >
               <MessageSquarePlus />
               Classify notes
             </Button>
@@ -351,7 +436,12 @@ function NotesBoard() {
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="mr-auto text-sm font-semibold">What stakeholders told us</h2>
-          <Button variant="outline" size="sm" onClick={() => void analyse()} disabled={notes.length === 0}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => void analyse()}
+            disabled={notes.length === 0}
+          >
             <Sparkles />
             Analyse notes
           </Button>
@@ -359,7 +449,7 @@ function NotesBoard() {
         {themes.length > 0 && (
           <div className="flex flex-wrap gap-1.5" aria-label="Recurring themes">
             {themes.map((t) => (
-              <span key={t.themeId} className="rounded-full border bg-card px-2.5 py-1 text-xs">
+              <span key={t.themeId} className="bg-card rounded-full border px-2.5 py-1 text-xs">
                 {t.label} <span className="tabular text-muted-foreground">{t.total}</span>
               </span>
             ))}
@@ -368,50 +458,84 @@ function NotesBoard() {
         <div className="grid gap-4 lg:grid-cols-3">
           <section aria-label="Strengths" className="flex flex-col gap-2">
             <h3 className="flex items-center gap-1.5 text-[13px] font-semibold">
-              <ThumbsUp className="size-4 text-validated" aria-hidden /> Strengths <span className="font-normal text-muted-foreground tabular">{strengths.length}</span>
+              <ThumbsUp className="text-validated size-4" aria-hidden /> Strengths{" "}
+              <span className="text-muted-foreground tabular font-normal">{strengths.length}</span>
             </h3>
             <ul className="flex flex-col gap-2">
               {strengths.map((e) => (
                 <BoardItem key={e.id} e={e} tone="strength" />
               ))}
-              {!strengths.length && <li className="rounded-lg border border-dashed p-3 text-xs text-muted-foreground">None yet.</li>}
+              {!strengths.length && (
+                <li className="text-muted-foreground rounded-lg border border-dashed p-3 text-xs">
+                  None yet.
+                </li>
+              )}
             </ul>
           </section>
           <section aria-label="Pain points" className="flex flex-col gap-2">
             <h3 className="flex items-center gap-1.5 text-[13px] font-semibold">
-              <ThumbsDown className="size-4 text-conf-low" aria-hidden /> Pain points <span className="font-normal text-muted-foreground tabular">{pains.length}</span>
+              <ThumbsDown className="text-conf-low size-4" aria-hidden /> Pain points{" "}
+              <span className="text-muted-foreground tabular font-normal">{pains.length}</span>
             </h3>
             <ul className="flex flex-col gap-2">
               {pains.map((e) => (
                 <BoardItem key={e.id} e={e} tone="pain" />
               ))}
-              {!pains.length && <li className="rounded-lg border border-dashed p-3 text-xs text-muted-foreground">None yet.</li>}
+              {!pains.length && (
+                <li className="text-muted-foreground rounded-lg border border-dashed p-3 text-xs">
+                  None yet.
+                </li>
+              )}
             </ul>
           </section>
-          <section aria-label="Contradictions" className="flex flex-col gap-2" data-tour="contradictions">
+          <section
+            aria-label="Contradictions"
+            className="flex flex-col gap-2"
+            data-tour="contradictions"
+          >
             <h3 className="flex items-center gap-1.5 text-[13px] font-semibold">
-              <AlertTriangle className="size-4 text-conf-med" aria-hidden /> Contradictions <span className="font-normal text-muted-foreground tabular">{contradictions.length}</span>
+              <AlertTriangle className="text-conf-med size-4" aria-hidden /> Contradictions{" "}
+              <span className="text-muted-foreground tabular font-normal">
+                {contradictions.length}
+              </span>
             </h3>
             <ul className="flex flex-col gap-2">
               {contradictions.map((c) => (
-                <li key={c.id} className="rounded-lg border border-conf-med/50 bg-card p-3" data-testid="contradiction">
-                  <Link href={`/scoring?cap=${c.capabilityId}&dim=${c.a.dimension}`} className="text-[13px] font-medium hover:underline">
+                <li
+                  key={c.id}
+                  className="border-conf-med/50 bg-card rounded-lg border p-3"
+                  data-testid="contradiction"
+                >
+                  <Link
+                    href={`/scoring?cap=${c.capabilityId}&dim=${c.a.dimension}`}
+                    className="text-[13px] font-medium hover:underline"
+                  >
                     {capabilityLabel(c.capabilityId)}
                   </Link>
-                  <p className="text-[11px] text-muted-foreground">
-                    {c.kind === "stakeholder-vs-artefact" ? "Stakeholder vs document" : "Stakeholder vs stakeholder"} · {c.diff} levels apart
+                  <p className="text-muted-foreground text-[11px]">
+                    {c.kind === "stakeholder-vs-artefact"
+                      ? "Stakeholder vs document"
+                      : "Stakeholder vs stakeholder"}{" "}
+                    · {c.diff} levels apart
                   </p>
                   {[c.a, c.b].map((x) => (
                     <div key={x.id} className="mt-2 flex gap-2">
                       <MaturityChip score={x.level} size="sm" />
                       <p className="text-xs leading-relaxed">
-                        “{x.quote}”<span className="block text-[11px] text-muted-foreground">{x.stakeholder ?? `${x.docTitle}, ${x.location}`}</span>
+                        “{x.quote}”
+                        <span className="text-muted-foreground block text-[11px]">
+                          {x.stakeholder ?? `${x.docTitle}, ${x.location}`}
+                        </span>
                       </p>
                     </div>
                   ))}
                 </li>
               ))}
-              {!contradictions.length && <li className="rounded-lg border border-dashed p-3 text-xs text-muted-foreground">No contradictions found.</li>}
+              {!contradictions.length && (
+                <li className="text-muted-foreground rounded-lg border border-dashed p-3 text-xs">
+                  No contradictions found.
+                </li>
+              )}
             </ul>
           </section>
         </div>
@@ -423,17 +547,25 @@ function NotesBoard() {
 function InterviewsInner() {
   const notes = useSession((s) => s.notes);
   const params = useSearchParams();
-  const [tab, setTab] = React.useState(params.get("tab") ?? (notes.length ? "notes" : "questionnaire"));
+  const [tab, setTab] = React.useState(
+    params.get("tab") ?? (notes.length ? "notes" : "questionnaire"),
+  );
   React.useEffect(() => {
     const t = params.get("tab");
     if (t) setTab(t);
   }, [params]);
   return (
     <Page>
-      <PageHeader
-        stage={3}
-        title="Interview intelligence"
-        description="Structured questionnaires follow each function’s L1 process chain; every option maps to a maturity level. Interview notes are classified into strengths, pain points and contradictions."
+      <PageHeader stage={3} title="Interview intelligence" />
+      <PageIntro
+        what="What people told us. Two parts: a structured workshop questionnaire, and free-form interview notes."
+        todo="Start with “Notes and themes” to see what stakeholders said and where they contradict each other or the documents."
+        how={[
+          "Questionnaire: each team’s questions follow its process from start to end (for E-commerce: listing → order receipt → delivery booking → settlement). Every answer option is a level from 1 to 5, so an answer is a score. Change an answer and the scores update immediately.",
+          "Notes: each sentence is read like a document and sorted into strengths or pain points, with the person who said it.",
+          "Contradictions: when two people — or a person and a document — describe the same thing two or more levels apart, it is listed for the consultant instead of being averaged away.",
+          "Recurring themes (like “manual reconciliation”) are counted across teams to spot shared problems.",
+        ]}
       />
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>

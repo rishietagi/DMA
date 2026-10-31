@@ -56,7 +56,7 @@ export function HeatmapGrid({
   return (
     <div ref={ref} role="grid" aria-label={caption} className="w-full">
       <div role="row" className="grid items-end gap-1 pb-1.5" style={{ gridTemplateColumns: `minmax(92px,1.3fr) repeat(${cols.length}, minmax(0,1fr))` }}>
-        <span role="columnheader" className="text-[11px] text-muted-foreground">Function</span>
+        <span role="columnheader" className="text-[11px] text-muted-foreground">Team</span>
         {cols.map((c) => (
           <span key={c} role="columnheader" className={cn("text-center text-[11px] text-muted-foreground", c === "overall" && "font-medium text-foreground")}>
             {c === "overall" ? "Overall" : DIMENSION_LABELS[c].replace(" & Analytics", "")}

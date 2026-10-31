@@ -95,8 +95,8 @@ export function CountUp({
 }
 
 /** Legend for the ramp. */
-export function MaturityLegend({ rag = false, className }: { rag?: boolean; className?: string }) {
-  const labels = ["Excel & email", "Digitized", "Integrated", "Automated", "Autonomous"];
+export function MaturityLegend({ rag = false, className, alwaysShowLabels = false }: { rag?: boolean; className?: string; alwaysShowLabels?: boolean }) {
+  const labels = ["Excel & email", "Digitised", "Integrated", "Automated", "Autonomous (AI)"];
   return (
     <div className={cn("flex items-center gap-2 text-[11px] text-muted-foreground", className)} aria-label="Maturity scale 1 to 5">
       {labels.map((l, i) => (
@@ -104,7 +104,7 @@ export function MaturityLegend({ rag = false, className }: { rag?: boolean; clas
           <span className="inline-flex size-4 items-center justify-center rounded-[4px] text-[10px] font-semibold tabular" style={maturityStyle(i + 1, rag)}>
             {i + 1}
           </span>
-          <span className="hidden xl:inline">{l}</span>
+          <span className={alwaysShowLabels ? "" : "hidden xl:inline"}>{l}</span>
         </span>
       ))}
     </div>

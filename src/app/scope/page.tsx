@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MaturityChip, maturityStyle } from "@/components/dma/maturity";
 import { Page, PageHeader } from "@/components/dma/page-header";
+import { InfoTip, PageIntro, useDetailed } from "@/components/dma/explain";
 import { runAgent } from "@/lib/ai/client";
 import { recalcContext } from "@/lib/ai/contexts";
 import { assess, DEFAULT_WEIGHTS, DIMENSION_LABELS, formatDelta, formatMean, gateLabel, gatesByLevel, targetFor } from "@/lib/engine";
@@ -35,6 +36,7 @@ function WeightsCard() {
     .filter((x) => Math.abs(x.d) >= 0.01)
     .sort((a, b) => Math.abs(b.d) - Math.abs(a.d))
     .slice(0, 4);
+  const detailed = useDetailed();
   const changed = DIMENSIONS.some((d) => Math.abs(weights[d] - DEFAULT_WEIGHTS[d]) > 1e-9);
   const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const narrate = () => {
@@ -49,8 +51,8 @@ function WeightsCard() {
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <div>
-            <CardTitle>Dimension weights</CardTitle>
-            <CardDescription>Scores, KPIs and the synthesis recalculate as you drag.</CardDescription>
+            <CardTitle>How much each area counts</CardTitle>
+            <CardDescription>Every capability score blends these four areas. Drag a slider and every score in the app updates immediately.</CardDescription>
           </div>
           <Button variant="ghost" size="xs" onClick={resetWeights} disabled={!changed}>
             <RotateCcw />
@@ -95,7 +97,7 @@ function WeightsCard() {
             </p>
           </div>
         </div>
-        {movers.length > 0 && (
+        {detailed && movers.length > 0 && (
           <div>
             <p className="mb-1 text-xs font-medium text-muted-foreground">Most affected by your weights</p>
             <ul className="divide-y text-[13px]">
@@ -118,13 +120,12 @@ function WeightsCard() {
 
 function RubricExplorer() {
   const [dim, setDim] = React.useState<Dimension>("process");
+  const detailed = useDetailed();
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Rubric</CardTitle>
-        <CardDescription>
-          Himalaya’s four parameters and five levels, with the stage gates the engine enforces and how each level maps to acatech, MITRE and Gartner.
-        </CardDescription>
+        <CardTitle>What each level means</CardTitle>
+        <CardDescription>The same 1–5 scale Himalaya used in 2025, described for each of the four areas.</CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs value={dim} onValueChange={(v) => setDim(v as Dimension)}>
@@ -152,14 +153,14 @@ function RubricExplorer() {
                         {l > 1 && gates[l as 2].length > 0 && (
                           <p className="mt-auto flex items-start gap-1 text-[11px] text-muted-foreground">
                             <Lock className="mt-px size-3 shrink-0" aria-hidden />
-                            Needs evidence of {gates[l as 2].map(gateLabel).join(", ")}
+                            Needs proof of {gates[l as 2].map(gateLabel).join(", ")}
                           </p>
                         )}
-                        <p className="text-[10px] text-muted-foreground/80">
+                        {detailed && <p className="text-[10px] text-muted-foreground/80">
                           {[seed.rubric.frameworkCrosswalk.acatech?.[String(l)], seed.rubric.frameworkCrosswalk.mitreAI?.[String(l)], d.id === "ai" ? seed.rubric.frameworkCrosswalk.gartnerAI?.[String(l)] : undefined]
                             .filter(Boolean)
                             .join(" · ")}
-                        </p>
+                        </p>}
                       </div>
                     </li>
                   ))}
@@ -186,8 +187,12 @@ function ScopeTree() {
       <CardHeader>
         <CardTitle>Capabilities in scope</CardTitle>
         <CardDescription>
-          {inScope} of {result.capabilities.length} in scope. Targets default to 4 for 2026-priority capabilities, 3.5 for revenue-facing
-          functions and 3 otherwise.
+          Switch off anything that should not be assessed. Each capability has a target level{" "}
+          <InfoTip>
+            Targets set the ambition: 4 for capabilities linked to Himalaya’s five 2026 priorities, 3.5 for sales and marketing, 3 for the
+            rest. The gap between the current score and the target drives the recommendations.
+          </InfoTip>{" "}
+          — the number on the right is how far each one is from it. {inScope} of {result.capabilities.length} in scope.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
@@ -246,7 +251,16 @@ export default function ScopePage() {
       <PageHeader
         stage={1}
         title="Scope & framework"
-        description="Agree what is assessed and how. The same four parameters and five levels as the 2025 assessment, made evidence-based with stage gates and confidence."
+      />
+      <PageIntro
+        what="Decide what gets assessed and how it is scored, before any evidence comes in."
+        todo="Usually agreed once at kick-off. Try dragging a slider to see every score in the app change."
+        how={[
+          "Himalaya’s 2025 method is kept: four areas (process, data, AI, people) and a 1–5 scale.",
+          "Each capability gets a score per area; the four are blended using the weights on the right (process counts most by default).",
+          "Each level has a plain description (below). A level can only be claimed if the basics of the level beneath it are proven — e.g. “integrated” needs proof the systems are connected.",
+          "Targets express ambition per capability. The gap to target is what turns into recommendations later.",
+        ]}
       />
       <div className="grid items-start gap-6 xl:grid-cols-[1.15fr_1fr]">
         <ScopeTree />

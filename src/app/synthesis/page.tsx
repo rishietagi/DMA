@@ -9,6 +9,7 @@ import { HeatmapGrid } from "@/components/dma/heatmap-grid";
 import { headlineStats, KpiStrip } from "@/components/dma/kpi-strip";
 import { MaturityChip, MaturityLegend, maturityStyle } from "@/components/dma/maturity";
 import { Page, PageHeader } from "@/components/dma/page-header";
+import { useDetailed } from "@/components/dma/explain";
 import { runAgent } from "@/lib/ai/client";
 import { synthesisContext } from "@/lib/ai/contexts";
 import { formatMean, type Phase } from "@/lib/engine";
@@ -38,6 +39,7 @@ export default function SynthesisPage() {
   const router = useRouter();
   const narrative = buildNarrative(result);
   const k = result.kpis;
+  const detailed = useDetailed();
   const validatedShare = k.all.validated / Math.max(1, k.all.capabilities);
 
   const priorities = seed.baseline.priorities2026.map((p) => {
@@ -49,13 +51,13 @@ export default function SynthesisPage() {
     return { p, avg, gap, inits, alignment: opps.map((o) => o!.alignment) };
   });
 
-  const portfolio = [...result.useCases].sort((a, b) => b.priority - a.priority).slice(0, 8);
+  const portfolio = [...result.useCases].sort((a, b) => b.priority - a.priority).slice(0, detailed ? 8 : 5);
 
   return (
     <Page className="max-w-[1280px]">
       <PageHeader
         title="Executive synthesis"
-        description="One boardroom view generated from the engine. AI-suggested figures are marked until a consultant validates them."
+        description="The one-page summary for leadership, written automatically from the scores. Figures stay marked “AI suggested” until a consultant has checked them."
         actions={
           <>
             <Button
@@ -98,15 +100,17 @@ export default function SynthesisPage() {
         </div>
       </section>
 
-      <KpiStrip stats={headlineStats(k.enterprise, baseline.kpis.enterprise)} />
+      <KpiStrip stats={headlineStats(k.enterprise, baseline.kpis.enterprise, !detailed)} />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+      <div className={cn("grid gap-6", detailed && "lg:grid-cols-[1fr_1fr]")}>
+        {detailed && (
         <Section title="Maturity heatmap">
           <HeatmapGrid functions={result.functions} rag={rag} onSelect={(fn) => router.push(`/compare?fn=${fn}`)} caption="Executive heatmap by function and dimension" />
           <MaturityLegend rag={rag} className="mt-3" />
         </Section>
+        )}
 
-        <Section title="Function scorecards" aside="Self-assessed vs current">
+        <Section title="Score by team" aside="Bar = today · tick = Himalaya’s 2025 rating">
           <ul className="flex flex-col gap-2.5">
             {result.functions.map((f) => (
               <li key={f.fn.id} className="grid grid-cols-[96px_1fr_auto] items-center gap-3">

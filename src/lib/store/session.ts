@@ -60,9 +60,12 @@ export interface SessionState {
   tourCompleted: boolean;
   visited: string[];
   sidebarCollapsed: boolean;
+  /** simple = plain-language essentials; detailed = full analysis */
+  view: "simple" | "detailed";
 
   markVisited: (href: string) => void;
   setSidebarCollapsed: (v: boolean) => void;
+  setView: (v: "simple" | "detailed") => void;
   setMode: (m: AssessmentMode) => void;
   setWeight: (d: Dimension, v: number) => void;
   resetWeights: () => void;
@@ -109,6 +112,7 @@ const initial = () => ({
   tourCompleted: false,
   visited: [] as string[],
   sidebarCollapsed: false,
+  view: "simple" as "simple" | "detailed",
 });
 
 export const useSession = create<SessionState>()(
@@ -119,6 +123,7 @@ export const useSession = create<SessionState>()(
 
       markVisited: (href) => set((s) => (s.visited.includes(href) ? {} : { visited: [...s.visited, href] })),
       setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
+      setView: (view) => set({ view }),
       setMode: (mode) => set({ mode }),
       setWeight: (d, v) => set((s) => ({ weights: { ...s.weights, [d]: v } })),
       resetWeights: () => set({ weights: { ...DEFAULT_WEIGHTS } }),

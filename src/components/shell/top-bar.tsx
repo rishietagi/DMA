@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/overlays";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { seed } from "@/lib/seed";
 import { useSession } from "@/lib/store/session";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,8 @@ export function TopBar({
   const agentOpen = useSession((s) => s.agentOpen);
   const setAgentOpen = useSession((s) => s.setAgentOpen);
   const running = useSession((s) => s.runs.some((r) => r.status === "running"));
+  const view = useSession((s) => s.view);
+  const setView = useSession((s) => s.setView);
 
   return (
     <header className="no-print flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur">
@@ -63,6 +66,20 @@ export function TopBar({
       </DropdownMenu>
 
       <div className="ml-auto flex items-center gap-1.5">
+        <ToggleGroup
+          type="single"
+          value={view}
+          onValueChange={(v) => v && setView(v as typeof view)}
+          aria-label="How much detail to show"
+          data-testid="view-toggle"
+        >
+          <ToggleGroupItem value="simple" title="Plain-language essentials">
+            Simple
+          </ToggleGroupItem>
+          <ToggleGroupItem value="detailed" title="Everything, including the full analysis">
+            Detailed
+          </ToggleGroupItem>
+        </ToggleGroup>
         <span
           className="hidden items-center gap-1.5 rounded-full border border-dashed border-ai/50 px-2.5 py-1 text-[11px] font-medium text-ai-foreground md:inline-flex"
           title="All AI behaviour is simulated by a deterministic engine. Demo data is illustrative."
@@ -71,7 +88,7 @@ export function TopBar({
           Demo mode · simulated AI
         </span>
 
-        <Button variant="outline" size="sm" onClick={onOpenPalette} className="w-44 justify-start text-muted-foreground">
+        <Button variant="outline" size="sm" onClick={onOpenPalette} className="w-36 justify-start text-muted-foreground">
           <CommandIcon className="size-3.5" />
           <span className="flex-1 text-left">Search</span>
           <kbd className="rounded border bg-muted px-1 text-[10px] font-medium">Ctrl K</kbd>

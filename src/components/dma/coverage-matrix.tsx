@@ -20,6 +20,20 @@ const SHORT: Record<EvidenceCategory, string> = {
 
 const capPrimary = new Map(seed.baseline.capabilities.map((c) => [c.id, c.primaryFunctionId]));
 
+/** Expected-but-missing evidence categories per function (plain list for the simple view). */
+export function coverageGaps(evidence: EvidenceItem[], documents: EvidenceDoc[]): { functionId: FunctionId; missing: EvidenceCategory[] }[] {
+  const have = new Set<string>();
+  for (const e of evidence) {
+    const f = e.functionId ?? (e.capabilityId ? capPrimary.get(e.capabilityId) : null);
+    if (f) have.add(`${f}|${e.category}`);
+  }
+  for (const d of documents) if (d.status === "analysed" && d.dominantFunctionId) have.add(`${d.dominantFunctionId}|${d.category}`);
+  return FUNCTION_IDS.map((f) => ({
+    functionId: f,
+    missing: expectedCategoriesForFunction(seed.questionBank, f).filter((c) => !have.has(`${f}|${c}`)),
+  })).filter((g) => g.missing.length > 0);
+}
+
 /** Function × evidence category. Empty cells the question bank expects are marked as gaps. */
 export function CoverageMatrix({ evidence, documents }: { evidence: EvidenceItem[]; documents: EvidenceDoc[] }) {
   const counts = new Map<string, number>();

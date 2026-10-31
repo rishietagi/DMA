@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("phase 3: baseline whitespaces are exactly DAM, TMS, Finance reconciliation, HR analytics", async ({ page }) => {
   await page.goto("/scoring");
+  await page.getByTestId("view-toggle").getByRole("radio", { name: "Detailed" }).click();
   await page.getByRole("radio", { name: "2025 baseline" }).click();
   await page.goto("/roadmap");
   const list = page.getByTestId("whitespace-list");
@@ -12,6 +13,7 @@ test("phase 3: baseline whitespaces are exactly DAM, TMS, Finance reconciliation
 
 test("phase 3: no use case is drawn in an earlier phase than its dependency", async ({ page }) => {
   await page.goto("/roadmap");
+  await page.getByTestId("view-toggle").getByRole("radio", { name: "Detailed" }).click();
   await page.locator("[data-uc]").first().waitFor();
   const cards = await page.locator("[data-uc]").evaluateAll((els) =>
     els.map((e) => ({ id: e.getAttribute("data-uc")!, phase: e.getAttribute("data-phase")!, deps: (e.getAttribute("data-deps") ?? "").split(" ").filter(Boolean) })),

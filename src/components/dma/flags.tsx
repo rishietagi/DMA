@@ -6,11 +6,11 @@ import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const FLAG_META: Record<FlagKind, { label: string; icon: typeof AlertTriangle; tone: string }> = {
-  LACKS_EVIDENCE: { label: "Lacks evidence", icon: FileQuestion, tone: "text-conf-low" },
-  INCONSISTENT: { label: "Inconsistent", icon: AlertTriangle, tone: "text-conf-med" },
-  SELF_VARIANCE: { label: "Self-assessment variance", icon: ArrowDownUp, tone: "text-ai-foreground" },
-  GATED: { label: "Stage-gated", icon: Lock, tone: "text-muted-foreground" },
-  LOW_COVERAGE: { label: "Low coverage", icon: ScanSearch, tone: "text-muted-foreground" },
+  LACKS_EVIDENCE: { label: "Not enough proof", icon: FileQuestion, tone: "text-conf-low" },
+  INCONSISTENT: { label: "Sources disagree", icon: AlertTriangle, tone: "text-conf-med" },
+  SELF_VARIANCE: { label: "Differs from the 2025 score", icon: ArrowDownUp, tone: "text-ai-foreground" },
+  GATED: { label: "Held back by a missing basic", icon: Lock, tone: "text-muted-foreground" },
+  LOW_COVERAGE: { label: "Some document types missing", icon: ScanSearch, tone: "text-muted-foreground" },
 };
 
 export function describeFlag(f: Flag): string {
@@ -20,9 +20,9 @@ export function describeFlag(f: Flag): string {
     case "INCONSISTENT":
       return f.reason;
     case "SELF_VARIANCE":
-      return `Self-assessed ${formatScore(f.self)}, evidence suggests ${formatScore(f.evidence)}`;
+      return `Himalaya rated this ${formatScore(f.self)} in 2025; the evidence points to ${formatScore(f.evidence)}`;
     case "GATED":
-      return `Capped at ${formatScore(f.cappedAt)} — no evidence of ${f.missingGate}`;
+      return `Can't score above ${formatScore(f.cappedAt)} until there's proof of ${f.missingGate} — a level can't be claimed without the one below it`;
     case "LOW_COVERAGE":
       return `No ${f.missing.map((m) => EVIDENCE_CATEGORY_LABELS[m].toLowerCase()).join(", ")} for this function yet`;
   }

@@ -30,10 +30,19 @@ export function gateLevel(dim: RubricDimension, gateKey: string): GateLevel | nu
   return null;
 }
 
-/** Human-readable gate name: "process.system_integration" → "system integration" */
+const GATE_PLAIN: Record<string, string> = {
+  "process.system_integration": "the systems being connected end to end",
+  "process.rule_automation": "rules automating the routine work",
+  "process.ai_in_loop": "AI acting inside the process",
+  "data.single_source_of_truth": "one trusted, governed source of data",
+  "data.predictive_model": "a predictive model used in decisions",
+  "ai.governance": "AI that is monitored and governed",
+};
+
+/** Plain-language gate name: "process.system_integration" → "the systems being connected end to end" */
 export function gateLabel(gateKey: string): string {
   const [, key = gateKey] = gateKey.split(".");
-  return key.replace(/_/g, " ");
+  return GATE_PLAIN[gateKey] ?? key.replace(/_/g, " ");
 }
 
 export function levelDescriptor(dim: RubricDimension, level: number): string {

@@ -21,25 +21,26 @@ export function KpiStrip({ stats, className }: { stats: Stat[]; className?: stri
           <dd className={cn("text-[28px] leading-none font-semibold tracking-tight", s.tone === "ai" && "text-ai-foreground")}>
             <CountUp value={s.value} format={s.format} />
           </dd>
-          {s.note && <dd className="truncate text-xs text-muted-foreground">{s.note}</dd>}
+          {s.note && <dd className="text-xs leading-snug text-muted-foreground">{s.note}</dd>}
         </div>
       ))}
     </dl>
   );
 }
 
-export function headlineStats(k: Kpis, self?: Kpis): Stat[] {
+export function headlineStats(k: Kpis, self?: Kpis, simple = false): Stat[] {
   const delta = self ? k.mean - self.mean : 0;
-  return [
+  const all: Stat[] = [
     {
-      label: "Average maturity",
+      label: "Average score (out of 5)",
       value: k.mean,
       format: formatMean,
-      note: self ? (Math.abs(delta) < 0.05 ? `Self-assessed ${formatMean(self.mean)}` : `Self-assessed ${formatMean(self.mean)} (${delta > 0 ? "+" : "−"}${Math.abs(delta).toFixed(1)})`) : undefined,
+      note: self ? (Math.abs(delta) < 0.05 ? `Himalaya’s own 2025 rating: ${formatMean(self.mean)}` : `Himalaya’s own 2025 rating: ${formatMean(self.mean)} (${delta > 0 ? "+" : "−"}${Math.abs(delta).toFixed(1)})`) : undefined,
     },
-    { label: "At level 2 or below", value: k.pctAtOrBelow2, format: formatPct, note: `${Math.round(k.pctAtOrBelow2 * k.capabilities)} of ${k.capabilities} capabilities` },
+    { label: "Still at level 2 or below", value: k.pctAtOrBelow2, format: formatPct, note: `${Math.round(k.pctAtOrBelow2 * k.capabilities)} of ${k.capabilities} capabilities — mostly manual or basic systems` },
     { label: "At level 4 or above", value: k.countAtOrAbove4, format: (n) => String(Math.round(n)), note: `${k.countAt5} at level 5` },
-    { label: "Evidence coverage", value: k.evidenceCoverage, format: formatPct, note: `${k.highConfidence} high-confidence scores` },
-    { label: "Awaiting validation", value: k.awaitingValidation, format: (n) => String(Math.round(n)), note: `${k.validated} validated`, tone: "ai" },
+    { label: "Backed by documents or KPIs", value: k.evidenceCoverage, format: formatPct, note: `${k.highConfidence} scores with high confidence` },
+    { label: "Waiting for a consultant to check", value: k.awaitingValidation, format: (n) => String(Math.round(n)), note: `${k.validated} already checked`, tone: "ai" },
   ];
+  return simple ? [all[0]!, all[1]!, all[4]!] : all;
 }

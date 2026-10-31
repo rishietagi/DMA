@@ -13,7 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/overlays";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { CoverageMatrix } from "@/components/dma/coverage-matrix";
+import { CoverageMatrix, coverageGaps } from "@/components/dma/coverage-matrix";
+import { DetailOnly, MoreInDetailed, PageIntro, useDetailed } from "@/components/dma/explain";
 import { EvidenceCard } from "@/components/dma/evidence-card";
 import { Page, PageHeader } from "@/components/dma/page-header";
 import { ingest, loadDemoEvidence } from "@/lib/actions";
@@ -162,6 +163,9 @@ export default function EvidencePage() {
   const [dim, setDim] = React.useState<Dimension | "all">("all");
   const [pol, setPol] = React.useState<"all" | "pain" | "strength">("all");
   const [q, setQ] = React.useState("");
+  const detailed = useDetailed();
+  const gaps = coverageGaps(evidence, documents);
+  const shown = detailed ? 60 : 6;
   const parsing = documents.some((d) => d.status === "parsing") || busy;
   const demoLoaded = documents.some((d) => d.source === "demo" && d.status === "analysed");
   const contradictions = findContradictions(evidence).length;
@@ -198,7 +202,6 @@ export default function EvidencePage() {
       <PageHeader
         stage={2}
         title="Evidence hub"
-        description="Drop strategy papers, SOPs, landscapes, KPI extracts and notes into the nine categories. The analyser reads each sentence, tags function, capability, dimension and level, and maps it to the rubric."
         actions={
           <Button
             variant="ai"
@@ -213,12 +216,24 @@ export default function EvidencePage() {
         }
       />
 
+      <PageIntro
+        what="This is where the proof goes in: strategy papers, process documents, system lists, KPI reports and interview notes."
+        todo="Press “Load demo evidence” to see it work, or drop your own file (PDF, Word, CSV or text) into the right box."
+        how={[
+          "Each document is split into sentences. Every sentence is checked against word lists: which team it is about (e.g. “marketplace”, “Flipkart” → E-commerce), which capability (e.g. “reconciliation”), and how digital it sounds (“manually in Excel” → level 1, “integrated via API” → level 3, “automatically” → level 4).",
+          "Negatives are respected: “not yet automated” is not counted as automated.",
+          "Each sentence becomes a fact with its source and page or row, and feeds the score of that capability.",
+          "Facts from documents and KPI reports count more than what people say in interviews.",
+          "Nothing is sent to an outside AI — the reading is done by fixed rules, so it’s repeatable and explainable.",
+        ]}
+      />
+
       <dl className="bg-card grid grid-cols-4 divide-x rounded-xl border">
         {[
-          ["Documents", documents.length],
-          ["Evidence items", evidence.length],
-          ["Categories covered", `${categoriesCovered}/9`],
-          ["Contradictions to review", contradictions],
+          ["Documents read", documents.length],
+          ["Facts extracted", evidence.length],
+          ["Kinds of evidence covered", `${categoriesCovered} of 9`],
+          ["Contradictions to check", contradictions],
         ].map(([l, v]) => (
           <div key={l} className="px-5 py-3">
             <dt className="text-muted-foreground text-xs">{l}</dt>
@@ -238,70 +253,102 @@ export default function EvidencePage() {
         ))}
       </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle data-tour="coverage">Coverage</CardTitle>
-          <CardDescription>
-            Which functions have which kinds of evidence — and where the question bank expects more.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-3">
-          <CoverageMatrix evidence={evidence} documents={documents} />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Documents</CardTitle>
-          <CardDescription>Everything in the evidence store, with parse status.</CardDescription>
-        </CardHeader>
-        <CardContent className="pt-3">
-          <ul className="grid gap-x-6 md:grid-cols-2 xl:grid-cols-3">
-            {[...documents].reverse().map((d) => (
-              <li key={d.id} className="flex items-center gap-3 border-b py-2">
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] font-medium">{d.title}</p>
-                  <p className="text-muted-foreground truncate text-[11px]">
-                    {EVIDENCE_CATEGORY_LABELS[d.category]} · {SOURCE_LABEL[d.source]}
-                    {d.dominantFunctionId ? ` · ${FUNCTION_SHORT[d.dominantFunctionId]}` : ""}
-                  </p>
-                </div>
-                <span
-                  className={cn(
-                    "tabular text-[11px]",
-                    d.status === "analysed" && "text-muted-foreground",
-                    d.status === "parsing" && "text-ai-foreground",
-                    d.status === "error" && "text-destructive",
-                  )}
-                  title={d.error}
-                >
-                  {d.status === "analysed"
-                    ? `${d.itemCount ?? 0} items`
-                    : d.status === "parsing"
-                      ? "Reading…"
-                      : d.status === "error"
-                        ? "Couldn't read"
-                        : "Queued"}
-                </span>
-                {d.source !== "workshop" && (
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => removeDocument(d.id)}
-                    aria-label={`Remove ${d.title}`}
+      {!detailed && (
+        <Card>
+          <CardHeader>
+            <CardTitle data-tour="coverage">What’s still missing</CardTitle>
+            <CardDescription>
+              Evidence the questionnaire expects for a team, but nobody has provided yet.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-3">
+            {gaps.length === 0 ? (
+              <p className="text-muted-foreground text-sm">
+                Nothing — every team has the evidence types it needs.
+              </p>
+            ) : (
+              <ul className="grid gap-x-6 gap-y-1.5 text-[13px] md:grid-cols-2">
+                {gaps.map((g) => (
+                  <li key={g.functionId}>
+                    <span className="font-medium">{FUNCTION_SHORT[g.functionId]}:</span>{" "}
+                    <span className="text-muted-foreground">
+                      {g.missing.map((m) => EVIDENCE_CATEGORY_LABELS[m].toLowerCase()).join(", ")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      <DetailOnly>
+        <Card>
+          <CardHeader>
+            <CardTitle data-tour="coverage">Coverage</CardTitle>
+            <CardDescription>
+              Which functions have which kinds of evidence — and where the question bank expects
+              more.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-3">
+            <CoverageMatrix evidence={evidence} documents={documents} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Documents</CardTitle>
+            <CardDescription>Everything in the evidence store, with parse status.</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-3">
+            <ul className="grid gap-x-6 md:grid-cols-2 xl:grid-cols-3">
+              {[...documents].reverse().map((d) => (
+                <li key={d.id} className="flex items-center gap-3 border-b py-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-medium">{d.title}</p>
+                    <p className="text-muted-foreground truncate text-[11px]">
+                      {EVIDENCE_CATEGORY_LABELS[d.category]} · {SOURCE_LABEL[d.source]}
+                      {d.dominantFunctionId ? ` · ${FUNCTION_SHORT[d.dominantFunctionId]}` : ""}
+                    </p>
+                  </div>
+                  <span
+                    className={cn(
+                      "tabular text-[11px]",
+                      d.status === "analysed" && "text-muted-foreground",
+                      d.status === "parsing" && "text-ai-foreground",
+                      d.status === "error" && "text-destructive",
+                    )}
+                    title={d.error}
                   >
-                    <Trash2 />
-                  </Button>
-                )}
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+                    {d.status === "analysed"
+                      ? `${d.itemCount ?? 0} items`
+                      : d.status === "parsing"
+                        ? "Reading…"
+                        : d.status === "error"
+                          ? "Couldn't read"
+                          : "Queued"}
+                  </span>
+                  {d.source !== "workshop" && (
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => removeDocument(d.id)}
+                      aria-label={`Remove ${d.title}`}
+                    >
+                      <Trash2 />
+                    </Button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      </DetailOnly>
 
       <section className="flex flex-col gap-3" aria-label="Evidence items">
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="mr-auto text-sm font-semibold">
-            Evidence items{" "}
+            {detailed ? "Evidence items" : "Latest facts extracted"}{" "}
             <span className="text-muted-foreground tabular font-normal">({filtered.length})</span>
           </h2>
           <div className="relative">
@@ -317,42 +364,44 @@ export default function EvidencePage() {
               aria-label="Search evidence"
             />
           </div>
-          <Select value={fn} onValueChange={(v) => setFn(v as FunctionId | "all")}>
-            <SelectTrigger size="sm" className="w-40" aria-label="Filter by function">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All functions</SelectItem>
-              {FUNCTION_IDS.map((f) => (
-                <SelectItem key={f} value={f}>
-                  {FUNCTION_SHORT[f]}
-                </SelectItem>
+          <DetailOnly>
+            <Select value={fn} onValueChange={(v) => setFn(v as FunctionId | "all")}>
+              <SelectTrigger size="sm" className="w-40" aria-label="Filter by function">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All functions</SelectItem>
+                {FUNCTION_IDS.map((f) => (
+                  <SelectItem key={f} value={f}>
+                    {FUNCTION_SHORT[f]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <ToggleGroup
+              type="single"
+              value={dim}
+              onValueChange={(v) => v && setDim(v as Dimension | "all")}
+              aria-label="Filter by dimension"
+            >
+              <ToggleGroupItem value="all">All</ToggleGroupItem>
+              {DIMENSIONS.map((d) => (
+                <ToggleGroupItem key={d} value={d}>
+                  {DIMENSION_LABELS[d].replace(" & Analytics", "")}
+                </ToggleGroupItem>
               ))}
-            </SelectContent>
-          </Select>
-          <ToggleGroup
-            type="single"
-            value={dim}
-            onValueChange={(v) => v && setDim(v as Dimension | "all")}
-            aria-label="Filter by dimension"
-          >
-            <ToggleGroupItem value="all">All</ToggleGroupItem>
-            {DIMENSIONS.map((d) => (
-              <ToggleGroupItem key={d} value={d}>
-                {DIMENSION_LABELS[d].replace(" & Analytics", "")}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-          <ToggleGroup
-            type="single"
-            value={pol}
-            onValueChange={(v) => v && setPol(v as typeof pol)}
-            aria-label="Filter by polarity"
-          >
-            <ToggleGroupItem value="all">All</ToggleGroupItem>
-            <ToggleGroupItem value="pain">Pain points</ToggleGroupItem>
-            <ToggleGroupItem value="strength">Strengths</ToggleGroupItem>
-          </ToggleGroup>
+            </ToggleGroup>
+            <ToggleGroup
+              type="single"
+              value={pol}
+              onValueChange={(v) => v && setPol(v as typeof pol)}
+              aria-label="Filter by polarity"
+            >
+              <ToggleGroupItem value="all">All</ToggleGroupItem>
+              <ToggleGroupItem value="pain">Pain points</ToggleGroupItem>
+              <ToggleGroupItem value="strength">Strengths</ToggleGroupItem>
+            </ToggleGroup>
+          </DetailOnly>
         </div>
         {filtered.length === 0 ? (
           <div className="rounded-xl border border-dashed px-6 py-10 text-center">
@@ -363,15 +412,18 @@ export default function EvidencePage() {
           </div>
         ) : (
           <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
-            {filtered.slice(0, 60).map((e) => (
+            {filtered.slice(0, shown).map((e) => (
               <EvidenceCard key={e.id} e={e} />
             ))}
           </div>
         )}
-        {filtered.length > 60 && (
+        {detailed && filtered.length > shown && (
           <p className="text-muted-foreground text-center text-xs">
-            Showing 60 of {filtered.length}. Narrow the filters to see more.
+            Showing {shown} of {filtered.length}. Narrow the filters to see more.
           </p>
+        )}
+        {!detailed && filtered.length > shown && (
+          <MoreInDetailed what={`Showing ${shown} of ${filtered.length} facts.`} />
         )}
       </section>
     </Page>

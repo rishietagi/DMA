@@ -17,6 +17,7 @@ async function processScore(page: Page, capId: string) {
 test("phase 2: demo evidence loads, and an uploaded PDF moves fin-reconciliation", async ({ page }) => {
   watchConsole(page);
   await page.goto("/evidence");
+  await page.getByTestId("view-toggle").getByRole("radio", { name: "Detailed" }).click();
   await page.getByTestId("load-demo-evidence").click();
   await expect(page.getByText("Re-analyse demo evidence")).toBeVisible({ timeout: 60_000 });
   await expect(page.getByText(/evidence items mapped/).first()).toBeVisible();

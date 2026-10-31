@@ -82,7 +82,7 @@ describe("scoreDimension raw → gated → final", () => {
     expect(ds.raw).toBe(4);
     expect(ds.gated).toBe(2.5);
     expect(ds.final).toBe(2.5);
-    expect(ds.flags).toContainEqual({ kind: "GATED", cappedAt: 2.5, missingGate: "system integration" });
+    expect(ds.flags).toContainEqual({ kind: "GATED", cappedAt: 2.5, missingGate: "the systems being connected end to end" });
   });
   it("with only a self-assessment: raw = self and LACKS_EVIDENCE", () => {
     const ds = scoreDimension("cap", dataDim, [ind({ level: 2.5, sourceType: "self_assessment", dimension: "data" })])!;
