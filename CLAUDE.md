@@ -2,7 +2,9 @@
 
 KPMG POC for Himalaya: a stepwise, AI-enabled Digital Maturity Assessment workbench. Front-end quality is the priority; the back end is a **deterministic** engine that *looks* AI-powered (art of the possible). No real LLM calls.
 
-**Read first, in this order:** `PROJECT_CONTEXT.md` → `PLAN.md` → `docs/SCORING_ENGINE.md` → `seed/*.json`.
+**Read first:** `LOG.md` (running handover log — current status, env, decisions, open items). Then, as needed: `PROJECT_CONTEXT.md` → `PLAN.md` → `docs/SCORING_ENGINE.md` → `seed/*.json`.
+
+**Keep `LOG.md` up to date:** append to its "Session log" at the end of every working session.
 
 ## Workflow
 - Plan before code. For any phase or multi-file change: enter plan mode, propose the plan, wait for approval.
