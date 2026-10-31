@@ -1,0 +1,638 @@
+{
+  "meta": {
+    "note": "SAMPLE ONLY — pattern for Claude Code to expand to 8–15 questions for all 10 functions. Structure inspired by SAP-blueprint questionnaires (L1 chain → L2 sections → questions → response); content is Himalaya-specific and written fresh.",
+    "responseColumns": [
+      "selectedLevel",
+      "notes",
+      "answeredBy",
+      "date"
+    ]
+  },
+  "functions": [
+    {
+      "functionId": "sales-ecom",
+      "l1Chain": [
+        "Platform onboarding & listing",
+        "Order induction (PO receipt)",
+        "Appointment & dispatch",
+        "Delivery & GRN",
+        "Reconciliation & settlement",
+        "PDP content & ratings"
+      ],
+      "questions": [
+        {
+          "id": "ecom-q01",
+          "l2": "Order induction (PO receipt)",
+          "text": "How are marketplace / quick-commerce purchase orders received and entered into SAP?",
+          "dimension": "process",
+          "capabilityIds": [
+            "ecom-order-induction"
+          ],
+          "weight": 3,
+          "options": [
+            {
+              "level": 1,
+              "label": "Downloaded from each portal and keyed into SAP manually"
+            },
+            {
+              "level": 2,
+              "label": "Bulk-upload templates per platform"
+            },
+            {
+              "level": 3,
+              "label": "API/EDI integration via middleware for major platforms"
+            },
+            {
+              "level": 4,
+              "label": "Auto-validated against ATP/pricing with exception alerts"
+            },
+            {
+              "level": 5,
+              "label": "Agent ingests, validates and confirms POs end-to-end; humans handle edge cases"
+            },
+            {
+              "level": null,
+              "label": "Don't know / N/A"
+            }
+          ],
+          "evidenceExpected": [
+            "process_docs",
+            "application_landscape"
+          ],
+          "gateKey": "process.system_integration"
+        },
+        {
+          "id": "ecom-q02",
+          "l2": "Appointment & dispatch",
+          "text": "How are delivery appointments (DC / dark-store slots) booked and tracked?",
+          "dimension": "process",
+          "capabilityIds": [
+            "ecom-appointment"
+          ],
+          "weight": 3,
+          "options": [
+            {
+              "level": 1,
+              "label": "Phone/email/portal by hand, tracked in Excel"
+            },
+            {
+              "level": 2,
+              "label": "Booked on each portal; status kept in a shared tracker"
+            },
+            {
+              "level": 3,
+              "label": "Appointment status flows into WMS/TMS automatically"
+            },
+            {
+              "level": 4,
+              "label": "Slots auto-booked by rules based on dispatch plan; misses alerted"
+            },
+            {
+              "level": 5,
+              "label": "Optimiser books and re-books slots dynamically to maximise fill rate"
+            },
+            {
+              "level": null,
+              "label": "Don't know / N/A"
+            }
+          ],
+          "evidenceExpected": [
+            "process_docs"
+          ],
+          "gateKey": "process.system_integration"
+        },
+        {
+          "id": "ecom-q03",
+          "l2": "Reconciliation & settlement",
+          "text": "How are marketplace settlements, deductions and claims reconciled against invoices?",
+          "dimension": "process",
+          "capabilityIds": [
+            "ecom-reconciliation"
+          ],
+          "weight": 3,
+          "options": [
+            {
+              "level": 1,
+              "label": "Manually in Excel from downloaded portal reports"
+            },
+            {
+              "level": 2,
+              "label": "Templates/macros; settlement files uploaded to SAP"
+            },
+            {
+              "level": 3,
+              "label": "Integrated settlement feed into SAP via middleware"
+            },
+            {
+              "level": 4,
+              "label": "Auto-matching with rules; only exceptions to the team"
+            },
+            {
+              "level": 5,
+              "label": "AI agent reconciles, raises disputes and learns from outcomes"
+            },
+            {
+              "level": null,
+              "label": "Don't know / N/A"
+            }
+          ],
+          "evidenceExpected": [
+            "process_docs",
+            "kpi_extracts"
+          ],
+          "gateKey": "process.system_integration"
+        },
+        {
+          "id": "ecom-q04",
+          "l2": "Reconciliation & settlement",
+          "text": "How visible are deductions/leakage by platform, reason and SKU?",
+          "dimension": "data",
+          "capabilityIds": [
+            "ecom-reconciliation"
+          ],
+          "weight": 2,
+          "options": [
+            {
+              "level": 1,
+              "label": "Not tracked or only month-end Excel"
+            },
+            {
+              "level": 2,
+              "label": "Periodic platform-wise reports"
+            },
+            {
+              "level": 3,
+              "label": "Single dashboard across platforms from governed data"
+            },
+            {
+              "level": 4,
+              "label": "Predictive flags for likely disputes/leakage"
+            },
+            {
+              "level": 5,
+              "label": "Prescriptive recommendations on which claims to contest"
+            },
+            {
+              "level": null,
+              "label": "Don't know / N/A"
+            }
+          ],
+          "evidenceExpected": [
+            "kpi_extracts"
+          ],
+          "gateKey": "data.single_source_of_truth"
+        },
+        {
+          "id": "ecom-q05",
+          "l2": "PDP content & ratings",
+          "text": "How is product detail page (PDP) content created and kept compliant across platforms?",
+          "dimension": "ai",
+          "capabilityIds": [
+            "mkt-content-gen",
+            "ecom-order-induction"
+          ],
+          "weight": 2,
+          "options": [
+            {
+              "level": 1,
+              "label": "Agency creates; uploaded manually per platform"
+            },
+            {
+              "level": 2,
+              "label": "Central content repository, manual syndication"
+            },
+            {
+              "level": 3,
+              "label": "Syndication tool pushes content to platforms"
+            },
+            {
+              "level": 4,
+              "label": "GenAI drafts content variants; humans approve"
+            },
+            {
+              "level": 5,
+              "label": "AI continuously optimises PDPs from ratings/search signals"
+            },
+            {
+              "level": null,
+              "label": "Don't know / N/A"
+            }
+          ],
+          "evidenceExpected": [
+            "process_docs"
+          ]
+        }
+      ]
+    },
+    {
+      "functionId": "sales-gt",
+      "l1Chain": [
+        "Demand planning",
+        "Distributor management (DMS)",
+        "Beat planning & SFA",
+        "Order capture",
+        "Schemes & claims",
+        "Sales control tower"
+      ],
+      "questions": [
+        {
+          "id": "gt-q01",
+          "l2": "Beat planning & SFA",
+          "text": "How are beat plans and SKU recommendations generated for sales reps?",
+          "dimension": "ai",
+          "capabilityIds": [
+            "gt-reco-beat"
+          ],
+          "weight": 3,
+          "options": [
+            {
+              "level": 1,
+              "label": "Rep / ASM judgement, no system support"
+            },
+            {
+              "level": 2,
+              "label": "Static beats in SFA, no recommendations"
+            },
+            {
+              "level": 3,
+              "label": "Rule-based recommendations in Saksham"
+            },
+            {
+              "level": 4,
+              "label": "ML recommendations used by most reps, outcomes tracked"
+            },
+            {
+              "level": 5,
+              "label": "Closed-loop recommendations that learn from conversion and are adopted at scale"
+            },
+            {
+              "level": null,
+              "label": "Don't know / N/A"
+            }
+          ],
+          "evidenceExpected": [
+            "application_landscape",
+            "kpi_extracts"
+          ]
+        },
+        {
+          "id": "gt-q02",
+          "l2": "Beat planning & SFA",
+          "text": "What share of reps act on system recommendations in a typical week?",
+          "dimension": "people",
+          "capabilityIds": [
+            "gt-reco-beat",
+            "gt-sfa"
+          ],
+          "weight": 2,
+          "options": [
+            {
+              "level": 1,
+              "label": "Not measured"
+            },
+            {
+              "level": 2,
+              "label": "<25%"
+            },
+            {
+              "level": 3,
+              "label": "25–50%"
+            },
+            {
+              "level": 4,
+              "label": "50–80%"
+            },
+            {
+              "level": 5,
+              "label": ">80% with feedback captured"
+            },
+            {
+              "level": null,
+              "label": "Don't know / N/A"
+            }
+          ],
+          "evidenceExpected": [
+            "kpi_extracts"
+          ]
+        },
+        {
+          "id": "gt-q03",
+          "l2": "Distributor management (DMS)",
+          "text": "How does secondary sales data flow from distributors into Himalaya systems?",
+          "dimension": "data",
+          "capabilityIds": [
+            "gt-dms"
+          ],
+          "weight": 3,
+          "options": [
+            {
+              "level": 1,
+              "label": "Emailed Excel from distributors"
+            },
+            {
+              "level": 2,
+              "label": "Uploaded to DMS periodically"
+            },
+            {
+              "level": 3,
+              "label": "Leap DMS integrated with SAP, daily sync"
+            },
+            {
+              "level": 4,
+              "label": "Near real-time with anomaly alerts"
+            },
+            {
+              "level": 5,
+              "label": "Feeds autonomous replenishment suggestions"
+            },
+            {
+              "level": null,
+              "label": "Don't know / N/A"
+            }
+          ],
+          "evidenceExpected": [
+            "process_docs"
+          ],
+          "gateKey": "data.single_source_of_truth"
+        }
+      ]
+    },
+    {
+      "functionId": "finance",
+      "l1Chain": [
+        "Record to report",
+        "Reconciliation",
+        "MIS & management reporting",
+        "Consolidation",
+        "Tax & compliance",
+        "Planning & FP&A",
+        "Travel & expense"
+      ],
+      "questions": [
+        {
+          "id": "fin-q01",
+          "l2": "Reconciliation",
+          "text": "How are bank, intercompany and customer/vendor reconciliations performed?",
+          "dimension": "process",
+          "capabilityIds": [
+            "fin-reconciliation"
+          ],
+          "weight": 3,
+          "options": [
+            {
+              "level": 1,
+              "label": "Manually in Excel"
+            },
+            {
+              "level": 2,
+              "label": "Partly in SAP with Excel workpapers"
+            },
+            {
+              "level": 3,
+              "label": "Integrated in SAP with standard matching"
+            },
+            {
+              "level": 4,
+              "label": "Auto-match with exception workflow"
+            },
+            {
+              "level": 5,
+              "label": "AI-driven matching and root-cause suggestions"
+            },
+            {
+              "level": null,
+              "label": "Don't know / N/A"
+            }
+          ],
+          "evidenceExpected": [
+            "process_docs"
+          ],
+          "gateKey": "process.system_integration"
+        },
+        {
+          "id": "fin-q02",
+          "l2": "MIS & management reporting",
+          "text": "At what granularity and frequency is management MIS produced?",
+          "dimension": "data",
+          "capabilityIds": [
+            "fin-mis",
+            "mkt-perf-cmi"
+          ],
+          "weight": 3,
+          "options": [
+            {
+              "level": 1,
+              "label": "Monthly, Excel, entity level"
+            },
+            {
+              "level": 2,
+              "label": "Monthly Power BI, BU level"
+            },
+            {
+              "level": 3,
+              "label": "Governed model at SKU/PG/channel, monthly"
+            },
+            {
+              "level": 4,
+              "label": "Weekly with forecasts and variance drivers"
+            },
+            {
+              "level": 5,
+              "label": "On-demand with prescriptive commentary"
+            },
+            {
+              "level": null,
+              "label": "Don't know / N/A"
+            }
+          ],
+          "evidenceExpected": [
+            "kpi_extracts",
+            "data_architecture"
+          ],
+          "gateKey": "data.single_source_of_truth"
+        }
+      ]
+    },
+    {
+      "functionId": "supply-chain",
+      "l1Chain": [
+        "Demand planning / IBP",
+        "Supply & production planning",
+        "Warehousing",
+        "Transportation",
+        "Order fulfilment & fill rate",
+        "Sustainability"
+      ],
+      "questions": [
+        {
+          "id": "scm-q01",
+          "l2": "Demand planning / IBP",
+          "text": "How is the statistical demand forecast generated and consumed in IBP?",
+          "dimension": "data",
+          "capabilityIds": [
+            "sales-demand-forecasting",
+            "scm-ibp"
+          ],
+          "weight": 3,
+          "options": [
+            {
+              "level": 1,
+              "label": "Sales targets in Excel used as forecast"
+            },
+            {
+              "level": 2,
+              "label": "Basic statistical forecast, heavily overridden"
+            },
+            {
+              "level": 3,
+              "label": "IBP forecast with consensus process, single number"
+            },
+            {
+              "level": 4,
+              "label": "ML forecast with drivers; accuracy tracked by SKU/channel"
+            },
+            {
+              "level": 5,
+              "label": "Self-correcting forecast triggering replenishment automatically"
+            },
+            {
+              "level": null,
+              "label": "Don't know / N/A"
+            }
+          ],
+          "evidenceExpected": [
+            "kpi_extracts",
+            "process_docs"
+          ],
+          "gateKey": "data.predictive_model"
+        },
+        {
+          "id": "scm-q02",
+          "l2": "Order fulfilment & fill rate",
+          "text": "How is customer fill-rate shortfall analysed?",
+          "dimension": "process",
+          "capabilityIds": [
+            "scm-dashboard"
+          ],
+          "weight": 2,
+          "options": [
+            {
+              "level": 1,
+              "label": "Ad hoc, after customer escalation"
+            },
+            {
+              "level": 2,
+              "label": "Monthly Excel analysis"
+            },
+            {
+              "level": 3,
+              "label": "Dashboard with standard reason codes"
+            },
+            {
+              "level": 4,
+              "label": "Automated RCA with alerts on at-risk orders"
+            },
+            {
+              "level": 5,
+              "label": "Prescriptive actions issued before shortfall occurs"
+            },
+            {
+              "level": null,
+              "label": "Don't know / N/A"
+            }
+          ],
+          "evidenceExpected": [
+            "process_docs"
+          ]
+        }
+      ]
+    },
+    {
+      "functionId": "*",
+      "l1Chain": [],
+      "note": "Cross-functional People & AI questions — asked once per function, capabilityIds '*' applies to all capabilities of that function",
+      "questions": [
+        {
+          "id": "x-q01",
+          "l2": "People",
+          "text": "How do teams get new reports or small automations built?",
+          "dimension": "people",
+          "capabilityIds": [
+            "*"
+          ],
+          "weight": 2,
+          "options": [
+            {
+              "level": 1,
+              "label": "Raise IT/vendor ticket for everything"
+            },
+            {
+              "level": 2,
+              "label": "Use standard reports; changes via IT"
+            },
+            {
+              "level": 3,
+              "label": "Power users build own dashboards"
+            },
+            {
+              "level": 4,
+              "label": "Digital champions and citizen developers in the function"
+            },
+            {
+              "level": 5,
+              "label": "Function co-creates AI/digital solutions with IT"
+            },
+            {
+              "level": null,
+              "label": "Don't know / N/A"
+            }
+          ],
+          "evidenceExpected": [
+            "interview_notes"
+          ]
+        },
+        {
+          "id": "x-q02",
+          "l2": "AI",
+          "text": "Which best describes AI usage in this function today?",
+          "dimension": "ai",
+          "capabilityIds": [
+            "*"
+          ],
+          "weight": 2,
+          "options": [
+            {
+              "level": 1,
+              "label": "None beyond awareness"
+            },
+            {
+              "level": 2,
+              "label": "Pilots or vendor demos"
+            },
+            {
+              "level": 3,
+              "label": "At least one use case in production"
+            },
+            {
+              "level": 4,
+              "label": "Several scaled use cases with monitoring and an owner"
+            },
+            {
+              "level": 5,
+              "label": "AI embedded in core decisions; governed and continuously improved"
+            },
+            {
+              "level": null,
+              "label": "Don't know / N/A"
+            }
+          ],
+          "evidenceExpected": [
+            "transformation_portfolio",
+            "interview_notes"
+          ],
+          "gateKey": "ai.governance"
+        }
+      ]
+    }
+  ]
+}

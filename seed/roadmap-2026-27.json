@@ -1,0 +1,323 @@
+{
+  "meta": {
+    "source": "Himalaya Process IT Roadmap 2026-27 (Sales/Marketing + Enterprise slides)",
+    "statusReadFrom": "tile border colours on photos — VERIFY",
+    "knownDiscrepancy": "Enterprise slide headline says 14 initiatives (5 delivered / 4 in flight / 5 committed); tiles read as 16 (5/5/6). Confirm with deck owner.",
+    "mappingNote": "mapsTo is KPMG's proposed initiative→capability mapping — confirm"
+  },
+  "initiatives": [
+    {
+      "id": "r-omni-share",
+      "functionId": "marketing-design",
+      "title": "Omni-channel Market Share (Nielsen, 1DS, POS)",
+      "status": "in_progress",
+      "mapsTo": [
+        "mkt-perf-cmi"
+      ]
+    },
+    {
+      "id": "r-artwork",
+      "functionId": "marketing-design",
+      "title": "Artwork Management",
+      "status": "in_progress",
+      "mapsTo": [
+        "mkt-artwork"
+      ]
+    },
+    {
+      "id": "r-ai-content",
+      "functionId": "marketing-design",
+      "title": "AI-driven Content Generation",
+      "status": "in_progress",
+      "mapsTo": [
+        "mkt-content-gen"
+      ]
+    },
+    {
+      "id": "r-geo",
+      "functionId": "marketing-design",
+      "title": "Generative Engine Optimization",
+      "status": "in_progress",
+      "mapsTo": [
+        "mkt-perf-cmi"
+      ]
+    },
+    {
+      "id": "r-ai-pdp",
+      "functionId": "marketing-design",
+      "title": "AI-driven PDP Improvement",
+      "status": "in_progress",
+      "mapsTo": [
+        "mkt-content-gen"
+      ]
+    },
+    {
+      "id": "r-consumer-insights",
+      "functionId": "marketing-design",
+      "title": "Consumer Insights",
+      "status": "in_progress",
+      "mapsTo": [
+        "mkt-perf-cmi"
+      ]
+    },
+    {
+      "id": "r-sct-adoption",
+      "functionId": "sales-gt",
+      "title": "SCT Adoption",
+      "status": "completed",
+      "mapsTo": [
+        "sales-control-tower"
+      ]
+    },
+    {
+      "id": "r-gt-forecast",
+      "functionId": "sales-gt",
+      "title": "Demand Forecasting",
+      "status": "in_progress",
+      "mapsTo": [
+        "sales-demand-forecasting"
+      ]
+    },
+    {
+      "id": "r-mt-forecast",
+      "functionId": "sales-nmt",
+      "title": "Demand Forecasting",
+      "status": "in_progress",
+      "mapsTo": [
+        "sales-demand-forecasting"
+      ]
+    },
+    {
+      "id": "r-mt-platform",
+      "functionId": "sales-nmt",
+      "title": "Platform Integration",
+      "status": "planned",
+      "mapsTo": [
+        "nmt-order-induction",
+        "nmt-appointment",
+        "nmt-reconciliation"
+      ]
+    },
+    {
+      "id": "r-qc-ec-split",
+      "functionId": "sales-ecom",
+      "title": "Split of QC / EC",
+      "status": "completed",
+      "mapsTo": []
+    },
+    {
+      "id": "r-ecom-forecast",
+      "functionId": "sales-ecom",
+      "title": "Platform-level Demand Forecasting",
+      "status": "in_progress",
+      "mapsTo": [
+        "sales-demand-forecasting"
+      ]
+    },
+    {
+      "id": "r-finifi",
+      "functionId": "sales-ecom",
+      "title": "Platform Integration (Finifi)",
+      "status": "in_progress",
+      "mapsTo": [
+        "ecom-order-induction",
+        "ecom-appointment",
+        "ecom-reconciliation"
+      ]
+    },
+    {
+      "id": "r-ecom-pnl",
+      "functionId": "sales-ecom",
+      "title": "Global E-Comm P&L",
+      "status": "planned",
+      "mapsTo": []
+    },
+    {
+      "id": "r-d2c",
+      "functionId": "sales-retail",
+      "title": "D2C Revamp",
+      "status": "planned",
+      "mapsTo": [
+        "retail-oms",
+        "retail-store-mgmt"
+      ]
+    },
+    {
+      "id": "r-fill-rate",
+      "functionId": "supply-chain",
+      "title": "Order Fulfilment & Fill Rate",
+      "status": "in_progress",
+      "mapsTo": [
+        "scm-dashboard"
+      ]
+    },
+    {
+      "id": "r-tqms",
+      "functionId": "supply-chain",
+      "title": "TQMS Revamp (audit requirement)",
+      "status": "planned",
+      "mapsTo": [
+        "rnd-tqms"
+      ]
+    },
+    {
+      "id": "r-ibp",
+      "functionId": "supply-chain",
+      "title": "IBP (Integrated Business Planning)",
+      "status": "completed",
+      "mapsTo": [
+        "scm-ibp"
+      ]
+    },
+    {
+      "id": "r-sustainability",
+      "functionId": "supply-chain",
+      "title": "Sustainability Reporting",
+      "status": "in_progress",
+      "mapsTo": [
+        "scm-sustainability"
+      ]
+    },
+    {
+      "id": "r-mdm",
+      "functionId": "supply-chain",
+      "title": "Master Data Management (Customer, Vendor, Material)",
+      "status": "in_progress",
+      "mapsTo": [
+        "mdm"
+      ]
+    },
+    {
+      "id": "r-proc-dash",
+      "functionId": "procurement",
+      "title": "Procurement Dashboards",
+      "status": "in_progress",
+      "mapsTo": [
+        "proc-analytics"
+      ]
+    },
+    {
+      "id": "r-sourcing",
+      "functionId": "procurement",
+      "title": "Strategic Sourcing & Supplier Onboarding",
+      "status": "completed",
+      "mapsTo": [
+        "proc-sourcing"
+      ]
+    },
+    {
+      "id": "r-via",
+      "functionId": "procurement",
+      "title": "Vendor Invoice Automation",
+      "status": "in_progress",
+      "mapsTo": [
+        "proc-invoice-automation"
+      ]
+    },
+    {
+      "id": "r-mis",
+      "functionId": "finance",
+      "title": "Monthly MIS @ SKU / PG / Category",
+      "status": "planned",
+      "mapsTo": [
+        "fin-mis"
+      ]
+    },
+    {
+      "id": "r-fpa",
+      "functionId": "finance",
+      "title": "Financial Planning & Analytics (SAP SAC)",
+      "status": "planned",
+      "mapsTo": [
+        "fin-planning"
+      ]
+    },
+    {
+      "id": "r-fin-te",
+      "functionId": "finance",
+      "title": "Travel & Expense",
+      "status": "planned",
+      "mapsTo": [
+        "fin-te",
+        "sales-te"
+      ]
+    },
+    {
+      "id": "r-stat-consol",
+      "functionId": "finance",
+      "title": "Global Statutory Consolidation (GR)",
+      "status": "planned",
+      "mapsTo": [
+        "fin-consolidation"
+      ]
+    },
+    {
+      "id": "r-ai-recruit",
+      "functionId": "hr",
+      "title": "AI-driven Recruitment",
+      "status": "completed",
+      "mapsTo": [
+        "hr-hcm"
+      ]
+    },
+    {
+      "id": "r-npd-process",
+      "functionId": "rnd-qa",
+      "title": "NPD Process Improvement",
+      "status": "completed",
+      "mapsTo": [
+        "rnd-npd-pm"
+      ]
+    },
+    {
+      "id": "r-npd-pm",
+      "functionId": "rnd-qa",
+      "title": "NPD Project Management",
+      "status": "completed",
+      "mapsTo": [
+        "rnd-npd-pm"
+      ]
+    },
+    {
+      "id": "r-plm",
+      "functionId": "rnd-qa",
+      "title": "PLM Revamp",
+      "status": "planned",
+      "mapsTo": [
+        "rnd-plm"
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "from": "mdm",
+      "to": "sales-demand-forecasting",
+      "why": "Clean material/customer master needed for forecast hierarchy"
+    },
+    {
+      "from": "sales-demand-forecasting",
+      "to": "scm-dashboard",
+      "why": "Fill-rate RCA depends on forecast accuracy signal"
+    },
+    {
+      "from": "ecom-order-induction",
+      "to": "ecom-reconciliation",
+      "why": "Reconciliation automation needs integrated PO/invoice feed"
+    },
+    {
+      "from": "nmt-order-induction",
+      "to": "nmt-reconciliation",
+      "why": "Same as e-com"
+    },
+    {
+      "from": "mkt-dam",
+      "to": "mkt-content-gen",
+      "why": "AI content at scale needs governed asset library"
+    },
+    {
+      "from": "fin-mis",
+      "to": "mkt-perf-cmi",
+      "why": "PG-level spend needs SKU/PG-level MIS"
+    }
+  ]
+}

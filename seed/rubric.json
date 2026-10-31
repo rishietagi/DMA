@@ -1,0 +1,110 @@
+{
+  "scale": {
+    "1": "Excel & email driven",
+    "2": "Digitized",
+    "3": "Integrated",
+    "4": "Automated & predictive",
+    "5": "Autonomous & AI-driven"
+  },
+  "dimensions": [
+    {
+      "id": "process",
+      "name": "Process Digitization",
+      "journey": "From manual workflows to autonomous processes",
+      "defaultWeight": 0.35,
+      "levels": {
+        "1": "Run on Excel, email and phone; data re-keyed between steps",
+        "2": "Point systems/portals digitise steps, but hand-offs and re-entry remain",
+        "3": "Systems integrated end-to-end; one workflow, one record through the process",
+        "4": "Rule-based automation and exception management; predictive triggers",
+        "5": "Self-optimising process; AI agents act within guardrails, humans supervise"
+      },
+      "gates": {
+        "3": [
+          "process.system_integration"
+        ],
+        "4": [
+          "process.rule_automation"
+        ],
+        "5": [
+          "process.ai_in_loop"
+        ]
+      }
+    },
+    {
+      "id": "data",
+      "name": "Data & Analytics",
+      "journey": "From spreadsheets to prescriptive insight",
+      "defaultWeight": 0.25,
+      "levels": {
+        "1": "Spreadsheet reporting, manual consolidation, multiple versions of truth",
+        "2": "System reports and dashboards, periodic and descriptive",
+        "3": "Governed single source of truth; master data managed; self-serve dashboards",
+        "4": "Predictive models used in decisions (forecasts, risk scores)",
+        "5": "Prescriptive, real-time decisioning embedded in workflows"
+      },
+      "gates": {
+        "3": [
+          "data.single_source_of_truth"
+        ],
+        "4": [
+          "data.predictive_model"
+        ]
+      }
+    },
+    {
+      "id": "ai",
+      "name": "AI",
+      "journey": "From awareness to embedded intelligence",
+      "defaultWeight": 0.2,
+      "levels": {
+        "1": "Awareness only; no AI in use",
+        "2": "Experiments / pilots, often vendor-led",
+        "3": "At least one AI use case in production for the function",
+        "4": "Multiple scaled use cases with monitoring and governance",
+        "5": "AI embedded in core decisions and agentic workflows; continuous learning"
+      },
+      "gates": {
+        "4": [
+          "ai.governance"
+        ]
+      }
+    },
+    {
+      "id": "people",
+      "name": "People Skills",
+      "journey": "From digitally dependent to digital innovators",
+      "defaultWeight": 0.2,
+      "levels": {
+        "1": "Dependent on IT/vendors for basic system tasks and reports",
+        "2": "Proficient users of core tools",
+        "3": "Power users; self-serve analytics; trained on new tools",
+        "4": "Digital champions network; citizen development; data literacy programmes",
+        "5": "Teams co-create digital/AI solutions; continuous upskilling culture"
+      },
+      "gates": {}
+    }
+  ],
+  "frameworkCrosswalk": {
+    "acatech": {
+      "2": "Connectivity",
+      "3": "Visibility / Transparency",
+      "4": "Predictive capacity",
+      "5": "Adaptability"
+    },
+    "mitreAI": {
+      "1": "Initial",
+      "2": "Adopted",
+      "3": "Defined",
+      "4": "Managed",
+      "5": "Optimized"
+    },
+    "gartnerAI": {
+      "1": "Awareness",
+      "2": "Active",
+      "3": "Operational",
+      "4": "Systemic",
+      "5": "Transformational"
+    }
+  }
+}

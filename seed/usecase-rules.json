@@ -1,0 +1,736 @@
+{
+  "meta": {
+    "note": "Full rule library — 28 rules covering every function. when fields are ANDed; capabilityIds OR-matched; score uses the effective dimension score."
+  },
+  "rules": [
+    {
+      "id": "uc-ecom-recon-agent",
+      "when": {
+        "capabilityIds": [
+          "ecom-reconciliation",
+          "nmt-reconciliation"
+        ],
+        "dimension": "process",
+        "maxScore": 2
+      },
+      "useCase": {
+        "title": "Agentic marketplace reconciliation",
+        "description": "Agent matches settlements, deductions and claims to invoices; drafts disputes; humans approve exceptions.",
+        "aiPattern": "Agentic workflow + document understanding",
+        "kpis": [
+          "Deduction leakage",
+          "DSO",
+          "Recon effort (FTE hrs)"
+        ],
+        "dataPrerequisites": [
+          "Settlement reports",
+          "Invoice & credit-note data"
+        ],
+        "effort": "M",
+        "dependsOn": [
+          "uc-platform-po-integration"
+        ]
+      }
+    },
+    {
+      "id": "uc-platform-po-integration",
+      "when": {
+        "capabilityIds": [
+          "ecom-order-induction",
+          "nmt-order-induction"
+        ],
+        "dimension": "process",
+        "maxScore": 2.5
+      },
+      "useCase": {
+        "title": "Unified platform PO ingestion",
+        "description": "Single integration layer ingests POs from all marketplaces/MT chains, validates against ATP and pricing, posts to SAP.",
+        "aiPattern": "Integration + rules-based validation",
+        "kpis": [
+          "PO-to-dispatch TAT",
+          "Fill rate"
+        ],
+        "dataPrerequisites": [
+          "Platform APIs/EDI",
+          "Price master"
+        ],
+        "effort": "M",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-slot-optimiser",
+      "when": {
+        "capabilityIds": [
+          "ecom-appointment",
+          "nmt-appointment"
+        ],
+        "dimension": "process",
+        "maxScore": 2
+      },
+      "useCase": {
+        "title": "Appointment slot optimiser",
+        "description": "Auto-books and re-books DC/dark-store slots from the dispatch plan; predicts appointment misses.",
+        "aiPattern": "Optimisation + predictive alerts",
+        "kpis": [
+          "Appointment adherence",
+          "Fill rate"
+        ],
+        "dataPrerequisites": [
+          "Dispatch plan",
+          "Platform slot data"
+        ],
+        "effort": "S",
+        "dependsOn": [
+          "uc-platform-po-integration"
+        ]
+      }
+    },
+    {
+      "id": "uc-ml-forecast",
+      "when": {
+        "capabilityIds": [
+          "sales-demand-forecasting"
+        ],
+        "dimension": "data",
+        "maxScore": 3
+      },
+      "useCase": {
+        "title": "ML demand sensing by channel",
+        "description": "Driver-based ML forecast at SKU × channel × region, fed into IBP consensus.",
+        "aiPattern": "Time-series ML",
+        "kpis": [
+          "Forecast accuracy (MAPE)",
+          "Fill rate",
+          "Inventory days"
+        ],
+        "dataPrerequisites": [
+          "Clean SKU/customer master",
+          "3y sales history"
+        ],
+        "effort": "L",
+        "dependsOn": [
+          "uc-mdm-quality"
+        ]
+      }
+    },
+    {
+      "id": "uc-fillrate-rca",
+      "when": {
+        "capabilityIds": [
+          "scm-dashboard"
+        ],
+        "dimension": "process",
+        "maxScore": 3
+      },
+      "useCase": {
+        "title": "Fill-rate root-cause copilot",
+        "description": "Automatically attributes shortfalls to forecast, supply, MDM or logistics causes and suggests actions.",
+        "aiPattern": "Analytics + GenAI narrative",
+        "kpis": [
+          "Customer fill rate",
+          "OTIF"
+        ],
+        "dataPrerequisites": [
+          "Order lines",
+          "Inventory snapshots"
+        ],
+        "effort": "M",
+        "dependsOn": [
+          "uc-ml-forecast"
+        ]
+      }
+    },
+    {
+      "id": "uc-mdm-quality",
+      "when": {
+        "capabilityIds": [
+          "mdm"
+        ],
+        "dimension": "data",
+        "maxScore": 3.5
+      },
+      "useCase": {
+        "title": "AI master-data steward",
+        "description": "Detects duplicates and incomplete material/vendor/customer records; proposes fixes for approval.",
+        "aiPattern": "ML matching + GenAI enrichment",
+        "kpis": [
+          "MDM error rate",
+          "Time to create material"
+        ],
+        "dataPrerequisites": [
+          "Material/vendor/customer masters"
+        ],
+        "effort": "S",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-genai-content",
+      "when": {
+        "capabilityIds": [
+          "mkt-content-gen"
+        ],
+        "dimension": "ai",
+        "maxScore": 2.5
+      },
+      "useCase": {
+        "title": "GenAI content & PDP studio",
+        "description": "Brand-safe GenAI drafts of PDP copy, visuals and variants with claims-compliance checks.",
+        "aiPattern": "GenAI with guardrails",
+        "kpis": [
+          "Content cost per SKU",
+          "Time to market",
+          "PDP conversion"
+        ],
+        "dataPrerequisites": [
+          "Brand guidelines",
+          "Approved claims library",
+          "DAM"
+        ],
+        "effort": "M",
+        "dependsOn": [
+          "uc-dam-ai-tagging"
+        ]
+      }
+    },
+    {
+      "id": "uc-dam-ai-tagging",
+      "when": {
+        "capabilityIds": [
+          "mkt-dam"
+        ],
+        "dimension": "process",
+        "maxScore": 2.5
+      },
+      "useCase": {
+        "title": "AI-tagged digital asset library",
+        "description": "Central DAM with auto-tagging, rights tracking and search across brands and channels.",
+        "aiPattern": "Computer vision tagging",
+        "kpis": [
+          "Asset reuse rate",
+          "Search time"
+        ],
+        "dataPrerequisites": [
+          "Asset inventory"
+        ],
+        "effort": "S",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-pg-spend",
+      "when": {
+        "capabilityIds": [
+          "mkt-perf-cmi",
+          "fin-mis"
+        ],
+        "dimension": "data",
+        "maxScore": 2.5
+      },
+      "useCase": {
+        "title": "PG-level marketing spend & ROI",
+        "description": "Allocates spend to SKU/PG/channel and models ROI; feeds monthly MIS.",
+        "aiPattern": "Attribution / marketing mix modelling",
+        "kpis": [
+          "Marketing ROI",
+          "Spend visibility %"
+        ],
+        "dataPrerequisites": [
+          "Spend ledger",
+          "Sell-out data"
+        ],
+        "effort": "M",
+        "dependsOn": [
+          "uc-mis-automation"
+        ]
+      }
+    },
+    {
+      "id": "uc-fin-recon",
+      "when": {
+        "capabilityIds": [
+          "fin-reconciliation"
+        ],
+        "dimension": "process",
+        "maxScore": 2
+      },
+      "useCase": {
+        "title": "Intelligent finance reconciliation",
+        "description": "Auto-matching for bank/intercompany/vendor with exception queue and AI root-cause hints.",
+        "aiPattern": "Rules + ML matching",
+        "kpis": [
+          "Close days",
+          "Recon backlog"
+        ],
+        "dataPrerequisites": [
+          "Bank statements",
+          "GL"
+        ],
+        "effort": "S",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-hr-analytics",
+      "when": {
+        "capabilityIds": [
+          "hr-analytics"
+        ],
+        "dimension": "data",
+        "maxScore": 2
+      },
+      "useCase": {
+        "title": "People analytics & attrition risk",
+        "description": "Unified HR data model on SuccessFactors with attrition-risk scoring for critical roles.",
+        "aiPattern": "Predictive ML",
+        "kpis": [
+          "Regretted attrition",
+          "Time to hire"
+        ],
+        "dataPrerequisites": [
+          "HCM data"
+        ],
+        "effort": "M",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-proc-spend-cube",
+      "when": {
+        "capabilityIds": [
+          "proc-analytics",
+          "proc-sourcing"
+        ],
+        "dimension": "data",
+        "maxScore": 2
+      },
+      "useCase": {
+        "title": "Spend cube & sourcing copilot",
+        "description": "Classified spend cube with savings opportunities and GenAI RFQ drafting.",
+        "aiPattern": "ML classification + GenAI",
+        "kpis": [
+          "Savings %",
+          "Spend under management"
+        ],
+        "dataPrerequisites": [
+          "PO & invoice history",
+          "Vendor master"
+        ],
+        "effort": "M",
+        "dependsOn": [
+          "uc-mdm-quality"
+        ]
+      }
+    },
+    {
+      "id": "uc-artwork-ai-check",
+      "when": {
+        "capabilityIds": [
+          "mkt-artwork"
+        ],
+        "dimension": "process",
+        "maxScore": 2.5
+      },
+      "useCase": {
+        "title": "AI artwork compliance checker",
+        "description": "Compares artwork against specs, claims library and legal text; routes only exceptions to reviewers.",
+        "aiPattern": "Computer vision + rules",
+        "kpis": [
+          "Artwork cycle time",
+          "Print errors"
+        ],
+        "dataPrerequisites": [
+          "Spec master",
+          "Approved claims library"
+        ],
+        "effort": "S",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-reco-closed-loop",
+      "when": {
+        "capabilityIds": [
+          "gt-reco-beat"
+        ],
+        "dimension": "ai",
+        "maxScore": 4
+      },
+      "useCase": {
+        "title": "Closed-loop beat & SKU recommendations",
+        "description": "Feeds rep conversion back into the recommendation model so it learns which outlets and SKUs convert.",
+        "aiPattern": "ML with feedback loop",
+        "kpis": [
+          "Strike rate",
+          "Lines per call",
+          "Rep adoption %"
+        ],
+        "dataPrerequisites": [
+          "SFA visit and order history",
+          "Outlet master"
+        ],
+        "effort": "M",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-sct-action-agent",
+      "when": {
+        "capabilityIds": [
+          "sales-control-tower"
+        ],
+        "dimension": "process",
+        "maxScore": 3
+      },
+      "useCase": {
+        "title": "Control-tower action agent",
+        "description": "Turns control-tower alerts into owned tasks in SFA/DMS, tracks closure and escalates by rule.",
+        "aiPattern": "Agentic workflow",
+        "kpis": [
+          "Gap-to-target closure",
+          "Alert closure time"
+        ],
+        "dataPrerequisites": [
+          "Primary & secondary sales",
+          "Org hierarchy"
+        ],
+        "effort": "S",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-dms-claims",
+      "when": {
+        "capabilityIds": [
+          "gt-dms"
+        ],
+        "dimension": "process",
+        "maxScore": 3
+      },
+      "useCase": {
+        "title": "Automated scheme & claims validation",
+        "description": "Validates distributor scheme claims against rules and secondary sales; flags anomalies.",
+        "aiPattern": "Rules + anomaly detection",
+        "kpis": [
+          "Claim settlement TAT",
+          "Claim leakage"
+        ],
+        "dataPrerequisites": [
+          "Scheme master",
+          "DMS secondary sales"
+        ],
+        "effort": "S",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-retail-personalisation",
+      "when": {
+        "capabilityIds": [
+          "retail-loyalty"
+        ],
+        "dimension": "ai",
+        "maxScore": 2.5
+      },
+      "useCase": {
+        "title": "Personalised loyalty offers",
+        "description": "Propensity models choose the next-best offer per member across store and D2C.",
+        "aiPattern": "Propensity ML",
+        "kpis": [
+          "Repeat rate",
+          "Redemption rate"
+        ],
+        "dataPrerequisites": [
+          "Single customer view",
+          "Transaction history"
+        ],
+        "effort": "M",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-retail-omni-inventory",
+      "when": {
+        "capabilityIds": [
+          "retail-oms",
+          "retail-store-mgmt"
+        ],
+        "dimension": "data",
+        "maxScore": 3
+      },
+      "useCase": {
+        "title": "Unified retail inventory & order routing",
+        "description": "Single inventory view across stores, D2C and warehouses with rule-based order routing.",
+        "aiPattern": "Integration + optimisation",
+        "kpis": [
+          "Order promise accuracy",
+          "Stock-outs"
+        ],
+        "dataPrerequisites": [
+          "Store & warehouse stock feeds"
+        ],
+        "effort": "M",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-tms-optimiser",
+      "when": {
+        "capabilityIds": [
+          "scm-tms"
+        ],
+        "dimension": "process",
+        "maxScore": 2.5
+      },
+      "useCase": {
+        "title": "Load & route optimisation on TMS",
+        "description": "TMS with automated load building, carrier selection and in-transit tracking.",
+        "aiPattern": "Optimisation",
+        "kpis": [
+          "Freight cost per case",
+          "Truck fill %",
+          "OTIF"
+        ],
+        "dataPrerequisites": [
+          "Shipment history",
+          "Carrier rates"
+        ],
+        "effort": "M",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-esg-data",
+      "when": {
+        "capabilityIds": [
+          "scm-sustainability"
+        ],
+        "dimension": "data",
+        "maxScore": 3
+      },
+      "useCase": {
+        "title": "Automated ESG data capture & reporting",
+        "description": "Captures energy, water and emissions data from plants automatically and drafts BRSR disclosures.",
+        "aiPattern": "Integration + GenAI drafting",
+        "kpis": [
+          "Reporting effort",
+          "Data completeness"
+        ],
+        "dataPrerequisites": [
+          "Plant meters",
+          "Utility invoices"
+        ],
+        "effort": "S",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-ibp-scenarios",
+      "when": {
+        "capabilityIds": [
+          "scm-ibp"
+        ],
+        "dimension": "process",
+        "maxScore": 3
+      },
+      "useCase": {
+        "title": "IBP scenario planning copilot",
+        "description": "Generates supply-demand scenarios and gap-closure options for the monthly IBP cycle.",
+        "aiPattern": "Optimisation + GenAI narrative",
+        "kpis": [
+          "Plan adherence",
+          "Inventory days"
+        ],
+        "dataPrerequisites": [
+          "IBP plans",
+          "Capacity data"
+        ],
+        "effort": "M",
+        "dependsOn": [
+          "uc-ml-forecast"
+        ]
+      }
+    },
+    {
+      "id": "uc-invoice-touchless",
+      "when": {
+        "capabilityIds": [
+          "proc-invoice-automation"
+        ],
+        "dimension": "process",
+        "maxScore": 3
+      },
+      "useCase": {
+        "title": "Touchless invoice processing",
+        "description": "OCR plus automated 3-way match; AI resolves common exceptions and learns from AP decisions.",
+        "aiPattern": "Document AI + ML",
+        "kpis": [
+          "Touchless rate",
+          "Invoice cycle time"
+        ],
+        "dataPrerequisites": [
+          "Invoice images",
+          "PO & GRN data"
+        ],
+        "effort": "S",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-mis-automation",
+      "when": {
+        "capabilityIds": [
+          "fin-mis"
+        ],
+        "dimension": "process",
+        "maxScore": 2
+      },
+      "useCase": {
+        "title": "Automated MIS with GenAI commentary",
+        "description": "Pipeline from S/4HANA to a governed SKU/PG model; GenAI drafts variance commentary.",
+        "aiPattern": "Data pipeline + GenAI narrative",
+        "kpis": [
+          "MIS cycle time",
+          "Report versions"
+        ],
+        "dataPrerequisites": [
+          "S/4HANA GL & COPA",
+          "Product hierarchy"
+        ],
+        "effort": "M",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-fpa-driver",
+      "when": {
+        "capabilityIds": [
+          "fin-planning"
+        ],
+        "dimension": "data",
+        "maxScore": 2.5
+      },
+      "useCase": {
+        "title": "Driver-based rolling forecast",
+        "description": "Driver-based rolling forecast in SAP SAC linked to the IBP volume plan.",
+        "aiPattern": "Predictive ML",
+        "kpis": [
+          "Forecast accuracy",
+          "Planning cycle time"
+        ],
+        "dataPrerequisites": [
+          "Actuals by driver",
+          "IBP volume plan"
+        ],
+        "effort": "M",
+        "dependsOn": [
+          "uc-mis-automation"
+        ]
+      }
+    },
+    {
+      "id": "uc-te-audit",
+      "when": {
+        "capabilityIds": [
+          "fin-te",
+          "sales-te"
+        ],
+        "dimension": "process",
+        "maxScore": 2.5
+      },
+      "useCase": {
+        "title": "AI expense audit",
+        "description": "Integrated T&E tool with AI audit of 100% of claims against policy.",
+        "aiPattern": "Anomaly detection + rules",
+        "kpis": [
+          "Audit coverage",
+          "Policy breaches"
+        ],
+        "dataPrerequisites": [
+          "Claims & receipts",
+          "Travel policy"
+        ],
+        "effort": "S",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-tqms-predictive",
+      "when": {
+        "capabilityIds": [
+          "rnd-tqms",
+          "rnd-lims"
+        ],
+        "dimension": "data",
+        "maxScore": 3
+      },
+      "useCase": {
+        "title": "Predictive quality & CAPA assistant",
+        "description": "Predicts deviation risk from LIMS trends and drafts CAPA for QA approval.",
+        "aiPattern": "Predictive ML + GenAI",
+        "kpis": [
+          "Deviations",
+          "CAPA closure time"
+        ],
+        "dataPrerequisites": [
+          "LIMS results",
+          "Deviation history"
+        ],
+        "effort": "M",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-plm-genai",
+      "when": {
+        "capabilityIds": [
+          "rnd-plm"
+        ],
+        "dimension": "ai",
+        "maxScore": 2
+      },
+      "useCase": {
+        "title": "GenAI regulatory & claims assistant",
+        "description": "Drafts dossiers and checks claims against regulations and the approved claims library.",
+        "aiPattern": "GenAI with retrieval",
+        "kpis": [
+          "Dossier prep time",
+          "Claims rework"
+        ],
+        "dataPrerequisites": [
+          "Regulatory library",
+          "Formulation specs"
+        ],
+        "effort": "M",
+        "dependsOn": []
+      }
+    },
+    {
+      "id": "uc-hr-copilot",
+      "when": {
+        "capabilityIds": [
+          "hr-hcm",
+          "hr-payroll"
+        ],
+        "dimension": "process",
+        "maxScore": 2.5
+      },
+      "useCase": {
+        "title": "HR service copilot",
+        "description": "Employee and manager self-service on SuccessFactors with a GenAI assistant for HR queries.",
+        "aiPattern": "GenAI assistant + workflow",
+        "kpis": [
+          "HR ticket volume",
+          "Resolution time"
+        ],
+        "dataPrerequisites": [
+          "HR policies",
+          "HCM data"
+        ],
+        "effort": "S",
+        "dependsOn": []
+      }
+    }
+  ]
+}

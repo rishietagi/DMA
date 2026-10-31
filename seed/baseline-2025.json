@@ -1,0 +1,638 @@
+{
+  "meta": {
+    "source": "Himalaya Functional Digital Maturity Assessment 2025 (IT-led, functions & partners consulted, vetted internally)",
+    "transcribedFrom": "photos of the deck — verify any score that looks off",
+    "scale": {
+      "1": "Excel & email driven",
+      "2": "Digitized",
+      "3": "Integrated",
+      "4": "Automated & predictive",
+      "5": "Autonomous & AI-driven"
+    },
+    "halfPoints": true,
+    "deckKpis": {
+      "scope": "enterprise",
+      "avgMaturity": 2.3,
+      "capabilities": 21,
+      "pctAtOrBelow2": 43,
+      "countAtLevel5": 0
+    },
+    "deckTagline": "The gap is not technology investment; it is scaled adoption"
+  },
+  "divisions": [
+    {
+      "id": "cpd",
+      "name": "Consumer Products Division (CPD)",
+      "status": "assessed"
+    },
+    {
+      "id": "gp",
+      "name": "Green Pharma (GP)",
+      "status": "not_started"
+    },
+    {
+      "id": "ahp",
+      "name": "AHP",
+      "status": "not_started",
+      "note": "Confirm expansion before using in UI copy"
+    }
+  ],
+  "functions": [
+    {
+      "id": "marketing-design",
+      "name": "Marketing & Design",
+      "group": "cpd",
+      "revenueFacing": true
+    },
+    {
+      "id": "sales-gt",
+      "name": "Sales — General Trade",
+      "group": "cpd",
+      "revenueFacing": true
+    },
+    {
+      "id": "sales-nmt",
+      "name": "Sales — NMT (Modern Trade)",
+      "group": "cpd",
+      "revenueFacing": true
+    },
+    {
+      "id": "sales-ecom",
+      "name": "Sales — E-Commerce",
+      "group": "cpd",
+      "revenueFacing": true
+    },
+    {
+      "id": "sales-retail",
+      "name": "Sales — Retail / D2C",
+      "group": "cpd",
+      "revenueFacing": true
+    },
+    {
+      "id": "supply-chain",
+      "name": "Supply Chain",
+      "group": "enterprise",
+      "revenueFacing": false
+    },
+    {
+      "id": "procurement",
+      "name": "Procurement",
+      "group": "enterprise",
+      "revenueFacing": false
+    },
+    {
+      "id": "finance",
+      "name": "Finance",
+      "group": "enterprise",
+      "revenueFacing": false
+    },
+    {
+      "id": "rnd-qa",
+      "name": "R&D / QA",
+      "group": "enterprise",
+      "revenueFacing": false
+    },
+    {
+      "id": "hr",
+      "name": "HR",
+      "group": "enterprise",
+      "revenueFacing": false
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "mkt-content-gen",
+      "name": "Content Generation (Agency)",
+      "primaryFunctionId": "marketing-design",
+      "functionIds": [
+        "marketing-design"
+      ],
+      "group": "cpd",
+      "selfScore": 1,
+      "criticality": 2,
+      "system": "Agency-led"
+    },
+    {
+      "id": "mkt-perf-cmi",
+      "name": "Performance Marketing & CMI",
+      "primaryFunctionId": "marketing-design",
+      "functionIds": [
+        "marketing-design"
+      ],
+      "group": "cpd",
+      "selfScore": 2,
+      "criticality": 2
+    },
+    {
+      "id": "mkt-artwork",
+      "name": "Artwork Management",
+      "primaryFunctionId": "marketing-design",
+      "functionIds": [
+        "marketing-design"
+      ],
+      "group": "cpd",
+      "selfScore": 2,
+      "criticality": 2
+    },
+    {
+      "id": "mkt-dam",
+      "name": "Digital Asset Management",
+      "primaryFunctionId": "marketing-design",
+      "functionIds": [
+        "marketing-design"
+      ],
+      "group": "cpd",
+      "selfScore": 2,
+      "criticality": 2
+    },
+    {
+      "id": "sales-demand-forecasting",
+      "name": "Demand Forecasting",
+      "primaryFunctionId": "sales-gt",
+      "functionIds": [
+        "sales-gt",
+        "sales-nmt",
+        "sales-ecom",
+        "sales-retail"
+      ],
+      "group": "cpd",
+      "selfScore": 1.5,
+      "criticality": 2,
+      "note": "Spans all sales channels in deck"
+    },
+    {
+      "id": "sales-te",
+      "name": "Travel & Expense (Sales)",
+      "primaryFunctionId": "sales-gt",
+      "functionIds": [
+        "sales-gt",
+        "sales-nmt",
+        "sales-ecom",
+        "sales-retail"
+      ],
+      "group": "cpd",
+      "selfScore": 3,
+      "criticality": 2,
+      "note": "Spans all sales channels in deck"
+    },
+    {
+      "id": "sales-control-tower",
+      "name": "Sales Control Tower",
+      "primaryFunctionId": "sales-gt",
+      "functionIds": [
+        "sales-gt",
+        "sales-nmt"
+      ],
+      "group": "cpd",
+      "selfScore": 3,
+      "criticality": 2,
+      "note": "Tile spans GT/NMT rows — verify"
+    },
+    {
+      "id": "gt-dms",
+      "name": "DMS",
+      "primaryFunctionId": "sales-gt",
+      "functionIds": [
+        "sales-gt"
+      ],
+      "group": "cpd",
+      "selfScore": 3,
+      "criticality": 2,
+      "system": "Leap"
+    },
+    {
+      "id": "gt-sfa",
+      "name": "SFA",
+      "primaryFunctionId": "sales-gt",
+      "functionIds": [
+        "sales-gt"
+      ],
+      "group": "cpd",
+      "selfScore": 3,
+      "criticality": 2,
+      "system": "Saksham"
+    },
+    {
+      "id": "gt-reco-beat",
+      "name": "Product Recommendation & Beat Optimization",
+      "primaryFunctionId": "sales-gt",
+      "functionIds": [
+        "sales-gt"
+      ],
+      "group": "cpd",
+      "selfScore": 5,
+      "criticality": 2
+    },
+    {
+      "id": "nmt-order-induction",
+      "name": "Order Induction",
+      "primaryFunctionId": "sales-nmt",
+      "functionIds": [
+        "sales-nmt"
+      ],
+      "group": "cpd",
+      "selfScore": 2,
+      "criticality": 2
+    },
+    {
+      "id": "nmt-appointment",
+      "name": "Appointment",
+      "primaryFunctionId": "sales-nmt",
+      "functionIds": [
+        "sales-nmt"
+      ],
+      "group": "cpd",
+      "selfScore": 1,
+      "criticality": 2
+    },
+    {
+      "id": "nmt-reconciliation",
+      "name": "Reconciliation",
+      "primaryFunctionId": "sales-nmt",
+      "functionIds": [
+        "sales-nmt"
+      ],
+      "group": "cpd",
+      "selfScore": 1,
+      "criticality": 2
+    },
+    {
+      "id": "ecom-order-induction",
+      "name": "Order Induction",
+      "primaryFunctionId": "sales-ecom",
+      "functionIds": [
+        "sales-ecom"
+      ],
+      "group": "cpd",
+      "selfScore": 2,
+      "criticality": 2
+    },
+    {
+      "id": "ecom-appointment",
+      "name": "Appointment",
+      "primaryFunctionId": "sales-ecom",
+      "functionIds": [
+        "sales-ecom"
+      ],
+      "group": "cpd",
+      "selfScore": 1,
+      "criticality": 2
+    },
+    {
+      "id": "ecom-reconciliation",
+      "name": "Reconciliation",
+      "primaryFunctionId": "sales-ecom",
+      "functionIds": [
+        "sales-ecom"
+      ],
+      "group": "cpd",
+      "selfScore": 1,
+      "criticality": 2
+    },
+    {
+      "id": "retail-store-mgmt",
+      "name": "Store Management",
+      "primaryFunctionId": "sales-retail",
+      "functionIds": [
+        "sales-retail"
+      ],
+      "group": "cpd",
+      "selfScore": 3,
+      "criticality": 2
+    },
+    {
+      "id": "retail-oms",
+      "name": "Order Management System",
+      "primaryFunctionId": "sales-retail",
+      "functionIds": [
+        "sales-retail"
+      ],
+      "group": "cpd",
+      "selfScore": 3,
+      "criticality": 2
+    },
+    {
+      "id": "retail-loyalty",
+      "name": "Loyalty Management",
+      "primaryFunctionId": "sales-retail",
+      "functionIds": [
+        "sales-retail"
+      ],
+      "group": "cpd",
+      "selfScore": 3,
+      "criticality": 2
+    },
+    {
+      "id": "retail-analytics",
+      "name": "Analytics",
+      "primaryFunctionId": "sales-retail",
+      "functionIds": [
+        "sales-retail"
+      ],
+      "group": "cpd",
+      "selfScore": 3,
+      "criticality": 2
+    },
+    {
+      "id": "scm-ibp",
+      "name": "Integrated Planning (IBP)",
+      "primaryFunctionId": "supply-chain",
+      "functionIds": [
+        "supply-chain"
+      ],
+      "group": "enterprise",
+      "selfScore": 2.5,
+      "criticality": 2
+    },
+    {
+      "id": "scm-tms",
+      "name": "Transportation Management System",
+      "primaryFunctionId": "supply-chain",
+      "functionIds": [
+        "supply-chain"
+      ],
+      "group": "enterprise",
+      "selfScore": 2,
+      "criticality": 2
+    },
+    {
+      "id": "scm-dashboard",
+      "name": "Supply Chain Dashboard",
+      "primaryFunctionId": "supply-chain",
+      "functionIds": [
+        "supply-chain"
+      ],
+      "group": "enterprise",
+      "selfScore": 3,
+      "criticality": 2
+    },
+    {
+      "id": "mdm",
+      "name": "MDM (Material, Vendor)",
+      "primaryFunctionId": "supply-chain",
+      "functionIds": [
+        "supply-chain",
+        "procurement"
+      ],
+      "group": "enterprise",
+      "selfScore": 3,
+      "criticality": 2
+    },
+    {
+      "id": "scm-sustainability",
+      "name": "Sustainability",
+      "primaryFunctionId": "supply-chain",
+      "functionIds": [
+        "supply-chain"
+      ],
+      "group": "enterprise",
+      "selfScore": 2.5,
+      "criticality": 2
+    },
+    {
+      "id": "proc-sourcing",
+      "name": "Sourcing & Procurement",
+      "primaryFunctionId": "procurement",
+      "functionIds": [
+        "procurement"
+      ],
+      "group": "enterprise",
+      "selfScore": 1.5,
+      "criticality": 2
+    },
+    {
+      "id": "proc-analytics",
+      "name": "Procurement Analytics",
+      "primaryFunctionId": "procurement",
+      "functionIds": [
+        "procurement"
+      ],
+      "group": "enterprise",
+      "selfScore": 1,
+      "criticality": 2
+    },
+    {
+      "id": "proc-invoice-automation",
+      "name": "Vendor Invoice Automation",
+      "primaryFunctionId": "procurement",
+      "functionIds": [
+        "procurement"
+      ],
+      "group": "enterprise",
+      "selfScore": 2.5,
+      "criticality": 2
+    },
+    {
+      "id": "fin-mis",
+      "name": "MIS Reporting",
+      "primaryFunctionId": "finance",
+      "functionIds": [
+        "finance"
+      ],
+      "group": "enterprise",
+      "selfScore": 1.5,
+      "criticality": 2,
+      "system": "Excel / Power BI / S4HANA"
+    },
+    {
+      "id": "fin-consolidation",
+      "name": "Consolidation",
+      "primaryFunctionId": "finance",
+      "functionIds": [
+        "finance"
+      ],
+      "group": "enterprise",
+      "selfScore": 3,
+      "criticality": 2,
+      "system": "SAP BPC"
+    },
+    {
+      "id": "fin-tax",
+      "name": "Tax & Compliance",
+      "primaryFunctionId": "finance",
+      "functionIds": [
+        "finance"
+      ],
+      "group": "enterprise",
+      "selfScore": 3,
+      "criticality": 2,
+      "system": "SAP DCS"
+    },
+    {
+      "id": "fin-planning",
+      "name": "Financial Planning",
+      "primaryFunctionId": "finance",
+      "functionIds": [
+        "finance"
+      ],
+      "group": "enterprise",
+      "selfScore": 2,
+      "criticality": 2,
+      "system": "BW4HANA"
+    },
+    {
+      "id": "fin-te",
+      "name": "Travel & Expense",
+      "primaryFunctionId": "finance",
+      "functionIds": [
+        "finance"
+      ],
+      "group": "enterprise",
+      "selfScore": 1,
+      "criticality": 2
+    },
+    {
+      "id": "fin-reconciliation",
+      "name": "Reconciliation",
+      "primaryFunctionId": "finance",
+      "functionIds": [
+        "finance"
+      ],
+      "group": "enterprise",
+      "selfScore": 1,
+      "criticality": 2
+    },
+    {
+      "id": "rnd-plm",
+      "name": "PLM",
+      "primaryFunctionId": "rnd-qa",
+      "functionIds": [
+        "rnd-qa"
+      ],
+      "group": "enterprise",
+      "selfScore": 3,
+      "criticality": 2,
+      "system": "Ennovia"
+    },
+    {
+      "id": "rnd-tqms",
+      "name": "TQMS",
+      "primaryFunctionId": "rnd-qa",
+      "functionIds": [
+        "rnd-qa"
+      ],
+      "group": "enterprise",
+      "selfScore": 3,
+      "criticality": 2,
+      "system": "Ennovia"
+    },
+    {
+      "id": "rnd-lims",
+      "name": "LIMS",
+      "primaryFunctionId": "rnd-qa",
+      "functionIds": [
+        "rnd-qa"
+      ],
+      "group": "enterprise",
+      "selfScore": 3,
+      "criticality": 2,
+      "system": "SAP MII"
+    },
+    {
+      "id": "rnd-npd-pm",
+      "name": "NPD / EPD Project Management",
+      "primaryFunctionId": "rnd-qa",
+      "functionIds": [
+        "rnd-qa"
+      ],
+      "group": "enterprise",
+      "selfScore": 3,
+      "criticality": 2
+    },
+    {
+      "id": "hr-hcm",
+      "name": "HCM",
+      "primaryFunctionId": "hr",
+      "functionIds": [
+        "hr"
+      ],
+      "group": "enterprise",
+      "selfScore": 2,
+      "criticality": 2,
+      "system": "SuccessFactors"
+    },
+    {
+      "id": "hr-analytics",
+      "name": "Analytics",
+      "primaryFunctionId": "hr",
+      "functionIds": [
+        "hr"
+      ],
+      "group": "enterprise",
+      "selfScore": 1,
+      "criticality": 2
+    },
+    {
+      "id": "hr-payroll",
+      "name": "Payroll",
+      "primaryFunctionId": "hr",
+      "functionIds": [
+        "hr"
+      ],
+      "group": "enterprise",
+      "selfScore": 3,
+      "criticality": 2
+    }
+  ],
+  "priorities2026": [
+    {
+      "rank": 1,
+      "id": "p1",
+      "title": "End-to-end platform integration for E-com / NMT",
+      "detail": "Automate order induction, appointments and reconciliation end-to-end",
+      "capabilityIds": [
+        "ecom-order-induction",
+        "ecom-appointment",
+        "ecom-reconciliation",
+        "nmt-order-induction",
+        "nmt-appointment",
+        "nmt-reconciliation"
+      ]
+    },
+    {
+      "rank": 2,
+      "id": "p2",
+      "title": "Marketing spend at PG level",
+      "detail": "SKU / PG / channel granularity missing in marketing spend, impacting decisions",
+      "capabilityIds": [
+        "mkt-perf-cmi",
+        "fin-mis"
+      ]
+    },
+    {
+      "rank": 3,
+      "id": "p3",
+      "title": "AI-driven content generation & PDP",
+      "detail": "Content generation at scale using AI; artwork management revamp",
+      "capabilityIds": [
+        "mkt-content-gen",
+        "mkt-artwork"
+      ]
+    },
+    {
+      "rank": 4,
+      "id": "p4",
+      "title": "Demand forecasting",
+      "detail": "Under-forecasting constantly impacting fill rate",
+      "capabilityIds": [
+        "sales-demand-forecasting",
+        "scm-ibp"
+      ]
+    },
+    {
+      "rank": 5,
+      "id": "p5",
+      "title": "Fill rate",
+      "detail": "Single source of truth; improve customer fill rate and root-cause analysis",
+      "capabilityIds": [
+        "scm-dashboard",
+        "mdm",
+        "scm-ibp"
+      ]
+    }
+  ],
+  "targets": {
+    "rule": "4 if linked to a 2026 priority; 3.5 if revenue-facing function; else 3",
+    "overrides": {}
+  }
+}

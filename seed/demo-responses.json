@@ -1,0 +1,1211 @@
+{
+  "meta": {
+    "label": "Illustrative",
+    "note": "Synthetic workshop questionnaire answers and pre-read workshop artefacts for the POC demo. Not Himalaya data. Deliberate variances vs the 2025 self-assessment (gt-reco-beat, sales-control-tower, proc-invoice-automation) must be agreed with the engagement manager before any client showing."
+  },
+  "responses": [
+    {
+      "questionId": "mkt-q01",
+      "functionId": "marketing-design",
+      "level": 1,
+      "answeredBy": "Brand Marketing Manager",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "mkt-q02",
+      "functionId": "marketing-design",
+      "level": 1,
+      "answeredBy": "Brand Marketing Manager",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "mkt-q03",
+      "functionId": "marketing-design",
+      "level": 1,
+      "answeredBy": "Brand Marketing Manager",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "mkt-q04",
+      "functionId": "marketing-design",
+      "level": 2,
+      "answeredBy": "Brand Marketing Manager",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "mkt-q05",
+      "functionId": "marketing-design",
+      "level": 2,
+      "answeredBy": "Brand Marketing Manager",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "mkt-q06",
+      "functionId": "marketing-design",
+      "level": 2,
+      "answeredBy": "Brand Marketing Manager",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "mkt-q07",
+      "functionId": "marketing-design",
+      "level": 2,
+      "answeredBy": "Brand Marketing Manager",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "mkt-q08",
+      "functionId": "marketing-design",
+      "level": 2,
+      "answeredBy": "Brand Marketing Manager",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "mkt-q09",
+      "functionId": "marketing-design",
+      "level": 2,
+      "answeredBy": "Brand Marketing Manager",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "mkt-q10",
+      "functionId": "marketing-design",
+      "level": 1,
+      "answeredBy": "Brand Marketing Manager",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "x-q01",
+      "functionId": "marketing-design",
+      "level": 2,
+      "answeredBy": "Brand Marketing Manager",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "x-q02",
+      "functionId": "marketing-design",
+      "level": 2,
+      "answeredBy": "Brand Marketing Manager",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "x-q03",
+      "functionId": "marketing-design",
+      "level": 2,
+      "answeredBy": "Brand Marketing Manager",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "gt-q01",
+      "functionId": "sales-gt",
+      "level": 4,
+      "notes": "Recommendation module live in Saksham for all reps; weights set at launch, not retrained on conversion.",
+      "answeredBy": "GT Sales Excellence Lead",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "gt-q02",
+      "functionId": "sales-gt",
+      "level": 3,
+      "notes": "Roughly a third of reps act on suggestions in a typical week; higher in metro beats.",
+      "answeredBy": "GT Sales Excellence Lead",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "gt-q03",
+      "functionId": "sales-gt",
+      "level": 3,
+      "answeredBy": "GT Sales Excellence Lead",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "gt-q04",
+      "functionId": "sales-gt",
+      "level": 3,
+      "answeredBy": "GT Sales Excellence Lead",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "gt-q05",
+      "functionId": "sales-gt",
+      "level": 3,
+      "answeredBy": "GT Sales Excellence Lead",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "gt-q06",
+      "functionId": "sales-gt",
+      "level": 3,
+      "answeredBy": "GT Sales Excellence Lead",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "gt-q07",
+      "functionId": "sales-gt",
+      "level": 3,
+      "notes": "Control tower exists but is refreshed weekly from uploaded DMS extracts.",
+      "answeredBy": "GT Sales Excellence Lead",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "gt-q08",
+      "functionId": "sales-gt",
+      "level": 3,
+      "answeredBy": "GT Sales Excellence Lead",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "gt-q09",
+      "functionId": "sales-gt",
+      "level": 4,
+      "answeredBy": "GT Sales Excellence Lead",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "gt-q10",
+      "functionId": "sales-gt",
+      "level": 3,
+      "answeredBy": "GT Sales Excellence Lead",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "gt-q11",
+      "functionId": "sales-gt",
+      "level": 2,
+      "answeredBy": "GT Sales Excellence Lead",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "gt-q12",
+      "functionId": "sales-gt",
+      "level": 3,
+      "answeredBy": "GT Sales Excellence Lead",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "gt-q13",
+      "functionId": "sales-gt",
+      "level": 3,
+      "answeredBy": "GT Sales Excellence Lead",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "x-q01",
+      "functionId": "sales-gt",
+      "level": 3,
+      "answeredBy": "GT Sales Excellence Lead",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "x-q02",
+      "functionId": "sales-gt",
+      "level": 2,
+      "answeredBy": "GT Sales Excellence Lead",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "x-q03",
+      "functionId": "sales-gt",
+      "level": 3,
+      "answeredBy": "GT Sales Excellence Lead",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "nmt-q01",
+      "functionId": "sales-nmt",
+      "level": 2,
+      "answeredBy": "Modern Trade KAM Lead",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "nmt-q02",
+      "functionId": "sales-nmt",
+      "level": 2,
+      "answeredBy": "Modern Trade KAM Lead",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "nmt-q03",
+      "functionId": "sales-nmt",
+      "level": 1,
+      "answeredBy": "Modern Trade KAM Lead",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "nmt-q04",
+      "functionId": "sales-nmt",
+      "level": 1,
+      "answeredBy": "Modern Trade KAM Lead",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "nmt-q05",
+      "functionId": "sales-nmt",
+      "level": 1,
+      "answeredBy": "Modern Trade KAM Lead",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "nmt-q06",
+      "functionId": "sales-nmt",
+      "level": 1,
+      "answeredBy": "Modern Trade KAM Lead",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "nmt-q07",
+      "functionId": "sales-nmt",
+      "level": 2,
+      "answeredBy": "Modern Trade KAM Lead",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "nmt-q08",
+      "functionId": "sales-nmt",
+      "level": 1,
+      "answeredBy": "Modern Trade KAM Lead",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "x-q01",
+      "functionId": "sales-nmt",
+      "level": 2,
+      "answeredBy": "Modern Trade KAM Lead",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "x-q02",
+      "functionId": "sales-nmt",
+      "level": 1,
+      "answeredBy": "Modern Trade KAM Lead",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "x-q03",
+      "functionId": "sales-nmt",
+      "level": 2,
+      "answeredBy": "Modern Trade KAM Lead",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "ecom-q01",
+      "functionId": "sales-ecom",
+      "level": 2,
+      "notes": "Top two marketplaces still downloaded from the seller portal and keyed into SAP.",
+      "answeredBy": "Head of E-commerce",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "ecom-q02",
+      "functionId": "sales-ecom",
+      "level": 1,
+      "answeredBy": "Head of E-commerce",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "ecom-q03",
+      "functionId": "sales-ecom",
+      "level": 1,
+      "notes": "Settlement reports downloaded per platform and matched in Excel.",
+      "answeredBy": "Head of E-commerce",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "ecom-q04",
+      "functionId": "sales-ecom",
+      "level": 2,
+      "answeredBy": "Head of E-commerce",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "ecom-q05",
+      "functionId": "sales-ecom",
+      "level": 1,
+      "answeredBy": "Head of E-commerce",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "ecom-q06",
+      "functionId": "sales-ecom",
+      "level": 2,
+      "answeredBy": "Head of E-commerce",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "ecom-q07",
+      "functionId": "sales-ecom",
+      "level": 1,
+      "answeredBy": "Head of E-commerce",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "ecom-q08",
+      "functionId": "sales-ecom",
+      "level": 1,
+      "answeredBy": "Head of E-commerce",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "x-q01",
+      "functionId": "sales-ecom",
+      "level": 2,
+      "answeredBy": "Head of E-commerce",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "x-q02",
+      "functionId": "sales-ecom",
+      "level": 2,
+      "answeredBy": "Head of E-commerce",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "x-q03",
+      "functionId": "sales-ecom",
+      "level": 2,
+      "answeredBy": "Head of E-commerce",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "rtl-q01",
+      "functionId": "sales-retail",
+      "level": 3,
+      "answeredBy": "Retail Operations Manager",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "rtl-q02",
+      "functionId": "sales-retail",
+      "level": 3,
+      "answeredBy": "Retail Operations Manager",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "rtl-q03",
+      "functionId": "sales-retail",
+      "level": 3,
+      "answeredBy": "Retail Operations Manager",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "rtl-q04",
+      "functionId": "sales-retail",
+      "level": 3,
+      "answeredBy": "Retail Operations Manager",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "rtl-q05",
+      "functionId": "sales-retail",
+      "level": 3,
+      "answeredBy": "Retail Operations Manager",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "rtl-q06",
+      "functionId": "sales-retail",
+      "level": 3,
+      "answeredBy": "Retail Operations Manager",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "rtl-q07",
+      "functionId": "sales-retail",
+      "level": 2,
+      "answeredBy": "Retail Operations Manager",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "rtl-q08",
+      "functionId": "sales-retail",
+      "level": 3,
+      "answeredBy": "Retail Operations Manager",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "rtl-q09",
+      "functionId": "sales-retail",
+      "level": 3,
+      "answeredBy": "Retail Operations Manager",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "x-q01",
+      "functionId": "sales-retail",
+      "level": 3,
+      "answeredBy": "Retail Operations Manager",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "x-q02",
+      "functionId": "sales-retail",
+      "level": 2,
+      "answeredBy": "Retail Operations Manager",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "x-q03",
+      "functionId": "sales-retail",
+      "level": 3,
+      "answeredBy": "Retail Operations Manager",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "scm-q01",
+      "functionId": "supply-chain",
+      "level": 2,
+      "answeredBy": "Supply Chain Planning Lead",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "scm-q02",
+      "functionId": "supply-chain",
+      "level": 3,
+      "answeredBy": "Supply Chain Planning Lead",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "scm-q03",
+      "functionId": "supply-chain",
+      "level": 3,
+      "answeredBy": "Supply Chain Planning Lead",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "scm-q04",
+      "functionId": "supply-chain",
+      "level": 2,
+      "answeredBy": "Supply Chain Planning Lead",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "scm-q05",
+      "functionId": "supply-chain",
+      "level": 3,
+      "answeredBy": "Supply Chain Planning Lead",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "scm-q06",
+      "functionId": "supply-chain",
+      "level": 2,
+      "answeredBy": "Supply Chain Planning Lead",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "scm-q07",
+      "functionId": "supply-chain",
+      "level": 2,
+      "answeredBy": "Supply Chain Planning Lead",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "scm-q08",
+      "functionId": "supply-chain",
+      "level": 3,
+      "answeredBy": "Supply Chain Planning Lead",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "scm-q09",
+      "functionId": "supply-chain",
+      "level": 3,
+      "answeredBy": "Supply Chain Planning Lead",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "scm-q10",
+      "functionId": "supply-chain",
+      "level": 3,
+      "answeredBy": "Supply Chain Planning Lead",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "scm-q11",
+      "functionId": "supply-chain",
+      "level": 2,
+      "answeredBy": "Supply Chain Planning Lead",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "x-q01",
+      "functionId": "supply-chain",
+      "level": 2,
+      "answeredBy": "Supply Chain Planning Lead",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "x-q02",
+      "functionId": "supply-chain",
+      "level": 2,
+      "answeredBy": "Supply Chain Planning Lead",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "x-q03",
+      "functionId": "supply-chain",
+      "level": 3,
+      "answeredBy": "Supply Chain Planning Lead",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "proc-q01",
+      "functionId": "procurement",
+      "level": 2,
+      "answeredBy": "Procurement Head",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "proc-q02",
+      "functionId": "procurement",
+      "level": 1,
+      "answeredBy": "Procurement Head",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "proc-q03",
+      "functionId": "procurement",
+      "level": 1,
+      "answeredBy": "Procurement Head",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "proc-q04",
+      "functionId": "procurement",
+      "level": 1,
+      "answeredBy": "Procurement Head",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "proc-q05",
+      "functionId": "procurement",
+      "level": 3,
+      "notes": "OCR capture went live in Q1; integration layer posts to SAP.",
+      "answeredBy": "Procurement Head",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "proc-q06",
+      "functionId": "procurement",
+      "level": 4,
+      "answeredBy": "Procurement Head",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "proc-q07",
+      "functionId": "procurement",
+      "level": 3,
+      "answeredBy": "Procurement Head",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "proc-q08",
+      "functionId": "procurement",
+      "level": 3,
+      "answeredBy": "Procurement Head",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "x-q01",
+      "functionId": "procurement",
+      "level": 2,
+      "answeredBy": "Procurement Head",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "x-q02",
+      "functionId": "procurement",
+      "level": 2,
+      "answeredBy": "Procurement Head",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "x-q03",
+      "functionId": "procurement",
+      "level": 2,
+      "answeredBy": "Procurement Head",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "fin-q01",
+      "functionId": "finance",
+      "level": 2,
+      "notes": "Bank recs partly in SAP; intercompany and customer recs still in Excel.",
+      "answeredBy": "Finance Controller",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "fin-q02",
+      "functionId": "finance",
+      "level": 1,
+      "answeredBy": "Finance Controller",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "fin-q03",
+      "functionId": "finance",
+      "level": 1,
+      "answeredBy": "Finance Controller",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "fin-q04",
+      "functionId": "finance",
+      "level": 2,
+      "answeredBy": "Finance Controller",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "fin-q05",
+      "functionId": "finance",
+      "level": 3,
+      "answeredBy": "Finance Controller",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "fin-q06",
+      "functionId": "finance",
+      "level": 3,
+      "answeredBy": "Finance Controller",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "fin-q07",
+      "functionId": "finance",
+      "level": 3,
+      "answeredBy": "Finance Controller",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "fin-q08",
+      "functionId": "finance",
+      "level": 3,
+      "answeredBy": "Finance Controller",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "fin-q09",
+      "functionId": "finance",
+      "level": 2,
+      "answeredBy": "Finance Controller",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "fin-q10",
+      "functionId": "finance",
+      "level": 2,
+      "answeredBy": "Finance Controller",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "fin-q11",
+      "functionId": "finance",
+      "level": 1,
+      "answeredBy": "Finance Controller",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "fin-q12",
+      "functionId": "finance",
+      "level": 1,
+      "answeredBy": "Finance Controller",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "x-q01",
+      "functionId": "finance",
+      "level": 2,
+      "answeredBy": "Finance Controller",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "x-q02",
+      "functionId": "finance",
+      "level": 1,
+      "answeredBy": "Finance Controller",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "x-q03",
+      "functionId": "finance",
+      "level": 2,
+      "answeredBy": "Finance Controller",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "rnd-q01",
+      "functionId": "rnd-qa",
+      "level": 3,
+      "answeredBy": "R&D / QA Head",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "rnd-q02",
+      "functionId": "rnd-qa",
+      "level": 3,
+      "answeredBy": "R&D / QA Head",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "rnd-q03",
+      "functionId": "rnd-qa",
+      "level": 3,
+      "answeredBy": "R&D / QA Head",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "rnd-q04",
+      "functionId": "rnd-qa",
+      "level": 3,
+      "answeredBy": "R&D / QA Head",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "rnd-q05",
+      "functionId": "rnd-qa",
+      "level": 3,
+      "answeredBy": "R&D / QA Head",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "rnd-q06",
+      "functionId": "rnd-qa",
+      "level": 3,
+      "answeredBy": "R&D / QA Head",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "rnd-q07",
+      "functionId": "rnd-qa",
+      "level": 3,
+      "answeredBy": "R&D / QA Head",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "rnd-q08",
+      "functionId": "rnd-qa",
+      "level": 3,
+      "answeredBy": "R&D / QA Head",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "rnd-q09",
+      "functionId": "rnd-qa",
+      "level": 2,
+      "answeredBy": "R&D / QA Head",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "x-q01",
+      "functionId": "rnd-qa",
+      "level": 3,
+      "answeredBy": "R&D / QA Head",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "x-q02",
+      "functionId": "rnd-qa",
+      "level": 2,
+      "answeredBy": "R&D / QA Head",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "x-q03",
+      "functionId": "rnd-qa",
+      "level": 3,
+      "answeredBy": "R&D / QA Head",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "hr-q01",
+      "functionId": "hr",
+      "level": 2,
+      "answeredBy": "HR Business Partner",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "hr-q02",
+      "functionId": "hr",
+      "level": 2,
+      "answeredBy": "HR Business Partner",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "hr-q03",
+      "functionId": "hr",
+      "level": 1,
+      "answeredBy": "HR Business Partner",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "hr-q04",
+      "functionId": "hr",
+      "level": 1,
+      "answeredBy": "HR Business Partner",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "hr-q05",
+      "functionId": "hr",
+      "level": 3,
+      "answeredBy": "HR Business Partner",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "hr-q06",
+      "functionId": "hr",
+      "level": 3,
+      "answeredBy": "HR Business Partner",
+      "date": "2026-09-14"
+    },
+    {
+      "questionId": "hr-q07",
+      "functionId": "hr",
+      "level": 1,
+      "answeredBy": "HR Business Partner",
+      "date": "2026-09-15"
+    },
+    {
+      "questionId": "hr-q08",
+      "functionId": "hr",
+      "level": 2,
+      "answeredBy": "HR Business Partner",
+      "date": "2026-09-16"
+    },
+    {
+      "questionId": "x-q01",
+      "functionId": "hr",
+      "level": 2,
+      "answeredBy": "HR Business Partner",
+      "date": "2026-09-17"
+    },
+    {
+      "questionId": "x-q02",
+      "functionId": "hr",
+      "level": 2,
+      "answeredBy": "HR Business Partner",
+      "date": "2026-09-18"
+    },
+    {
+      "questionId": "x-q03",
+      "functionId": "hr",
+      "level": 2,
+      "answeredBy": "HR Business Partner",
+      "date": "2026-09-14"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ws-e01",
+      "capabilityId": "gt-reco-beat",
+      "dimension": "process",
+      "level": 4,
+      "weight": 2,
+      "sourceType": "artifact",
+      "category": "process_docs",
+      "gateKey": "process.rule_automation",
+      "docId": "ws-beat-sop",
+      "docTitle": "Beat planning SOP v3",
+      "location": "§2.3",
+      "quote": "Beat plans are re-optimised automatically each month by the Saksham optimiser using outlet potential and visit history.",
+      "polarity": "strength"
+    },
+    {
+      "id": "ws-e02",
+      "capabilityId": "gt-reco-beat",
+      "dimension": "ai",
+      "level": 3,
+      "weight": 3,
+      "sourceType": "system",
+      "category": "application_landscape",
+      "docId": "ws-saksham-note",
+      "docTitle": "Saksham & Leap application note",
+      "location": "Recommendation module",
+      "quote": "The recommendation module is live for all GT reps; model weights were set at launch and have not been retrained on conversion outcomes.",
+      "polarity": "pain"
+    },
+    {
+      "id": "ws-e03",
+      "capabilityId": "gt-reco-beat",
+      "dimension": "people",
+      "level": 3,
+      "weight": 2,
+      "sourceType": "kpi",
+      "category": "kpi_extracts",
+      "docId": "ws-gt-kpi",
+      "docTitle": "GT field KPI extract — Aug 2026",
+      "location": "Row 12",
+      "quote": "Recommendation adoption: 38% of reps acted on at least one suggested SKU per week.",
+      "polarity": "pain"
+    },
+    {
+      "id": "ws-e04",
+      "capabilityId": "gt-reco-beat",
+      "dimension": "data",
+      "level": 3,
+      "weight": 2,
+      "sourceType": "kpi",
+      "category": "kpi_extracts",
+      "gateKey": "data.single_source_of_truth",
+      "docId": "ws-gt-kpi",
+      "docTitle": "GT field KPI extract — Aug 2026",
+      "location": "Row 13",
+      "quote": "Recommendation conversion is captured in Saksham and reported on the governed GT dashboard, but is not fed back to the model.",
+      "polarity": "neutral"
+    },
+    {
+      "id": "ws-e05",
+      "capabilityId": "sales-control-tower",
+      "dimension": "data",
+      "level": 2,
+      "weight": 3,
+      "sourceType": "artifact",
+      "category": "process_docs",
+      "gateKey": "data.single_source_of_truth",
+      "docId": "ws-sct-note",
+      "docTitle": "Sales control tower operating note",
+      "location": "p. 2",
+      "quote": "The control tower is refreshed weekly from DMS extracts uploaded manually; primary and secondary sales do not reconcile until month end.",
+      "polarity": "pain"
+    },
+    {
+      "id": "ws-e06",
+      "capabilityId": "sales-control-tower",
+      "dimension": "process",
+      "level": 2,
+      "weight": 2,
+      "sourceType": "artifact",
+      "category": "process_docs",
+      "gateKey": "process.system_integration",
+      "docId": "ws-sct-note",
+      "docTitle": "Sales control tower operating note",
+      "location": "p. 3",
+      "quote": "Exceptions flagged in the control tower are followed up over email and WhatsApp; there is no task workflow.",
+      "polarity": "pain"
+    },
+    {
+      "id": "ws-e07",
+      "capabilityId": "sales-control-tower",
+      "dimension": "people",
+      "level": 2,
+      "weight": 1,
+      "sourceType": "kpi",
+      "category": "kpi_extracts",
+      "docId": "ws-gt-kpi",
+      "docTitle": "GT field KPI extract — Aug 2026",
+      "location": "Row 21",
+      "quote": "Control tower weekly active users: 41 of 160 ASMs and above.",
+      "polarity": "pain"
+    },
+    {
+      "id": "ws-e08",
+      "capabilityId": "proc-invoice-automation",
+      "dimension": "process",
+      "level": 3,
+      "weight": 3,
+      "sourceType": "system",
+      "category": "application_landscape",
+      "gateKey": "process.system_integration",
+      "docId": "ws-via-note",
+      "docTitle": "Vendor invoice automation solution note",
+      "location": "Architecture",
+      "quote": "Invoices are captured by OCR and posted to SAP through the integration layer; 3-way match runs in SAP.",
+      "polarity": "strength"
+    },
+    {
+      "id": "ws-e09",
+      "capabilityId": "proc-invoice-automation",
+      "dimension": "process",
+      "level": 4,
+      "weight": 2,
+      "sourceType": "kpi",
+      "category": "kpi_extracts",
+      "gateKey": "process.rule_automation",
+      "docId": "ws-ap-kpi",
+      "docTitle": "AP invoice processing extract — Aug 2026",
+      "location": "Row 4",
+      "quote": "Touchless posting rate reached 52% in August 2026 for PO-backed invoices.",
+      "polarity": "strength"
+    },
+    {
+      "id": "ws-e10",
+      "capabilityId": "proc-invoice-automation",
+      "dimension": "data",
+      "level": 3,
+      "weight": 2,
+      "sourceType": "kpi",
+      "category": "kpi_extracts",
+      "gateKey": "data.single_source_of_truth",
+      "docId": "ws-ap-kpi",
+      "docTitle": "AP invoice processing extract — Aug 2026",
+      "location": "Row 9",
+      "quote": "AP exceptions, holds and ageing are visible on a single governed dashboard.",
+      "polarity": "strength"
+    },
+    {
+      "id": "ws-e11",
+      "capabilityId": "scm-ibp",
+      "dimension": "process",
+      "level": 3,
+      "weight": 2,
+      "sourceType": "artifact",
+      "category": "process_docs",
+      "gateKey": "process.system_integration",
+      "docId": "ws-ibp-raci",
+      "docTitle": "IBP cycle calendar & RACI",
+      "location": "p. 1",
+      "quote": "The monthly IBP cycle runs in-system with demand review, supply review and executive sign-off steps.",
+      "polarity": "strength"
+    },
+    {
+      "id": "ws-e12",
+      "capabilityId": "scm-ibp",
+      "dimension": "data",
+      "level": 2,
+      "weight": 2,
+      "sourceType": "artifact",
+      "category": "process_docs",
+      "gateKey": "data.single_source_of_truth",
+      "docId": "ws-ibp-raci",
+      "docTitle": "IBP cycle calendar & RACI",
+      "location": "p. 2",
+      "quote": "Sales and finance still maintain parallel plan versions in Excel that are reconciled before the executive review.",
+      "polarity": "pain"
+    },
+    {
+      "id": "ws-e13",
+      "capabilityId": "mdm",
+      "dimension": "data",
+      "level": 3,
+      "weight": 2,
+      "sourceType": "kpi",
+      "category": "kpi_extracts",
+      "gateKey": "data.single_source_of_truth",
+      "docId": "ws-mdm-kpi",
+      "docTitle": "MDM quality scorecard — Aug 2026",
+      "location": "Row 3",
+      "quote": "Material master completeness 94%; duplicate vendor rate 3.1%.",
+      "polarity": "neutral"
+    },
+    {
+      "id": "ws-e14",
+      "capabilityId": "mdm",
+      "dimension": "process",
+      "level": 3,
+      "weight": 2,
+      "sourceType": "artifact",
+      "category": "policies_sops",
+      "gateKey": "process.system_integration",
+      "docId": "ws-mdm-sop",
+      "docTitle": "Master data governance SOP",
+      "location": "§4",
+      "quote": "Material and vendor creation run through the governed MDM workflow integrated with SAP.",
+      "polarity": "strength"
+    },
+    {
+      "id": "ws-e15",
+      "capabilityId": "ecom-reconciliation",
+      "dimension": "data",
+      "level": 2,
+      "weight": 2,
+      "sourceType": "kpi",
+      "category": "kpi_extracts",
+      "gateKey": "data.single_source_of_truth",
+      "docId": "ws-deductions",
+      "docTitle": "Marketplace deductions tracker",
+      "location": "Summary tab",
+      "quote": "Platform-wise deduction reports are produced monthly; leakage by reason code and SKU is not available.",
+      "polarity": "pain"
+    },
+    {
+      "id": "ws-e16",
+      "capabilityId": "fin-reconciliation",
+      "dimension": "process",
+      "level": 2,
+      "weight": 2,
+      "sourceType": "artifact",
+      "category": "process_docs",
+      "gateKey": "process.system_integration",
+      "docId": "ws-close-checklist",
+      "docTitle": "Month-end close checklist",
+      "location": "Step 7",
+      "quote": "Bank reconciliation is performed partly in SAP, with Excel workpapers for unmatched items.",
+      "polarity": "pain"
+    },
+    {
+      "id": "ws-e17",
+      "capabilityId": "rnd-lims",
+      "dimension": "process",
+      "level": 3,
+      "weight": 2,
+      "sourceType": "system",
+      "category": "application_landscape",
+      "gateKey": "process.system_integration",
+      "docId": "ws-qc-systems",
+      "docTitle": "QC lab systems overview",
+      "location": "LIMS",
+      "quote": "LIMS is integrated with SAP MII and QM for usage decisions.",
+      "polarity": "strength"
+    },
+    {
+      "id": "ws-e18",
+      "capabilityId": "rnd-tqms",
+      "dimension": "process",
+      "level": 3,
+      "weight": 2,
+      "sourceType": "system",
+      "category": "application_landscape",
+      "gateKey": "process.system_integration",
+      "docId": "ws-qc-systems",
+      "docTitle": "QC lab systems overview",
+      "location": "TQMS",
+      "quote": "TQMS on Ennovia is linked to LIMS so deviations are raised directly from OOS results.",
+      "polarity": "strength"
+    },
+    {
+      "id": "ws-e19",
+      "capabilityId": "hr-payroll",
+      "dimension": "process",
+      "level": 3,
+      "weight": 2,
+      "sourceType": "artifact",
+      "category": "process_docs",
+      "gateKey": "process.system_integration",
+      "docId": "ws-payroll-note",
+      "docTitle": "Payroll process note",
+      "location": "§1",
+      "quote": "Payroll inputs flow from SuccessFactors and the attendance system; manual inputs are limited to arrears.",
+      "polarity": "strength"
+    },
+    {
+      "id": "ws-e20",
+      "capabilityId": "gt-dms",
+      "dimension": "data",
+      "level": 3,
+      "weight": 2,
+      "sourceType": "system",
+      "category": "application_landscape",
+      "gateKey": "data.single_source_of_truth",
+      "docId": "ws-saksham-note",
+      "docTitle": "Saksham & Leap application note",
+      "location": "Leap DMS",
+      "quote": "Leap DMS syncs secondary sales and stock to SAP daily for all active distributors.",
+      "polarity": "strength"
+    },
+    {
+      "id": "ws-e21",
+      "capabilityId": "gt-sfa",
+      "dimension": "process",
+      "level": 3,
+      "weight": 2,
+      "sourceType": "system",
+      "category": "application_landscape",
+      "gateKey": "process.system_integration",
+      "docId": "ws-saksham-note",
+      "docTitle": "Saksham & Leap application note",
+      "location": "Order flow",
+      "quote": "Orders captured in Saksham flow to Leap DMS and on to SAP without re-entry.",
+      "polarity": "strength"
+    }
+  ]
+}
