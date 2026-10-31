@@ -86,6 +86,8 @@ export interface CapabilityResult {
   /** dimension flags + capability-level flags (SELF_VARIANCE, LOW_COVERAGE) */
   flags: Flag[];
   hasEvidence: boolean;
+  /** at least one artefact / KPI / system indicator in any dimension */
+  hasObjectiveEvidence: boolean;
   /** 0–100 index of the effective score */
   index: number;
   /** effective weights used for this capability (normalised over scored dims) */

@@ -14,8 +14,8 @@
   --card-foreground: oklch(0.141 0.005 285.823);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.141 0.005 285.823);
-  --primary: oklch(0.21 0.006 285.885);
-  --primary-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.47 0.19 268);
+  --primary-foreground: oklch(0.99 0 0);
   --secondary: oklch(0.967 0.001 286.375);
   --secondary-foreground: oklch(0.21 0.006 285.885);
   --muted: oklch(0.967 0.001 286.375);
@@ -25,7 +25,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.915 0.004 286.32);
   --input: oklch(0.9 0.004 286.32);
-  --ring: oklch(0.55 0.2 275);
+  --ring: oklch(0.55 0.19 268);
   --sidebar: oklch(0.975 0.002 286);
 
   /* maturity ramp (blue) */
@@ -49,10 +49,10 @@
   --rag-fg: oklch(0.2 0.02 60);
 
   /* AI */
-  --ai-accent: oklch(0.55 0.22 292);
-  --ai-accent-2: oklch(0.62 0.17 245);
-  --ai-soft: oklch(0.97 0.018 292);
-  --ai-foreground: oklch(0.45 0.2 292);
+  --ai-accent: oklch(0.54 0.21 282);
+  --ai-accent-2: oklch(0.63 0.2 305);
+  --ai-soft: oklch(0.97 0.017 285);
+  --ai-foreground: oklch(0.46 0.2 282);
 
   /* confidence */
   --confidence-high: oklch(0.6 0.14 162);
@@ -80,8 +80,8 @@
   --card-foreground: oklch(0.975 0 0);
   --popover: oklch(0.19 0.006 285.885);
   --popover-foreground: oklch(0.975 0 0);
-  --primary: oklch(0.93 0.004 286.32);
-  --primary-foreground: oklch(0.21 0.006 285.885);
+  --primary: oklch(0.7 0.15 270);
+  --primary-foreground: oklch(0.16 0.03 270);
   --secondary: oklch(0.255 0.006 286.033);
   --secondary-foreground: oklch(0.975 0 0);
   --muted: oklch(0.235 0.006 286.033);
@@ -91,7 +91,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 9%);
   --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.68 0.17 280);
+  --ring: oklch(0.7 0.15 270);
   --sidebar: oklch(0.155 0.004 285.885);
 
   --maturity-1: oklch(0.29 0.035 255);
@@ -112,10 +112,10 @@
   --rag-5: oklch(0.6 0.13 152);
   --rag-fg: oklch(0.16 0.02 60);
 
-  --ai-accent: oklch(0.7 0.17 292);
-  --ai-accent-2: oklch(0.72 0.13 235);
-  --ai-soft: oklch(0.24 0.05 292);
-  --ai-foreground: oklch(0.8 0.13 292);
+  --ai-accent: oklch(0.72 0.15 282);
+  --ai-accent-2: oklch(0.74 0.15 310);
+  --ai-soft: oklch(0.235 0.045 285);
+  --ai-foreground: oklch(0.82 0.11 285);
 
   --confidence-high: oklch(0.72 0.14 162);
   --confidence-med: oklch(0.8 0.14 75);

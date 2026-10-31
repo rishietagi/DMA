@@ -95,7 +95,7 @@ export function computeKpis(
     lacksEvidence: set.filter((c) => c.flags.some((f) => f.kind === "LACKS_EVIDENCE")).length,
     awaitingValidation: set.filter((c) => c.status === "suggested").length,
     validated: set.filter((c) => c.status !== "suggested").length,
-    evidenceCoverage: n ? set.filter((c) => c.hasEvidence).length / n : 0,
+    evidenceCoverage: n ? set.filter((c) => c.hasObjectiveEvidence).length / n : 0,
     highConfidence: set.filter((c) => c.confidenceBand === "high").length,
   };
 }

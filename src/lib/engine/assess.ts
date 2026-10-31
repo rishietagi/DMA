@@ -105,6 +105,7 @@ export function assess(input: AssessmentInput): AssessmentResult {
       confidenceBand: agg?.band ?? "low",
       flags,
       hasEvidence,
+      hasObjectiveEvidence: anyObjective,
       index: toIndex(eff.score),
       weightsUsed: agg?.weightsUsed ?? {},
     };

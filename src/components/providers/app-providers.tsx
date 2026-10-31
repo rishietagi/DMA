@@ -1,0 +1,30 @@
+"use client";
+import * as React from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MotionConfig } from "framer-motion";
+import { ThemeProvider } from "next-themes";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { useSession } from "@/lib/store/session";
+import { AssessmentProvider } from "./assessment-provider";
+
+export function AppProviders({ children }: { children: React.ReactNode }) {
+  const [queryClient] = React.useState(() => new QueryClient({ defaultOptions: { queries: { staleTime: 60_000 } } }));
+
+  React.useEffect(() => {
+    void useSession.persist.rehydrate();
+  }, []);
+
+  return (
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+      <QueryClientProvider client={queryClient}>
+        <MotionConfig reducedMotion="user">
+          <TooltipProvider delayDuration={250}>
+            <AssessmentProvider>{children}</AssessmentProvider>
+            <Toaster position="bottom-right" />
+          </TooltipProvider>
+        </MotionConfig>
+      </QueryClientProvider>
+    </ThemeProvider>
+  );
+}
