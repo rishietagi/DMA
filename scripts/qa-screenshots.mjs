@@ -26,6 +26,12 @@ for (const theme of themes) {
     errors++;
     console.log(`[pageerror] ${theme} ${page.url()} :: ${String(e).slice(0, 300)}`);
   });
+  if (process.env.QA_LOAD_DEMO) {
+    await page.goto(base + "/evidence", { waitUntil: "networkidle" });
+    await page.getByTestId("load-demo-evidence").click();
+    await page.getByText("Re-analyse demo evidence").waitFor({ timeout: 90_000 });
+    await page.waitForTimeout(500);
+  }
   for (const r of routes) {
     await page.goto(base + r, { waitUntil: "networkidle" });
     await page.waitForTimeout(900);

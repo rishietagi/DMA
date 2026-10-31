@@ -7,13 +7,12 @@ import * as React from "react";
 import { toast } from "sonner";
 import { runAgent } from "@/lib/ai/client";
 import { scoreContext } from "@/lib/ai/contexts";
-import { assess, roundHalf, type EvidenceItem } from "@/lib/engine";
+import { assess, DIMENSION_LABELS, formatScore, roundHalf, type EvidenceItem } from "@/lib/engine";
 import { EVIDENCE_CATEGORY_LABELS } from "@/lib/engine/config";
 import { findContradictions } from "@/lib/classifier/insights";
 import { DEMO_DOCS } from "@/lib/demo-evidence";
-import { FUNCTION_SHORT } from "@/lib/labels";
-import type { EvidenceCategory, FunctionId } from "@/lib/schema";
-import { seed } from "@/lib/seed";
+import { capabilityLabel, FUNCTION_SHORT } from "@/lib/labels";
+import { DIMENSIONS, type EvidenceCategory, type FunctionId } from "@/lib/schema";
 import { buildInput, coverageByFunction } from "@/lib/store/build-input";
 import { useSession } from "@/lib/store/session";
 import type { EvidenceDoc, InterviewNote } from "@/lib/store/types";
@@ -41,14 +40,27 @@ async function classifyFile(file: Blob, meta: { docId: string; title: string; fi
   return (await res.json()) as ClassifyResponse;
 }
 
-/** Number of in-scope capabilities whose displayed (half-point) score changes. */
-function movedCount(before: EvidenceItem[], after: EvidenceItem[]): { moved: number; changes: { id: string; from: number; to: number }[] } {
+interface ScoreChange {
+  id: string;
+  label: string;
+}
+
+/** Capabilities whose displayed capability score or any dimension score changes. */
+function movedCount(before: EvidenceItem[], after: EvidenceItem[]): { moved: number; changes: ScoreChange[] } {
   const s = useSession.getState();
   const a = assess(buildInput({ ...s, evidence: before }));
   const b = assess(buildInput({ ...s, evidence: after }));
-  const changes = a.capabilities
-    .map((c) => ({ id: c.capability.id, from: c.evidenceScore, to: b.byId[c.capability.id]!.evidenceScore }))
-    .filter((x) => roundHalf(x.from) !== roundHalf(x.to));
+  const changes: ScoreChange[] = [];
+  for (const c of a.capabilities) {
+    const n = b.byId[c.capability.id]!;
+    const name = capabilityLabel(c.capability.id);
+    if (roundHalf(c.evidenceScore) !== roundHalf(n.evidenceScore)) {
+      changes.push({ id: c.capability.id, label: `${name} ${formatScore(c.evidenceScore)} → ${formatScore(n.evidenceScore)}` });
+      continue;
+    }
+    const d = DIMENSIONS.find((k) => c.dimensions[k]?.final !== n.dimensions[k]?.final);
+    if (d) changes.push({ id: c.capability.id, label: `${name} ${DIMENSION_LABELS[d].toLowerCase()} ${formatScore(c.dimensions[d]?.final)} → ${formatScore(n.dimensions[d]?.final)}` });
+  }
   return { moved: changes.length, changes };
 }
 
@@ -131,8 +143,10 @@ export async function ingest(
   if (notes.length) st.addNotes(notes);
 
   if (changes.length) {
-    const top = changes.slice(0, 2).map((c) => `${seed.baseline.capabilities.find((x) => x.id === c.id)?.name} ${c.from.toFixed(1)}→${c.to.toFixed(1)}`);
-    toast.success(`${newItems.length} evidence items mapped`, { description: `${moved} scores moved — ${top.join(", ")}` });
+    const top = changes.slice(0, 2).map((c) => c.label);
+    toast.success(`${newItems.length} evidence items mapped`, {
+      description: `${moved} ${moved === 1 ? "capability" : "capabilities"} moved — ${top.join("; ")}`,
+    });
   } else {
     toast.success(`${newItems.length} evidence items mapped`, { description: "No displayed scores changed." });
   }

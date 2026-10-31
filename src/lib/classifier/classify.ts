@@ -175,9 +175,13 @@ export function polarity(text: string, signal: LevelSignal): Polarity {
   return "neutral";
 }
 
-export function themesFor(text: string, level: number | null): string[] {
+/** Theme tags. Level-bound themes (manual reconciliation) need a low level, or a pain statement with no level. */
+export function themesFor(text: string, level: number | null, pol: Polarity = "neutral"): string[] {
   return THEMES.filter(
-    (t) => matchCues(text, t.cues).length > 0 && (t.requiresLevelAtMost === undefined || (level !== null && level <= t.requiresLevelAtMost)),
+    (t) =>
+      matchCues(text, t.cues).length > 0 &&
+      (t.requiresLevelAtMost === undefined ||
+        (level !== null ? level <= t.requiresLevelAtMost : pol === "pain")),
   ).map((t) => t.id);
 }
 
@@ -212,7 +216,7 @@ export function classifySegment(
     polarity: pol,
     gateKey: gateKeyFor(sig.dimension, sig.level),
     cues: [...new Set([...sig.cues, ...cap.cues])],
-    themes: themesFor(text, sig.level),
+    themes: themesFor(text, sig.level, pol),
   };
 }
 

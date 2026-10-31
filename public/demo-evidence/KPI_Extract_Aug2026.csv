@@ -1,0 +1,14 @@
+Function,Metric,Value,Period,Comment
+Supply chain,Customer fill rate,87.4%,Aug 2026,Fill-rate reason codes are reported on the supply chain dashboard fed by an integrated SAP feed
+Supply chain,Forecast accuracy (MAPE),38%,Aug 2026,Under-forecasting persists for quick commerce; the statistical forecast is overridden manually in Excel
+E-commerce,Deduction leakage,2.1% of GMV,Aug 2026,Claims and deductions are disputed manually; leakage by reason code is not available
+E-commerce,PO-to-dispatch time,41 hours,Aug 2026,POs keyed into SAP by hand for three of five platforms
+Modern trade,Claims reconciliation backlog,"1,240 open items",Aug 2026,Chain claims are reconciled manually in Excel
+Finance,Monthly close duration,9 working days,Aug 2026,MIS pack assembled in Excel from SAP extracts
+Procurement,Spend under management,46%,Aug 2026,Spend cube refreshed quarterly from SAP extracts in Excel
+General trade,Distributors live on Leap DMS,96%,Aug 2026,Secondary sales synced daily to SAP
+R&D / QA,Deviations closed on time,78%,Aug 2026,CAPA routed automatically in TQMS with alerts on overdue actions
+Retail / D2C,Loyalty repeat rate,31%,Aug 2026,Loyalty data integrated with POS and D2C through middleware
+Finance,GST mismatches vs books,0.3%,Aug 2026,Tax and books reconcile from a single source of truth in SAP DCS
+R&D / QA,Lab results released on time,97%,Aug 2026,LIMS results flow into SAP QM for usage decisions
+R&D / QA,OOS trend visibility,Monthly,Aug 2026,Test results are trended on a governed LIMS dashboard

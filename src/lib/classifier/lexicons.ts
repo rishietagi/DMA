@@ -113,9 +113,9 @@ export const AI_LEVEL_CUES: LevelCue[] = [
 
 /** §7.5 dimension cues */
 export const DIMENSION_CUES: Record<Exclude<Dimension, "process">, string[]> = {
-  ai: ["ml", "machine learning", "model", "models", "genai", "generative ai", "gen ai", "copilot", "recommendation engine", "ai", "llm", "agentic", "ai agent"],
+  ai: ["ml", "machine learning", "ml model", "ai model", "forecast model", "genai", "generative ai", "gen ai", "copilot", "recommendation engine", "ai", "llm", "agentic", "ai agent"],
   people: ["training", "trained", "champions", "champion", "dependent on it", "depend on it", "depends on it", "citizen developer", "citizen developers", "adoption", "skills", "upskilling", "power users", "data literacy", "active users"],
-  data: ["dashboard", "dashboards", "report", "reports", "reporting", "data lake", "kpi", "kpis", "analytics", "visibility", "single source of truth", "single view", "plan versions", "versions of", "data quality", "completeness"],
+  data: ["dashboard", "dashboards", "report", "reports", "reporting", "data lake", "kpi", "kpis", "analytics", "visibility", "single source of truth", "single view", "plan versions", "versions of", "data quality", "completeness", "data model", "governed view", "governed record", "trended", "visible"],
 };
 
 /** §7.6 polarity */
@@ -128,7 +128,7 @@ export const NEGATION_WINDOW = 3;
 
 /** Cross-functional theme taxonomy (§7 interview intelligence) */
 export const THEMES: { id: string; label: string; cues: string[]; requiresLevelAtMost?: number }[] = [
-  { id: "manual-reconciliation", label: "Manual reconciliation", cues: ["reconciliation", "reconciled", "reconcile", "settlement", "deductions", "workpapers", "matched in excel"], requiresLevelAtMost: 2 },
+  { id: "manual-reconciliation", label: "Manual reconciliation", cues: ["reconciliation", "reconciled", "reconcile", "settlement", "deductions", "workpapers", "intercompany", "matched", "matching", "open items"], requiresLevelAtMost: 2 },
   { id: "data-re-entry", label: "Data re-entry", cues: ["re-key", "re-keyed", "keyed into", "re-entered", "re-entry", "keyed by"] },
   { id: "no-single-source", label: "No single source of truth", cues: ["multiple versions", "parallel plan", "parallel", "do not reconcile", "no single view", "no visibility", "not visible", "versions of the truth"] },
   { id: "forecast-accuracy", label: "Forecast accuracy", cues: ["under-forecast", "under-forecasting", "forecast accuracy", "mape", "forecast bias"] },

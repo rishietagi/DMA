@@ -125,7 +125,13 @@ export function confidence(
     return { coverage: 0, agreement: 0, quality: 0, value: 0, band: "low" };
   }
   const objectiveTypes = new Set(contributing.filter(isObjective).map((i) => i.sourceType));
-  const coverage = Math.min(1, objectiveTypes.size / Math.max(1, expectedObjectiveTypes));
+  // expected 0: the question bank expects only affirmations (e.g. People) — any evidence covers it
+  const coverage =
+    expectedObjectiveTypes === 0
+      ? contributing.some((i) => !isSelf(i))
+        ? 1
+        : 0
+      : Math.min(1, objectiveTypes.size / expectedObjectiveTypes);
   const agreement =
     1 - Math.min(1, stdev(contributing.map((i) => i.level as number)) / CONFIDENCE.stdevDivisor);
   const quality = mean(contributing.map(reliability));

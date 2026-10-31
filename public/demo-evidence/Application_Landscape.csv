@@ -1,0 +1,15 @@
+System,Function,Integration,Notes
+Leap DMS,General trade,Integrated with SAP via middleware with daily sync,All active distributors
+Saksham SFA,General trade,API integration with the distributor system,Orders flow without re-entry
+Sales control tower dashboard,General trade and modern trade,DMS extracts uploaded weekly,Illustrative
+Finifi,E-commerce,Not yet integrated for marketplace order feeds,Pilot for one marketplace
+SAP BPC,Finance,Consolidation integrated with entity ledgers,Illustrative
+SAP DCS,Finance,Tax integrated with GSTN for e-invoicing,Illustrative
+BW4HANA,Finance,Planning templates uploaded to BW4HANA,Actuals only
+SuccessFactors,HR,Employee Central and Recruiting integrated with payroll,Illustrative
+Ennovia PLM,R&D / QA,PLM integrated with SAP material master,Illustrative
+SAP IBP,Supply chain,IBP integrated with S/4HANA for demand and supply planning,Illustrative
+None (TMS),Supply chain,No TMS; transport planned by phone and Excel with transporters,Whitespace candidate
+Retail OMS,Retail / D2C,Unified order management across D2C and stores integrated with SAP,Illustrative
+Brand asset storage,Marketing,No DAM; brand assets emailed by agencies and kept on shared drives,Illustrative
+Artwork tool,Marketing,Artwork files digitised; approvals still by email,Illustrative

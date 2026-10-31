@@ -1,0 +1,7 @@
+Initiative,Function,Status,AI component,Notes
+AI-driven content generation,Marketing,In progress,GenAI pilot with the agency,Brand guardrails being defined
+Demand forecasting (GT / MT / E-com),Sales,In progress,ML forecast pilot for quick commerce,Accuracy tracked at national level only
+AI-driven recruitment,HR,Completed,AI screening in production,Used for campus hiring
+Vendor invoice automation,Procurement,In progress,OCR with ML extraction in production,Touchless rate 52% in August
+Product recommendation & beat optimisation,General trade,Completed,Recommendation engine in production,Model not retrained on outcomes; adoption 38%
+Master data management,Cross-functional,In progress,AI duplicate detection proposed,Material and vendor domains first

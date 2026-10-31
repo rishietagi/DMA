@@ -112,7 +112,8 @@ export function evidenceIndicators(evidence: readonly EvidenceItem[]): Indicator
 
 /**
  * Expected number of distinct objective source types for (capability, dimension), derived
- * from the evidenceExpected of the questions that score it. null → use the config default.
+ * from the evidenceExpected of the questions that score it. 0 when questions exist but expect
+ * only affirmations (interview notes); null when no question scores it → config default.
  */
 export function expectedObjectiveTypes(
   bank: QuestionBank,
@@ -121,6 +122,7 @@ export function expectedObjectiveTypes(
   categorySource: Record<EvidenceCategory, string> = CATEGORY_SOURCE_TYPE,
 ): number | null {
   const types = new Set<string>();
+  let questions = 0;
   for (const f of bank.functions) {
     for (const q of f.questions) {
       if (q.dimension !== dimension) continue;
@@ -129,13 +131,14 @@ export function expectedObjectiveTypes(
         (q.capabilityIds.includes("*") &&
           (f.functionId === "*" || cap.functionIds.includes(f.functionId as FunctionId)));
       if (!applies) continue;
+      questions++;
       for (const c of q.evidenceExpected) {
         const st = categorySource[c];
         if (st && (OBJECTIVE_SOURCE_TYPES as readonly string[]).includes(st)) types.add(st);
       }
     }
   }
-  return types.size > 0 ? types.size : null;
+  return questions === 0 ? null : types.size;
 }
 
 /** Evidence categories the question bank expects for a function (for LOW_COVERAGE). */

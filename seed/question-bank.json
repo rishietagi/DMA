@@ -4147,8 +4147,7 @@
             }
           ],
           "evidenceExpected": [
-            "interview_notes",
-            "policies_sops"
+            "interview_notes"
           ]
         }
       ]
