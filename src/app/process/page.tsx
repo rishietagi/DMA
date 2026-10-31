@@ -147,7 +147,7 @@ export default function ProcessPage() {
       <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
         <Card>
           <CardHeader>
-            <CardTitle>Manual workarounds</CardTitle>
+            <CardTitle data-tour="workarounds">Manual workarounds</CardTitle>
             <CardDescription>Statements where a manual step sits next to a named system — the places automation pays back first.</CardDescription>
           </CardHeader>
           <CardContent className="pt-3">

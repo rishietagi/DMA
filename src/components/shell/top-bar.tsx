@@ -33,13 +33,14 @@ export function TopBar({
     <header className="no-print flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="-ml-2 gap-1.5 px-2 font-normal" aria-label="Switch engagement or division">
+          <Button variant="ghost" size="sm" className="-ml-2 gap-1.5 px-2 font-normal">
             <span className="font-semibold">Himalaya</span>
             <span className="text-muted-foreground/60">/</span>
             <span>CPD + Enterprise</span>
             <ChevronDown className="size-3.5 text-muted-foreground" />
             <span className="text-muted-foreground/60">/</span>
             <span className="text-muted-foreground">FY26 DMA</span>
+            <span className="sr-only">— switch division</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-72">
@@ -70,7 +71,7 @@ export function TopBar({
           Demo mode · simulated AI
         </span>
 
-        <Button variant="outline" size="sm" onClick={onOpenPalette} className="w-44 justify-start text-muted-foreground" aria-label="Open command palette">
+        <Button variant="outline" size="sm" onClick={onOpenPalette} className="w-44 justify-start text-muted-foreground">
           <CommandIcon className="size-3.5" />
           <span className="flex-1 text-left">Search</span>
           <kbd className="rounded border bg-muted px-1 text-[10px] font-medium">Ctrl K</kbd>

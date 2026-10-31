@@ -428,7 +428,7 @@ export function CapabilitySheet({
           </div>
         </Tabs>
 
-        <div className="border-t bg-card px-6 py-4">
+        <div className="border-t bg-card px-6 py-4" data-tour="validation">
           <ValidationPanel c={c} />
           <p className="mt-2 text-[11px] text-muted-foreground">
             Evidence categories: {[...new Set(DIMENSIONS.flatMap((d) => c.dimensions[d]?.contributing.map((i) => i.category).filter(Boolean) ?? []))].map((x) => EVIDENCE_CATEGORY_LABELS[x!]).join(", ") || "none"}

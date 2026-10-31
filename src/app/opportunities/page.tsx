@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ArrowRight, Database, GitBranch, ShieldAlert, Sparkles } from "lucide-react";
 import { useAssessment } from "@/components/providers/assessment-provider";
 import { Button } from "@/components/ui/button";
@@ -126,11 +127,16 @@ function UseCaseDetail({ u, all }: { u: UseCase; all: UseCase[] }) {
   );
 }
 
-export default function OpportunitiesPage() {
+function OpportunitiesInner() {
   const { result } = useAssessment();
+  const params = useSearchParams();
   const [fn, setFn] = React.useState<FunctionId | "all">("all");
   const [quad, setQuad] = React.useState<Quadrant | "all">("all");
-  const [selected, setSelected] = React.useState<string | null>(null);
+  const [selected, setSelected] = React.useState<string | null>(params.get("uc"));
+  React.useEffect(() => {
+    const uc = params.get("uc");
+    if (uc) setSelected(uc);
+  }, [params]);
   const all = result.useCases;
   const items = all.filter((u) => (fn === "all" || u.functionIds.includes(fn)) && (quad === "all" || u.quadrant === quad));
   const sorted = [...items].sort((a, b) => b.priority - a.priority);
@@ -209,7 +215,7 @@ export default function OpportunitiesPage() {
             <PriorityMatrix items={items} selected={sel?.id} onSelect={setSelected} />
           </CardContent>
         </Card>
-        <Card className="ai-surface">
+        <Card className="ai-surface" data-tour="uc-detail">
           <CardContent className="py-5">{sel ? <UseCaseDetail u={sel} all={all} /> : <p className="text-sm text-muted-foreground">No use cases match these filters.</p>}</CardContent>
         </Card>
       </div>
@@ -258,5 +264,13 @@ export default function OpportunitiesPage() {
         </div>
       </section>
     </Page>
+  );
+}
+
+export default function OpportunitiesPage() {
+  return (
+    <React.Suspense>
+      <OpportunitiesInner />
+    </React.Suspense>
   );
 }

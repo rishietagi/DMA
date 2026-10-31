@@ -110,7 +110,7 @@ function Dropzone({
       data-testid={`dropzone-${category}`}
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-[13px] font-semibold">{EVIDENCE_CATEGORY_LABELS[category]}</h3>
+        <h2 className="text-[13px] font-semibold">{EVIDENCE_CATEGORY_LABELS[category]}</h2>
         <span
           className={cn(
             "tabular rounded px-1.5 py-0.5 text-[11px]",
@@ -240,7 +240,7 @@ export default function EvidencePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Coverage</CardTitle>
+          <CardTitle data-tour="coverage">Coverage</CardTitle>
           <CardDescription>
             Which functions have which kinds of evidence — and where the question bank expects more.
           </CardDescription>

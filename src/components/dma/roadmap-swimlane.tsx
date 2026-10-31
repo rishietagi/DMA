@@ -142,7 +142,7 @@ export function RoadmapSwimlane({
         })}
       </svg>
 
-      <div className="grid grid-cols-[110px_1.25fr_1fr_1fr_1fr] gap-x-4">
+      <div className="grid grid-cols-[96px_1.15fr_1fr_1fr_1fr] gap-x-3">
         <div />
         <div className="sticky top-0 z-20 border-b bg-background pb-2 text-xs font-medium">
           2026-27 roadmap today
@@ -166,7 +166,7 @@ export function RoadmapSwimlane({
                   const flag = flagFor(i);
                   return (
                     <div key={i.id} className="flex items-start gap-2 rounded-md px-1 py-0.5 text-xs">
-                      <span className={cn("mt-1 size-2 shrink-0 rounded-full", STATUS_DOT[i.status])} aria-label={STATUS_LABEL[i.status]} />
+                      <span role="img" className={cn("mt-1 size-2 shrink-0 rounded-full", STATUS_DOT[i.status])} aria-label={STATUS_LABEL[i.status]} />
                       <span className="min-w-0 flex-1 leading-snug">{i.title}</span>
                       {flag === "ACCELERATE" && (
                         <span className="inline-flex shrink-0 items-center gap-0.5 rounded bg-conf-med/20 px-1 text-[10px] font-medium" title="Gap of 2 or more against target">

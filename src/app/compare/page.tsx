@@ -137,7 +137,7 @@ function CompareInner() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Cross-functional themes</CardTitle>
+          <CardTitle data-tour="themes">Cross-functional themes</CardTitle>
           <CardDescription>
             Pain points from documents and interviews, normalised to a fixed taxonomy and counted by function. Themes that span functions are
             candidates for shared solutions.

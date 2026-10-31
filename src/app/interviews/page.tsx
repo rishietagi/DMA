@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { AlertTriangle, FileStack, Lock, MessageSquarePlus, Sparkles, ThumbsDown, ThumbsUp } from "lucide-react";
 import { useAssessment } from "@/components/providers/assessment-provider";
 import { Button } from "@/components/ui/button";
@@ -387,7 +388,7 @@ function NotesBoard() {
               {!pains.length && <li className="rounded-lg border border-dashed p-3 text-xs text-muted-foreground">None yet.</li>}
             </ul>
           </section>
-          <section aria-label="Contradictions" className="flex flex-col gap-2">
+          <section aria-label="Contradictions" className="flex flex-col gap-2" data-tour="contradictions">
             <h3 className="flex items-center gap-1.5 text-[13px] font-semibold">
               <AlertTriangle className="size-4 text-conf-med" aria-hidden /> Contradictions <span className="font-normal text-muted-foreground tabular">{contradictions.length}</span>
             </h3>
@@ -419,8 +420,14 @@ function NotesBoard() {
   );
 }
 
-export default function InterviewsPage() {
+function InterviewsInner() {
   const notes = useSession((s) => s.notes);
+  const params = useSearchParams();
+  const [tab, setTab] = React.useState(params.get("tab") ?? (notes.length ? "notes" : "questionnaire"));
+  React.useEffect(() => {
+    const t = params.get("tab");
+    if (t) setTab(t);
+  }, [params]);
   return (
     <Page>
       <PageHeader
@@ -428,7 +435,7 @@ export default function InterviewsPage() {
         title="Interview intelligence"
         description="Structured questionnaires follow each function’s L1 process chain; every option maps to a maturity level. Interview notes are classified into strengths, pain points and contradictions."
       />
-      <Tabs defaultValue={notes.length ? "notes" : "questionnaire"}>
+      <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           <TabsTrigger value="questionnaire">Questionnaire</TabsTrigger>
           <TabsTrigger value="notes">Notes and themes</TabsTrigger>
@@ -441,5 +448,13 @@ export default function InterviewsPage() {
         </TabsContent>
       </Tabs>
     </Page>
+  );
+}
+
+export default function InterviewsPage() {
+  return (
+    <React.Suspense>
+      <InterviewsInner />
+    </React.Suspense>
   );
 }

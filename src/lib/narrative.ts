@@ -36,9 +36,11 @@ export function buildNarrative(r: AssessmentResult): Narrative {
             : ""
         }. ${seed.baseline.meta.deckTagline}.`;
 
-  const p3 = `${ws.length} ${ws.length === 1 ? "capability has" : "capabilities have"} a material gap and no initiative on the 2026-27 roadmap (${ws
-    .map((o) => capabilityLabel(o.capabilityId))
-    .join(", ")}). ${acc.length} ${acc.length === 1 ? "capability needs" : "capabilities need"} its roadmap initiative accelerated, and ${now.length} AI and digital use ${now.length === 1 ? "case is" : "cases are"} ready to start in the next six months.`;
+  const names = ws.map((o) => capabilityLabel(o.capabilityId));
+  const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : (names[0] ?? "");
+  const p3 = `${ws.length === 0 ? "No capability has" : ws.length === 1 ? "One capability has" : `${ws.length} capabilities have`} a material gap and no initiative on the 2026-27 roadmap${ws.length ? `: ${list}` : ""}. ${
+    acc.length === 1 ? "One capability needs its roadmap initiative" : `${acc.length} capabilities need their roadmap initiatives`
+  } accelerated, and ${now.length} AI and digital use ${now.length === 1 ? "case is" : "cases are"} ready to start in the next six months.`;
 
   return { headline, paragraphs: [p1, p2, p3] };
 }

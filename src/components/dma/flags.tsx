@@ -38,15 +38,20 @@ export function FlagIcons({ flags, className, max = 4 }: { flags: readonly Flag[
   const list = uniqueFlags(flags).slice(0, max);
   if (list.length === 0) return <span className="text-xs text-muted-foreground/60">—</span>;
   return (
-    <span className={cn("inline-flex items-center gap-1", className)}>
+    <span className={cn("inline-flex items-center gap-0.5", className)}>
       {list.map((f) => {
         const m = FLAG_META[f.kind];
         return (
           <Tooltip key={f.kind}>
             <TooltipTrigger asChild>
-              <span tabIndex={0} aria-label={`${m.label}: ${describeFlag(f)}`} className={cn("inline-flex rounded p-0.5 outline-none focus-visible:ring-2 focus-visible:ring-ring", m.tone)}>
+              <button
+                type="button"
+                onClick={(e) => e.stopPropagation()}
+                aria-label={`${m.label}: ${describeFlag(f)}`}
+                className={cn("inline-flex size-6 items-center justify-center rounded outline-none focus-visible:ring-2 focus-visible:ring-ring", m.tone)}
+              >
                 <m.icon className="size-3.5" aria-hidden />
-              </span>
+              </button>
             </TooltipTrigger>
             <TooltipContent>
               <span className="font-medium">{m.label}.</span> {describeFlag(f)}

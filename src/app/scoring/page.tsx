@@ -119,7 +119,7 @@ function ScoringWorkbench() {
                   e.stopPropagation();
                   open(c.capability.id, d);
                 }}
-                className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="inline-flex min-h-6 min-w-6 items-center rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label={`${capabilityLabel(c.capability.id)} ${DIM_SHORT[d]} ${formatScore(ds?.final)} — open evidence`}
               >
                 <MaturityChip score={ds?.final} size="sm" rag={rag} className={cn(ds && !ds.hasEvidence && "opacity-60")} />
@@ -158,7 +158,7 @@ function ScoringWorkbench() {
       col.accessor((c) => c.flags.length, {
         id: "flags",
         header: "Flags",
-        cell: (info) => <FlagIcons flags={info.row.original.flags} />,
+        cell: (info) => <FlagIcons flags={info.row.original.flags.filter((f) => f.kind !== "LOW_COVERAGE")} />,
       }),
       col.accessor("status", {
         header: "Status",
@@ -258,7 +258,7 @@ function ScoringWorkbench() {
                     <button
                       type="button"
                       onClick={h.column.getToggleSortingHandler()}
-                      className="inline-flex items-center gap-1 rounded outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                      className="inline-flex min-h-6 items-center gap-1 rounded outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
                       aria-label={`Sort by ${String(h.column.columnDef.header)}`}
                     >
                       {flexRender(h.column.columnDef.header, h.getContext())}

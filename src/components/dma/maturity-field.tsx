@@ -38,7 +38,7 @@ export function MaturityField({
               <span className="truncate text-xs font-medium" title={fn.name}>
                 {FUNCTION_SHORT[fn.id]}
               </span>
-              <span className="text-[10px] text-muted-foreground">{fn.group === "cpd" ? "CPD" : "Ent."}</span>
+              <span className="hidden text-[10px] text-muted-foreground 2xl:inline">{fn.group === "cpd" ? "CPD" : "Ent."}</span>
             </div>
             {caps.map((c) => {
               const score = view === "self" ? c.self : view === "evidence" ? c.evidenceScore : c.effectiveScore;
@@ -66,7 +66,7 @@ export function MaturityField({
                             <ArrowUp className="size-3 opacity-80" aria-label="above self-assessment" />
                           ))}
                         {view === "effective" && c.status !== "suggested" && (
-                          <span className="ml-auto size-1.5 rounded-full bg-current opacity-80" aria-label="validated" />
+                          <span role="img" className="ml-auto size-1.5 rounded-full bg-current opacity-80" aria-label="validated" />
                         )}
                       </span>
                     </Link>

@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Sparkles } from "lucide-react";
 import { useAssessment } from "@/components/providers/assessment-provider";
 import { Button } from "@/components/ui/button";
@@ -29,9 +30,14 @@ function chains(useCases: UseCase[]): UseCase[][] {
   return out.sort((a, b) => b.length - a.length).slice(0, 5);
 }
 
-export default function RoadmapPage() {
+function RoadmapInner() {
   const { result } = useAssessment();
-  const [selected, setSelected] = React.useState<string | null>(null);
+  const params = useSearchParams();
+  const [selected, setSelected] = React.useState<string | null>(params.get("uc"));
+  React.useEffect(() => {
+    const uc = params.get("uc");
+    if (uc) setSelected(uc);
+  }, [params]);
   const opps = Object.values(result.opportunities);
   const ws = opps.filter((o) => o.alignment === "WHITESPACE");
   const acc = opps.filter((o) => o.alignment === "ACCELERATE");
@@ -66,7 +72,7 @@ export default function RoadmapPage() {
       />
 
       <div className="grid gap-4 lg:grid-cols-4">
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2" data-tour="whitespaces">
           <CardHeader>
             <CardTitle>Whitespaces</CardTitle>
             <CardDescription>Gap ≥ 1 against target and nothing on the roadmap.</CardDescription>
@@ -91,7 +97,7 @@ export default function RoadmapPage() {
           <CardContent className="pt-3 text-[13px]">
             <ul className="flex flex-col gap-1">
               {acc.slice(0, 6).map((o) => (
-                <li key={o.capabilityId} className="truncate">
+                <li key={o.capabilityId} className="leading-snug">
                   {capabilityLabel(o.capabilityId)} <span className="text-xs text-muted-foreground">gap {o.gap.toFixed(1)}</span>
                 </li>
               ))}
@@ -120,7 +126,7 @@ export default function RoadmapPage() {
 
       <Card>
         <CardContent className="overflow-x-auto py-5">
-          <div className="min-w-[1100px]">
+          <div className="min-w-[940px]">
             <RoadmapSwimlane useCases={result.useCases} opportunities={result.opportunities} selected={selected} onSelect={setSelected} />
           </div>
         </CardContent>
@@ -149,5 +155,13 @@ export default function RoadmapPage() {
         </CardContent>
       </Card>
     </Page>
+  );
+}
+
+export default function RoadmapPage() {
+  return (
+    <React.Suspense>
+      <RoadmapInner />
+    </React.Suspense>
   );
 }

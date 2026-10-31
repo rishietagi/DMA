@@ -11,6 +11,7 @@ import { useStageStatus, type StageStatus } from "./use-stage-status";
 function StatusDot({ status }: { status: StageStatus }) {
   return (
     <span
+      role="img"
       aria-label={status === "done" ? "Complete" : status === "active" ? "In progress" : "Not started"}
       className={cn(
         "size-2 shrink-0 rounded-full",

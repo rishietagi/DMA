@@ -26,3 +26,24 @@
 - Initiative → capability mapping in `roadmap-2026-27.json` (our proposal).
 - Sales Control Tower span (GT only, or GT + NMT) and AHP's expansion.
 - The deliberate demo variances (e.g. Product Recommendation 5 → 3.5) — fine as illustrative, but agree them with Swati.
+
+## Running the workbench
+
+Uses the existing `it-smo` conda env (Node 20.20 + corepack → pnpm 10). No new environment is needed.
+
+```bash
+conda activate it-smo            # or: export PATH="/c/miniconda/envs/it-smo:$PATH"
+corepack pnpm install
+corepack pnpm dev                # http://localhost:3000
+corepack pnpm typecheck && corepack pnpm lint && corepack pnpm test
+corepack pnpm seed:check
+corepack pnpm exec playwright test   # e2e incl. guided-tour smoke test (starts dev on :3100)
+```
+
+Demo flow: open the Cockpit → **Run guided assessment** (top bar, ≈ 3 min, narrated in the Agent Console), or
+Evidence hub → **Load demo evidence**. `?theme=dark` forces the theme; `Ctrl/⌘ K` opens the palette; `?` lists shortcuts.
+
+Dev tools: `scripts/calibrate.ts` (self vs evidence per capability), `scripts/demo-evidence-report.ts` (what the demo pack
+does to scores, contradictions, themes), `scripts/qa-screenshots.mjs` (every route, light + dark, console errors),
+`scripts/a11y-audit.mjs` (Lighthouse accessibility per route), `scripts/print-synthesis.mjs` (synthesis → PDF),
+`scripts/time-tour.mjs`, `scripts/make-fixtures.mjs` (PDF/DOCX upload fixtures for e2e).

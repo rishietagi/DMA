@@ -78,7 +78,7 @@ export default function SynthesisPage() {
         <p className="text-xs">Himalaya · FY26 Digital Maturity Assessment · CPD and enterprise functions · KPMG · Illustrative demo — simulated AI</p>
       </div>
 
-      <section className="print-avoid rounded-xl border bg-card px-6 py-6">
+      <section className="print-avoid rounded-xl border bg-card px-6 py-6" data-tour="headline">
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           {validatedShare >= 1 ? (
             <span className="inline-flex items-center gap-1 text-validated">
@@ -157,7 +157,7 @@ export default function SynthesisPage() {
                 <th className="pb-2 font-medium">Function</th>
                 <th className="pb-2 font-medium">Quadrant</th>
                 <th className="pb-2 text-right font-medium">Priority</th>
-                <th className="pb-2 text-right font-medium">Phase</th>
+                <th className="pb-2 pl-3 text-right font-medium">Phase</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -167,7 +167,7 @@ export default function SynthesisPage() {
                   <td className="py-2 pr-2 text-xs text-muted-foreground">{u.functionIds.map((f) => FUNCTION_SHORT[f]).join(", ")}</td>
                   <td className="py-2 pr-2 text-xs">{u.quadrant}</td>
                   <td className="py-2 text-right tabular">{Math.round(u.priority)}</td>
-                  <td className="py-2 text-right text-xs">{u.phase}</td>
+                  <td className="py-2 pl-3 text-right text-xs">{u.phase}</td>
                 </tr>
               ))}
             </tbody>
