@@ -4,6 +4,8 @@ import { ai, type AgentTask } from "@/lib/ai";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+/** the longest scripted run (evidence analysis) streams for under 10 s; headroom for cold starts */
+export const maxDuration = 30;
 
 const TASKS = [
   "score",

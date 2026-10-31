@@ -67,10 +67,10 @@ function Dropzone({
   const handle = async (files: FileList | null) => {
     if (!files?.length) return;
     const list = [...files];
-    const bad = list.filter((f) => !/\.(pdf|docx|csv|md|markdown|txt)$/i.test(f.name));
+    const bad = list.filter((f) => !/\.(pdf|docx|csv|md|markdown|txt)$/i.test(f.name) || f.size > 4 * 1024 * 1024);
     if (bad.length)
       toast.error(`Can't read ${bad.map((b) => b.name).join(", ")}`, {
-        description: "Use PDF, DOCX, CSV, MD or TXT.",
+        description: "Use PDF, DOCX, CSV, MD or TXT files under 4 MB.",
       });
     const ok = list.filter((f) => !bad.includes(f));
     if (!ok.length) return;

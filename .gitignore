@@ -2,6 +2,7 @@
 private/
 
 node_modules/
+.vercel
 .next/
 out/
 coverage/

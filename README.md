@@ -47,3 +47,17 @@ Dev tools: `scripts/calibrate.ts` (self vs evidence per capability), `scripts/de
 does to scores, contradictions, themes), `scripts/qa-screenshots.mjs` (every route, light + dark, console errors),
 `scripts/a11y-audit.mjs` (Lighthouse accessibility per route), `scripts/print-synthesis.mjs` (synthesis → PDF),
 `scripts/time-tour.mjs`, `scripts/make-fixtures.mjs` (PDF/DOCX upload fixtures for e2e).
+
+## Deploying to Vercel
+
+No configuration file or environment variables are needed — it is a standard Next.js 15 app with no database and no external API keys.
+
+1. Push the repo to GitHub (the `private/` folder and build outputs are git-ignored).
+2. In Vercel: **Add New → Project → Import** the repo. Vercel detects **Next.js** and **pnpm** (from `pnpm-lock.yaml` / `packageManager`).
+   Leave the defaults: root directory `./`, build command `pnpm build`, output `.next`, install `pnpm install`.
+3. Deploy. Node 20+ is required (`engines` in `package.json`); Vercel's default Node 22 is fine.
+
+Notes
+- Session state (answers, uploads, validations) lives in each viewer's browser (localStorage), so every visitor gets their own demo. “Reset demo session” in the command palette starts over.
+- Uploads go to the `/api/classify` function; Vercel caps request bodies at 4.5 MB, so the app accepts files up to 4 MB.
+- All AI behaviour is simulated (no model calls, no keys). Demo documents are synthetic and labelled Illustrative — keep real client files out of the repo and out of any public deployment. Consider enabling Vercel **Deployment Protection** before sharing the URL.

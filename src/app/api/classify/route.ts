@@ -5,14 +5,17 @@ import { parseFile } from "@/lib/parse";
 import { evidenceCategorySchema } from "@/lib/schema";
 
 export const runtime = "nodejs";
+/** PDF parsing can take a few seconds on a cold start */
+export const maxDuration = 30;
 
-const MAX_BYTES = 8 * 1024 * 1024;
+/** Vercel functions reject request bodies above 4.5 MB */
+const MAX_BYTES = 4 * 1024 * 1024;
 
 export async function POST(req: Request) {
   const form = await req.formData().catch(() => null);
   const file = form?.get("file");
   if (!form || !(file instanceof File)) return Response.json({ error: "Attach a file in the 'file' field." }, { status: 400 });
-  if (file.size > MAX_BYTES) return Response.json({ error: "File is larger than 8 MB." }, { status: 413 });
+  if (file.size > MAX_BYTES) return Response.json({ error: "File is larger than 4 MB. Split it or upload the relevant section." }, { status: 413 });
 
   const category = evidenceCategorySchema.safeParse(form.get("category"));
   if (!category.success) return Response.json({ error: "Choose an evidence category." }, { status: 400 });
