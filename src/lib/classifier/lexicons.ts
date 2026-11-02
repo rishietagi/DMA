@@ -11,7 +11,7 @@ export const FUNCTION_LEXICON: Record<FunctionId, string[]> = {
   "sales-nmt": ["modern trade", "mt", "nmt", "chain", "chains", "key account", "kam", "chain portal", "chain portals"],
   "sales-ecom": ["marketplace", "marketplaces", "amazon", "flipkart", "quick commerce", "q-commerce", "blinkit", "zepto", "e-commerce", "ecommerce", "e-com", "seller portal", "settlement", "settlements", "dark store", "dark stores", "pdp", "finifi", "platform", "platforms"],
   "sales-retail": ["retail store", "stores", "d2c", "loyalty", "pos", "footfall", "store manager", "store managers"],
-  "supply-chain": ["supply chain", "ibp", "s&op", "warehouse", "transport", "transporter", "transporters", "tms", "freight", "fill rate", "logistics", "plant", "plants", "inventory", "sustainability", "esg", "otif"],
+  "supply-chain": ["supply chain", "ibp", "s&op", "warehouse", "warehouses", "warehousing", "depot", "depots", "cycle count", "cycle counts", "production plan", "production plans", "transport", "transporter", "transporters", "tms", "freight", "fill rate", "logistics", "plant", "plants", "inventory", "sustainability", "esg", "otif"],
   procurement: ["procurement", "sourcing", "rfq", "vendor", "vendors", "supplier", "suppliers", "buyer", "buyers", "spend", "accounts payable", "ap team"],
   finance: ["finance", "general ledger", "gl", "ledger", "bank", "mis", "consolidation", "bpc", "tax", "gst", "fp&a", "budget", "month-end", "close", "controller", "intercompany", "bw4hana", "sac", "journal", "workpaper", "workpapers"],
   "rnd-qa": ["r&d", "formulation", "formulations", "plm", "ennovia", "lims", "qc", "qa", "lab", "labs", "deviation", "deviations", "capa", "npd", "epd", "regulatory", "specification", "specifications"],

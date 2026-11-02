@@ -276,3 +276,76 @@ Each item below is a decision the spec left open or a deliberate change, with th
 | 15 | Prerequisite pull-forward | After base phases, a dependency is pulled forward to its earliest dependent's phase (`pulledForward: true`), then the floor rule (never earlier than a dependency) is applied. | A planner would not leave the foundation for a priority item in "Later" (e.g. DAM → AI content). |
 | 16 | Coverage when only affirmations are expected | If the questions scoring a (capability, dimension) expect no objective categories (e.g. People questions expect interview notes), `expected = 0` and coverage = 1 when any non-self indicator exists. | Otherwise People/AI could never exceed medium confidence and no capability could reach "high", making bulk-accept unusable. Baseline (self only) still scores coverage 0. |
 | 17 | Classifier: CSV rows | One CSV row is one segment, columns joined as `Header: value; …`. Theme tags that require a low level also accept a pain statement with no level signal. | §7.2 "CSV: one row = one segment"; keeps system names in context. |
+| 18 | Process ladder (2026-11-02) | The UI now rates **L1 processes of one function on the client's 0–5 ladder** (§11) instead of showing capability scores. The capability engine (§1–6) and its tests are unchanged and still feed the classifier and use-case library. | The user asked for a 4-step demo on the slide's Level 0–5 scale ("Digitized" → "Autonomous"), one function at a time, L0 → L1 only. |
+| 19 | Classifier: function-only items | A sentence that names its own function and carries a level cue, but matches no capability, is kept with `capabilityId: null`. Capability scoring ignores it; the process ladder places it by L1 keywords. | Warehousing has no scored capability; without this its SOP sentences were dropped. |
+
+## 11. Process ladder (`src/lib/engine/process.ts`)
+
+The 4-step flow rates each selected **L1 process** of one **L0 function** on the KPMG digital maturity ladder:
+
+| Level | Name | Meaning |
+|---|---|---|
+| 0 | Digitized processes | Runs in systems, but steps between them are manual |
+| 1 | Connected systems | Systems are linked; few manual hand-offs |
+| 2 | Real-time data capture | Data is captured live from systems and partners |
+| 3 | Visibility & transparency | Live dashboards show what is happening |
+| 4 | Predictive & intelligent | Forecasts and alerts show what will happen |
+| 5 | Autonomous & adaptive | AI decides and acts; people handle exceptions |
+
+### 11.1 Indicators and score
+Per process, three kinds of indicator, each with `weight × reliability`:
+- **Quick check** — the overall interview answer per process, already on the ladder: weight 3 × 0.85.
+- **Questionnaire answers** — each answered question-bank question whose `l2` is the process (rubric level
+  crosswalked, §11.2) and each **custom question** the consultant added to the process (answered directly on the
+  ladder): weight = the question's weight (custom: Low 1 / Medium 2 / High 3) × 0.85. "Don't know" / unanswered
+  is ignored. The quick check and the answers together count as one source for coverage.
+- **Evidence** — every classified sentence placed on the process (§11.3) with a level: crosswalked level, weight 1–3 × source reliability (§3.1).
+- **2025 self score** — of each capability the process owns, crosswalked: weight 1 × 0.50.
+
+`suggested = Σ value·w·r / Σ w·r` (full precision). `effective` = the consultant's level when changed, else
+`suggested` (accept stores the suggestion). The **level** a process sits on is `round(effective)` (half up),
+clamped 0–5; gaps use whole levels: `gap = max(0, target − level)`. The function's overall score is the mean of
+effective process scores.
+
+**Confidence** = 0.4·coverage + 0.3·agreement + 0.3·quality (weights from §3.5), where coverage =
+min(1, (distinct documents + quick check answered) / 3), agreement = 1 − min(1, stdev(values) / 2.5),
+quality = weight-averaged reliability. **Flags:** `LACKS_EVIDENCE` ("No documents yet") when no document
+speaks to the process; `INCONSISTENT` ("Sources disagree") when non-self indicators span ≥ 2.5 levels (the
+engine's 2-level rule × 1.25).
+
+### 11.2 Crosswalk (engine 1–5 → ladder 0–5)
+`ladder = (e − 1) × 1.25`: 1 → 0, 2 → 1.25, 3 → 2.5, 4 → 3.75, 5 → 5. Linear keeps the ends aligned
+(Excel/manual = the floor; autonomous = the top) and, after rounding, places the rubric's "Digitized" at L1,
+"Integrated" (dashboards, governed feeds) at L3 and "Automated & predictive" at L4, which matches the ladder's
+meanings closely enough for a deterministic demo.
+
+### 11.3 Mapping (`src/lib/process-input.ts`)
+- **Capabilities → process:** a capability belongs to the L1 step of the first question that scores it
+  (`question.l2`), so each capability has one step.
+- **Sentences → process:** the sentence must belong to the function (its own tag or its capability's primary
+  function). If it names a step (`l1Keywords` in the question bank, else the distinctive words of the step
+  name) it goes there; otherwise it follows its capability.
+
+### 11.4 Ideas and phasing
+A use-case rule belongs to a process through its capabilities or `when.steps`; it fires when that process is
+≥ 1 level short of target (taking the process with the largest gap). Base phase: gap ≥ 2 → Now, else Next;
+effort L moves one phase later. An idea never lands before a dependency in the set (topological order, floor
+rule). At most 6 ideas are shown.
+
+### 11.5 Explainability and results helpers
+- `indicatorShares(p)` — each signal's share of the score (`w·r / Σ w·r`) and contribution (`share × value`);
+  shares sum to 1, contributions to the suggested score. Drives the "How the score is calculated" table.
+- `levelDistribution(processes)` — processes per level L0…L5.
+- **Self level** per process = mean of its capabilities' 2025 scores, crosswalked; the function's = mean over
+  processes that have one.
+- **Roadmap alignment** per process reuses §6.4 `alignmentFor(gap, initiatives)` on whole-level gaps, with the
+  initiatives whose `mapsTo` hits the process's capabilities: no initiative and gap ≥ 1 → "Gap with nothing
+  planned"; planned / in progress and gap ≥ 2 → "Speed up".
+- **Idea scores:** value / feasibility / risk come from the capability engine's §6.2 scores for the rule's first
+  capability that has one; otherwise `fallbackIdeaScores(gap, effort)`: value = clamp(2 + gap, 1, 5),
+  feasibility S 4 / M 3 / L 2, risk S 2 / M 3 / L 4. Priority uses §6.3 with gap capped at 4; quadrant §6.3.
+- **Areas** (`src/lib/process-areas.ts`): process × (process / data / AI / people) = the capability engine's area
+  finals of owned capabilities, crosswalked; a process with no capabilities uses its own sentences tagged with
+  that area.
+- **Cross-function view:** every function assessed with all its L1 processes, the same evidence and quick-check
+  answers, and no validations.

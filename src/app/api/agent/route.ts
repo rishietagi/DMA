@@ -7,17 +7,7 @@ export const dynamic = "force-dynamic";
 /** the longest scripted run (evidence analysis) streams for under 10 s; headroom for cold starts */
 export const maxDuration = 30;
 
-const TASKS = [
-  "score",
-  "recalculate",
-  "synthesis",
-  "analyze-evidence",
-  "interview-themes",
-  "process",
-  "compare",
-  "opportunities",
-  "roadmap",
-] as const satisfies readonly AgentTask[];
+const TASKS = ["analyze-evidence", "score", "results"] as const satisfies readonly AgentTask[];
 
 const bodySchema = z.object({
   task: z.enum(TASKS),

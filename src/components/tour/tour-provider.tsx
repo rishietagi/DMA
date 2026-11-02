@@ -1,6 +1,6 @@
 "use client";
 /**
- * "Run guided assessment": walks stages 2 → 9, narrating into the Agent Console, running the
+ * "Guided demo": walks the four steps, narrating into the Agent Console, running the
  * real actions, and spotlighting the element under discussion. Pause / back / next / exit;
  * Esc pauses. `?tourSpeed=0.1` (or window.__TOUR_SPEED__) speeds it up for tests.
  */
@@ -14,7 +14,7 @@ import { useSession } from "@/lib/store/session";
 import { cn } from "@/lib/utils";
 import { TOUR_STEPS } from "./steps";
 
-/** narration pace: ~9 s for a typical line → the full tour runs about three minutes */
+/** narration pace: ~9 s for a typical line → the full tour runs about a minute */
 const LINE_MS = 9000;
 const MS_PER_CHAR = 45;
 const RUN_ID = "tour";
@@ -92,9 +92,9 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
           for (const l of step.outro?.() ?? []) await say(l, t);
           await wait(1200, t);
         }
-        useSession.getState().finishRun(RUN_ID, "Guided assessment complete.");
+        useSession.getState().finishRun(RUN_ID, "Guided demo complete.");
         useSession.getState().setTourCompleted(true);
-        setState((s) => ({ ...s, done: true, line: "Guided assessment complete. Explore any stage, or run it again from the top bar." }));
+        setState((s) => ({ ...s, done: true, line: "Guided demo complete. Explore any step, or run it again from the top bar." }));
         setAgentSpeed(1);
       } catch {
         /* cancelled by next / back / exit */
@@ -110,7 +110,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     const s = useSession.getState();
     s.setAgentOpen(true);
     useSession.setState({ runs: s.runs.filter((r) => r.id !== RUN_ID) });
-    s.startRun({ id: RUN_ID, task: "tour", title: "Guided assessment", startedAt: new Date().toISOString(), status: "running", steps: [] });
+    s.startRun({ id: RUN_ID, task: "tour", title: "Guided demo", startedAt: new Date().toISOString(), status: "running", steps: [] });
     setState({ active: true, index: 0, paused: false, line: "", done: false });
     void runFrom(0);
   }, [runFrom]);
@@ -120,7 +120,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     paused.current = false;
     setAgentSpeed(1);
     const run = useSession.getState().runs.find((r) => r.id === RUN_ID);
-    if (run?.status === "running") useSession.getState().finishRun(RUN_ID, "Guided assessment stopped.");
+    if (run?.status === "running") useSession.getState().finishRun(RUN_ID, "Guided demo stopped.");
     setState((s) => ({ ...s, active: false, paused: false }));
   }, []);
 
@@ -213,7 +213,7 @@ export function TourOverlay() {
           {!t.done && <Spotlight target={step.target} />}
           <motion.div
             role="region"
-            aria-label="Guided assessment"
+            aria-label="Guided demo"
             aria-live="polite"
             data-testid="tour-overlay"
             initial={{ opacity: 0, y: 16 }}
@@ -223,10 +223,10 @@ export function TourOverlay() {
           >
             <div className="flex items-center gap-2">
               <span className="rounded-md bg-ai-soft px-1.5 py-0.5 text-[11px] font-medium text-ai-foreground tabular">
-                {t.done ? "Complete" : `Stage ${step.stage} · ${t.index + 1} of ${TOUR_STEPS.length}`}
+                {t.done ? "Complete" : `Step ${step.stage} of ${TOUR_STEPS.length}`}
               </span>
               <p className="text-sm font-semibold" data-testid="tour-title">
-                {t.done ? "Guided assessment complete" : step.title}
+                {t.done ? "Guided demo complete" : step.title}
               </p>
               <div className="ml-auto flex items-center gap-1">
                 <Button variant="ghost" size="icon-sm" onClick={t.back} disabled={t.index === 0} aria-label="Previous step">
@@ -240,7 +240,7 @@ export function TourOverlay() {
                 <Button variant="ghost" size="icon-sm" onClick={t.next} disabled={t.index >= TOUR_STEPS.length - 1} aria-label="Next step">
                   <ChevronRight />
                 </Button>
-                <Button variant="ghost" size="icon-sm" onClick={t.stop} aria-label="Exit guided assessment">
+                <Button variant="ghost" size="icon-sm" onClick={t.stop} aria-label="Exit guided demo">
                   <X />
                 </Button>
               </div>

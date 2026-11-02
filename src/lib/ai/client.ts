@@ -65,6 +65,8 @@ export async function runAgent(task: AgentTask, context: AgentContext, opts: Run
     try {
       summary = await consume(streamFromApi(task, context));
     } catch {
+      // the stream may have failed part-way: start the fallback from a clean run
+      useSession.setState((s) => ({ runs: s.runs.map((r) => (r.id === runId ? { ...r, steps: [] } : r)) }));
       summary = await consume(MockProvider.runAgent(task, context, { speed: speedFactor }));
     }
     useSession.getState().finishRun(runId, summary);

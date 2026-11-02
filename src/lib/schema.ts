@@ -228,6 +228,8 @@ export type Question = z.infer<typeof questionSchema>;
 export const questionBankFunctionSchema = z.object({
   functionId: z.union([functionIdSchema, z.literal("*")]),
   l1Chain: z.array(z.string()),
+  /** words that place a sentence on an L1 process (process ladder, SCORING_ENGINE.md §11.3) */
+  l1Keywords: z.record(z.string(), z.array(z.string())).optional(),
   note: z.string().optional(),
   questions: z.array(questionSchema),
 });
@@ -246,7 +248,9 @@ export const effortSchema = z.enum(["S", "M", "L"]);
 export const useCaseRuleSchema = z.object({
   id: z.string(),
   when: z.object({
-    capabilityIds: z.array(z.string()).min(1),
+    capabilityIds: z.array(z.string()),
+    /** L1 process names the rule also applies to (process ladder, SCORING_ENGINE.md §11.4) */
+    steps: z.array(z.string()).optional(),
     dimension: dimensionSchema,
     maxScore: z.number().min(1).max(5),
     minScore: z.number().min(1).max(5).optional(),
@@ -261,6 +265,8 @@ export const useCaseRuleSchema = z.object({
     effort: effortSchema,
     dependsOn: z.array(z.string()),
   }),
+}).refine((r) => r.when.capabilityIds.length > 0 || (r.when.steps?.length ?? 0) > 0, {
+  message: "a rule needs at least one capability or step",
 });
 export type UseCaseRule = z.infer<typeof useCaseRuleSchema>;
 
@@ -305,6 +311,8 @@ export const demoResponsesSchema = z.object({
   meta: z.object({ label: z.literal("Illustrative"), note: z.string() }),
   responses: z.array(questionnaireResponseSchema),
   evidence: z.array(seededEvidenceSchema),
+  /** quick-check answers on the 0–5 process ladder, keyed "<functionId>:<L1 process>" */
+  quickCheck: z.record(z.string(), z.number().int().min(0).max(5)).default({}),
 });
 export type DemoResponses = z.infer<typeof demoResponsesSchema>;
 

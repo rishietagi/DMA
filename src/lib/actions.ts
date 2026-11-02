@@ -1,73 +1,83 @@
 "use client";
 /**
  * User-level actions that combine the store, the classify route and the agent narrative.
- * Used by pages, the command palette and the guided tour.
+ * Used by the steps and the guided tour.
  */
-import * as React from "react";
 import { toast } from "sonner";
+import { ai } from "@/lib/ai";
 import { runAgent } from "@/lib/ai/client";
-import { scoreContext } from "@/lib/ai/contexts";
-import { assess, DIMENSION_LABELS, formatScore, roundHalf, type EvidenceItem } from "@/lib/engine";
-import { EVIDENCE_CATEGORY_LABELS } from "@/lib/engine/config";
-import { findContradictions } from "@/lib/classifier/insights";
+import type { EvidenceItem, FunctionProcessResult } from "@/lib/engine";
 import { DEMO_DOCS } from "@/lib/demo-evidence";
-import { capabilityLabel, FUNCTION_SHORT } from "@/lib/labels";
-import { DIMENSIONS, type EvidenceCategory, type FunctionId } from "@/lib/schema";
-import { buildInput, coverageByFunction } from "@/lib/store/build-input";
-import { useSession } from "@/lib/store/session";
-import type { EvidenceDoc, InterviewNote } from "@/lib/store/types";
+import { functionName } from "@/lib/labels";
+import { buildProcessInput, stepForEvidence } from "@/lib/process-input";
+import type { EvidenceCategory, FunctionId } from "@/lib/schema";
+import { useSession, type SessionState } from "@/lib/store/session";
+import type { EvidenceDoc } from "@/lib/store/types";
 
 interface ClassifyResponse {
   items: EvidenceItem[];
   segments: number;
   dominantFunctionId: FunctionId | null;
   negated: number;
-  text: string;
 }
 
-async function classifyFile(file: Blob, meta: { docId: string; title: string; fileName: string; category: EvidenceCategory; stakeholder?: string }): Promise<ClassifyResponse> {
+export interface IngestFile {
+  blob: Blob;
+  docId: string;
+  title: string;
+  fileName: string;
+  category: EvidenceCategory;
+  stakeholder?: string;
+  source: EvidenceDoc["source"];
+}
+
+/** Engine result for the session as it stands (or with different evidence). */
+export function liveResult(s: SessionState = useSession.getState(), evidence = s.evidence): FunctionProcessResult {
+  return ai.assessProcesses(buildProcessInput({ ...s, evidence, processValidations: s.validations }));
+}
+
+/** Evidence category from the file name — one drop zone instead of nine. */
+export function guessCategory(fileName: string): EvidenceCategory {
+  const n = fileName.toLowerCase();
+  if (/interview|notes|workshop/.test(n)) return "interview_notes";
+  if (/strategy|board/.test(n)) return "it_strategy";
+  if (/polic|approval/.test(n)) return "policies_sops";
+  if (/architecture/.test(n)) return "data_architecture";
+  if (/landscape|application|system/.test(n)) return "application_landscape";
+  if (/portfolio|initiative|programme/.test(n)) return "transformation_portfolio";
+  if (/kpi|metric/.test(n) || n.endsWith(".csv")) return "kpi_extracts";
+  return "process_docs";
+}
+
+async function classifyFile(f: IngestFile): Promise<ClassifyResponse> {
   const form = new FormData();
-  form.set("file", file, meta.fileName);
-  form.set("docId", meta.docId);
-  form.set("title", meta.title);
-  form.set("category", meta.category);
-  if (meta.stakeholder) form.set("stakeholder", meta.stakeholder);
+  form.set("file", f.blob, f.fileName);
+  form.set("docId", f.docId);
+  form.set("title", f.title);
+  form.set("category", f.category);
+  if (f.stakeholder) form.set("stakeholder", f.stakeholder);
   const res = await fetch("/api/classify", { method: "POST", body: form });
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new Error(body.error ?? `Could not read ${meta.fileName}`);
+    throw new Error(body.error ?? `Could not read ${f.fileName}`);
   }
   return (await res.json()) as ClassifyResponse;
 }
 
-interface ScoreChange {
-  id: string;
-  label: string;
-}
-
-/** Capabilities whose displayed capability score or any dimension score changes. */
-function movedCount(before: EvidenceItem[], after: EvidenceItem[]): { moved: number; changes: ScoreChange[] } {
+/** Processes whose displayed level changes between two evidence sets. */
+function levelMoves(before: EvidenceItem[], after: EvidenceItem[]): string[] {
   const s = useSession.getState();
-  const a = assess(buildInput({ ...s, evidence: before }));
-  const b = assess(buildInput({ ...s, evidence: after }));
-  const changes: ScoreChange[] = [];
-  for (const c of a.capabilities) {
-    const n = b.byId[c.capability.id]!;
-    const name = capabilityLabel(c.capability.id);
-    if (roundHalf(c.evidenceScore) !== roundHalf(n.evidenceScore)) {
-      changes.push({ id: c.capability.id, label: `${name} ${formatScore(c.evidenceScore)} → ${formatScore(n.evidenceScore)}` });
-      continue;
-    }
-    const d = DIMENSIONS.find((k) => c.dimensions[k]?.final !== n.dimensions[k]?.final);
-    if (d) changes.push({ id: c.capability.id, label: `${name} ${DIMENSION_LABELS[d].toLowerCase()} ${formatScore(c.dimensions[d]?.final)} → ${formatScore(n.dimensions[d]?.final)}` });
-  }
-  return { moved: changes.length, changes };
+  const a = liveResult(s, before);
+  const b = liveResult(s, after);
+  return b.processes.flatMap((p) => {
+    const old = a.processes.find((x) => x.id === p.id)!;
+    if (old.level === p.level) return [];
+    return [`${p.name} L${old.level ?? "–"} → L${p.level ?? "–"}`];
+  });
 }
 
 /** Classify a batch of files, narrate it in the Agent Console, then apply the evidence. */
-export async function ingest(
-  files: { blob: Blob; docId: string; title: string; fileName: string; category: EvidenceCategory; stakeholder?: string; source: EvidenceDoc["source"]; functionId?: FunctionId; date?: string }[],
-): Promise<{ items: number; moved: number }> {
+export async function ingest(files: IngestFile[]): Promise<{ items: number; moves: string[] }> {
   const store = useSession.getState();
   const at = new Date().toISOString();
   store.upsertDocuments(
@@ -87,70 +97,40 @@ export async function ingest(
   const results = await Promise.all(
     files.map(async (f) => {
       try {
-        const r = await classifyFile(f.blob, f);
-        return { f, r };
+        return { f, r: await classifyFile(f) };
       } catch (e) {
         useSession.getState().updateDocument(f.docId, { status: "error", error: String((e as Error).message ?? e) });
         return { f, r: null };
       }
     }),
   );
-  const ok = results.filter((x): x is { f: (typeof files)[number]; r: ClassifyResponse } => x.r !== null);
+  const ok = results.filter((x): x is { f: IngestFile; r: ClassifyResponse } => x.r !== null);
   const newItems = ok.flatMap((x) => x.r.items);
   const before = useSession.getState().evidence;
   const ids = new Set(newItems.map((i) => i.id));
   const after = [...before.filter((e) => !ids.has(e.id)), ...newItems];
-  const { moved, changes } = movedCount(before, after);
-
-  const s = useSession.getState();
-  const cov = coverageByFunction(after, [
-    ...s.documents.filter((d) => !ok.some((x) => x.f.docId === d.id)),
-    ...ok.map((x) => ({ ...s.documents.find((d) => d.id === x.f.docId)!, status: "analysed" as const, dominantFunctionId: x.f.functionId ?? x.r.dominantFunctionId })),
-  ]);
-  const hrMissing = (["kpi_extracts"] as EvidenceCategory[]).filter((c) => !(cov.hr ?? []).includes(c));
-  const contradictions = findContradictions(after).length;
+  const moves = levelMoves(before, after);
+  const fn = useSession.getState().functionId;
+  const mapped = newItems.filter((e) => e.level !== null && stepForEvidence(fn, e)).length;
 
   await runAgent("analyze-evidence", {
+    functionName: functionName(fn),
     docs: ok.map((x) => `${x.f.title}|${x.r.segments}|${x.r.items.length}`),
-    categories: new Set(ok.map((x) => x.f.category)).size,
     items: newItems.length,
     negated: ok.reduce((a, x) => a + x.r.negated, 0),
-    contradictions,
-    coverageGap: hrMissing.length ? `No ${EVIDENCE_CATEGORY_LABELS[hrMissing[0]!].toLowerCase()} for ${FUNCTION_SHORT.hr}` : "No gaps in expected categories",
-    moved,
+    mapped,
+    moves: moves.length ? moves.join("; ") : undefined,
   });
 
   const st = useSession.getState();
   st.addEvidence(newItems);
-  for (const { f, r } of ok) {
-    st.updateDocument(f.docId, {
-      status: "analysed",
-      segments: r.segments,
-      itemCount: r.items.length,
-      dominantFunctionId: f.functionId ?? r.dominantFunctionId,
-    });
-  }
-  const notes: InterviewNote[] = ok
-    .filter((x) => x.f.category === "interview_notes")
-    .map((x) => ({
-      id: x.f.docId,
-      stakeholder: x.f.stakeholder ?? x.f.title,
-      functionId: x.f.functionId ?? x.r.dominantFunctionId ?? "finance",
-      date: x.f.date ?? at.slice(0, 10),
-      text: x.r.text,
-      source: x.f.source === "upload" ? "upload" : "demo",
-    }));
-  if (notes.length) st.addNotes(notes);
+  for (const { f, r } of ok)
+    st.updateDocument(f.docId, { status: "analysed", segments: r.segments, itemCount: r.items.length, dominantFunctionId: r.dominantFunctionId });
 
-  if (changes.length) {
-    const top = changes.slice(0, 2).map((c) => c.label);
-    toast.success(`${newItems.length} evidence items mapped`, {
-      description: `${moved} ${moved === 1 ? "capability" : "capabilities"} moved — ${top.join("; ")}`,
-    });
-  } else {
-    toast.success(`${newItems.length} evidence items mapped`, { description: "No displayed scores changed." });
-  }
-  return { items: newItems.length, moved };
+  toast.success(`${mapped} ${mapped === 1 ? "sentence" : "sentences"} mapped to ${functionName(fn)}`, {
+    description: moves.length ? `Level changed: ${moves.slice(0, 3).join("; ")}` : "No process changed level.",
+  });
+  return { items: newItems.length, moves };
 }
 
 export async function loadDemoEvidence() {
@@ -164,8 +144,6 @@ export async function loadDemoEvidence() {
         fileName: d.fileName,
         category: d.category,
         stakeholder: d.stakeholder,
-        functionId: d.functionId,
-        date: d.date,
         source: "demo" as const,
       };
     }),
@@ -174,21 +152,31 @@ export async function loadDemoEvidence() {
 }
 
 export async function runScoring() {
-  const s = useSession.getState();
-  const r = assess(buildInput(s));
-  return runAgent("score", scoreContext(r, { responses: s.responses.length, evidence: s.evidence.length }));
+  const r = liveResult();
+  const top = [...r.processes].filter((p) => p.level !== null).sort((a, b) => a.effective! - b.effective!)[0];
+  return runAgent("score", {
+    processes: r.processes.length,
+    indicators: r.processes.reduce((a, p) => a + p.indicators.length, 0),
+    disagree: r.processes.filter((p) => p.flags.includes("INCONSISTENT")).length,
+    headline: top ? `Lowest: ${top.name} at L${top.level}.` : "",
+  });
 }
 
-export function useDemoActions() {
-  return React.useMemo(
-    () => ({
-      loadDemoEvidence,
-      runScoring,
-      resetDemo: () => {
-        useSession.getState().resetDemo();
-        toast("Demo session reset", { description: "Back to the workshop pack and questionnaire answers." });
-      },
-    }),
-    [],
-  );
+export async function runResults() {
+  const r = liveResult();
+  return runAgent("results", {
+    processes: r.processes.length,
+    validated: r.validated,
+    gaps: r.processes.filter((p) => (p.gap ?? 0) > 0).length,
+    ideas: r.ideas.length ? `${r.ideas.length} ideas: ${r.ideas.filter((i) => i.phase === "Now").length} now` : "No gaps to target",
+    headline:
+      r.overallLevel === null
+        ? "Not enough input to rate this function yet."
+        : `${functionName(r.functionId)} is at Level ${r.overallLevel} overall against a target of Level ${r.target}.`,
+  });
+}
+
+export function resetDemo() {
+  useSession.getState().resetDemo();
+  toast("Demo reset", { description: "Back to the starting documents and quick-check answers." });
 }

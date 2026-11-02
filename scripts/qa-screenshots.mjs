@@ -4,10 +4,10 @@ import { chromium } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 
 const base = process.argv[2] ?? "http://localhost:3100";
-const routes = (process.argv[3] ?? "/,/scope,/evidence,/interviews,/process,/scoring,/compare,/opportunities,/roadmap,/synthesis").split(",");
+const routes = (process.argv[3] ?? "/,/inputs,/review,/results").split(",");
 const width = Number(process.argv[4] ?? 1440);
 const themes = (process.argv[5] ?? "light,dark").split(",");
-const out = "qa-screenshots";
+const out = process.env.QA_OUT ?? "qa-screenshots";
 mkdirSync(out, { recursive: true });
 
 const browser = await chromium.launch();
@@ -27,15 +27,15 @@ for (const theme of themes) {
     console.log(`[pageerror] ${theme} ${page.url()} :: ${String(e).slice(0, 300)}`);
   });
   if (process.env.QA_LOAD_DEMO) {
-    await page.goto(base + "/evidence", { waitUntil: "networkidle" });
-    await page.getByTestId("load-demo-evidence").click();
-    await page.getByText("Re-analyse demo evidence").waitFor({ timeout: 90_000 });
+    await page.goto(base + "/inputs", { waitUntil: "networkidle" });
+    await page.getByTestId("load-demo").click();
+    await page.getByText(/sentences? mapped to/).first().waitFor({ timeout: 90_000 });
     await page.waitForTimeout(500);
   }
   for (const r of routes) {
     await page.goto(base + r, { waitUntil: "networkidle" });
     await page.waitForTimeout(900);
-    const name = `${out}/${theme}-${width}-${r === "/" ? "cockpit" : r.slice(1).replace(/[/?=&]/g, "_")}.png`;
+    const name = `${out}/${theme}-${width}-${r === "/" ? "scope" : r.slice(1).replace(/[/?=&]/g, "_")}.png`;
     await page.screenshot({ path: name, fullPage: true });
     console.log("saved", name);
   }

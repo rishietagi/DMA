@@ -1,17 +1,8 @@
-import type { AssessmentInput, AssessmentResult, EvidenceItem } from "@/lib/engine";
+import type { EvidenceItem, FunctionProcessResult, ProcessInput } from "@/lib/engine";
 import type { EvidenceCategory } from "@/lib/schema";
 import type { AgentStepKind } from "@/lib/store/types";
 
-export type AgentTask =
-  | "score"
-  | "recalculate"
-  | "synthesis"
-  | "analyze-evidence"
-  | "interview-themes"
-  | "process"
-  | "compare"
-  | "opportunities"
-  | "roadmap";
+export type AgentTask = "analyze-evidence" | "score" | "results";
 
 export type AgentContext = Record<string, string | number | string[] | undefined>;
 
@@ -37,12 +28,12 @@ export interface ParsedDocument {
 
 /**
  * Every "AI" capability goes through this interface. MockProvider is deterministic
- * (classifier + engine + scripted agent narrative); LLMProvider is the phase-2 drop-in.
+ * (classifier + process-ladder engine + scripted agent narrative); LLMProvider is the phase-2 drop-in.
  */
 export interface AIProvider {
   readonly name: string;
   readonly simulated: boolean;
-  assess(input: AssessmentInput): AssessmentResult;
+  assessProcesses(input: ProcessInput): FunctionProcessResult;
   classify(doc: ParsedDocument): EvidenceItem[];
   runAgent(task: AgentTask, ctx: AgentContext, opts?: { speed?: number }): AsyncGenerator<AgentEvent>;
 }

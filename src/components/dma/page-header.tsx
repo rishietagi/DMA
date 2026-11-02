@@ -19,7 +19,7 @@ export function PageHeader({
         <h1 className="flex items-center gap-2.5 text-[22px] font-semibold tracking-tight">
           {stage !== undefined && (
             <span
-              aria-label={`Stage ${stage} of 8`}
+              aria-label={`Step ${stage} of 4`}
               className="grid size-6 place-items-center rounded-md border bg-card text-xs font-semibold tabular text-muted-foreground"
             >
               {stage}
@@ -35,7 +35,7 @@ export function PageHeader({
 }
 
 export function Page({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("mx-auto flex max-w-[1440px] flex-col gap-6 px-6 py-6", className)}>{children}</div>;
+  return <div className={cn("mx-auto flex max-w-[1200px] flex-col gap-6 px-4 py-6 sm:px-6", className)}>{children}</div>;
 }
 
 /** Section heading inside a page (not a card title). */

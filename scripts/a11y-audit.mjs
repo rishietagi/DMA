@@ -5,7 +5,7 @@ import * as chromeLauncher from "chrome-launcher";
 import lighthouse from "lighthouse";
 
 const base = process.argv[2] ?? "http://localhost:3100";
-const routes = process.env.ROUTES ? process.env.ROUTES.split(",") : ["/", "/scope", "/evidence", "/interviews", "/process", "/scoring", "/compare", "/opportunities", "/roadmap", "/synthesis"];
+const routes = process.env.ROUTES ? process.env.ROUTES.split(",") : ["/", "/inputs", "/review", "/results"];
 const chrome = await chromeLauncher.launch({ chromePath: chromium.executablePath(), chromeFlags: ["--headless=new", "--no-sandbox"] });
 let worst = 100;
 for (const theme of ["light", "dark"]) {

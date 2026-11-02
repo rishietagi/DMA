@@ -488,7 +488,7 @@
     {
       "questionId": "scm-q06",
       "functionId": "supply-chain",
-      "level": 2,
+      "level": 1,
       "answeredBy": "Supply Chain Planning Lead",
       "date": "2026-09-17"
     },
@@ -1207,5 +1207,13 @@
       "quote": "Orders captured in Saksham flow to Leap DMS and on to SAP without re-entry.",
       "polarity": "strength"
     }
-  ]
+  ],
+  "quickCheck": {
+    "supply-chain:Demand planning / IBP": 3,
+    "supply-chain:Supply & production planning": 2,
+    "supply-chain:Warehousing": 1,
+    "supply-chain:Transportation": 1,
+    "supply-chain:Order fulfilment & fill rate": 3,
+    "supply-chain:Sustainability": 1
+  }
 }

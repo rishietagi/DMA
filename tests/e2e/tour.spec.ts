@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("phase 4: guided assessment walks stages 2 → 9 without console errors", async ({ page }) => {
+test("guided demo walks the four steps without console errors", async ({ page }) => {
   const errors: string[] = [];
   page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
   page.on("pageerror", (e) => errors.push(String(e)));
@@ -9,12 +9,12 @@ test("phase 4: guided assessment walks stages 2 → 9 without console errors", a
     (window as unknown as { __TOUR_SPEED__: number }).__TOUR_SPEED__ = 0.04;
   });
   await page.goto("/");
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
   await page.getByTestId("start-tour").click();
-  const overlay = page.getByTestId("tour-overlay");
-  await expect(overlay).toBeVisible();
+  await expect(page.getByTestId("tour-overlay")).toBeVisible();
 
   const seen = new Set<string>();
-  const titles = ["Evidence goes in", "Interview intelligence", "Process lens", "Scores with reasons", "Validate at scale", "Cross-functional themes", "From gaps to use cases", "Roadmap and whitespaces", "Boardroom synthesis"];
   await expect
     .poll(
       async () => {
@@ -22,16 +22,17 @@ test("phase 4: guided assessment walks stages 2 → 9 without console errors", a
         seen.add(t);
         return t;
       },
-      { timeout: 180_000, intervals: [150] },
+      { timeout: 120_000, intervals: [150] },
     )
-    .toBe("Guided assessment complete");
-  for (const t of titles.slice(1)) expect([...seen], `missed step "${t}"`).toContain(t);
+    .toBe("Guided demo complete");
+  for (const t of ["Add documents", "Review the levels", "The result"]) expect([...seen], `missed step "${t}"`).toContain(t);
 
-  await expect(page).toHaveURL(/\/synthesis/);
-  await expect(page.getByLabel("Agent console").getByText("Guided assessment complete.")).toBeVisible();
+  await expect(page).toHaveURL(/\/results/);
+  await expect(page.getByTestId("headline")).toContainText("Supply Chain is at Level 2");
+  await expect(page.getByText("All levels reviewed")).toBeVisible();
 
-  // the override made during the tour is recorded with its rationale
-  await page.goto("/scoring?cap=gt-reco-beat");
-  await expect(page.getByText(/Overridden at 3\.5/)).toBeVisible();
+  // the change made during the tour is kept with its reason
+  await page.goto("/review");
+  await expect(page.getByTestId("process-Transportation").getByText(/SAP creates a shipment document/)).toBeVisible();
   expect(errors, errors.join("\n")).toEqual([]);
 });

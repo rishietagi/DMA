@@ -8,4 +8,5 @@ export * from "./prioritise";
 export * from "./usecases";
 export * from "./assess";
 export * from "./format";
+export * from "./process";
 export type * from "./types";

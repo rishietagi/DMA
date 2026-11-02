@@ -78,6 +78,16 @@ describe("classifier (§7, §9)", () => {
       "A bullet that is long enough",
     ]);
   });
+
+  it("keeps a function-level signal when no capability matches (process ladder, §11)", () => {
+    const c = classifySegment("Cycle counts in the depots are recorded on paper and keyed into Excel.", { docFunction: null });
+    expect(c).toMatchObject({ functionId: "supply-chain", capabilityId: null, dimension: "process", level: 1 });
+  });
+
+  it("drops a sentence with no capability unless it names its own function", () => {
+    expect(classifySegment("Counts are recorded on paper and keyed into Excel.", { docFunction: "supply-chain" })).toBeNull();
+    expect(classifySegment("The depots are being repainted this year.", { docFunction: null })).toBeNull();
+  });
 });
 
 const ev = (p: Partial<EvidenceItem>): EvidenceItem => ({

@@ -14,6 +14,7 @@ export interface DemoDoc {
 export const DEMO_DOCS: DemoDoc[] = [
   { id: "demo-strategy", fileName: "Digital_IT_Strategy_FY27.md", title: "Digital & IT strategy FY27", category: "it_strategy" },
   { id: "demo-ecom-sop", fileName: "Ecom_O2C_SOP.md", title: "E-com order-to-cash SOP", category: "process_docs" },
+  { id: "demo-scm-sop", fileName: "SCM_Warehouse_and_Logistics_SOP.md", title: "Supply chain operations SOP", category: "process_docs" },
   { id: "demo-finance-close", fileName: "Finance_Close_and_MIS_Process.md", title: "Finance close & MIS process note", category: "process_docs" },
   { id: "demo-app-landscape", fileName: "Application_Landscape.csv", title: "Application landscape", category: "application_landscape" },
   { id: "demo-data-arch", fileName: "Data_Architecture_Note.md", title: "Data architecture note", category: "data_architecture" },

@@ -17,7 +17,7 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } }],
   webServer: {
     command: `pnpm exec next dev -p ${PORT}`,
-    url: `http://localhost:${PORT}/api/assess`,
+    url: `http://localhost:${PORT}/`,
     reuseExistingServer: true,
     timeout: 180_000,
   },

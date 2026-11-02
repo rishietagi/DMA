@@ -5,7 +5,7 @@
 |---|---|
 | `CLAUDE.md` | Standing instructions for Claude Code (stack, rules, conventions, progress log) |
 | `PROJECT_CONTEXT.md` | Client, brief from Swati, inherited methodology, all baseline scores, priorities, roadmap, guardrails |
-| `PLAN.md` | Architecture, the 10 screens, design direction, phases with acceptance criteria, demo script |
+| `PLAN.md` | Architecture, design direction, phases with acceptance criteria (the 10-screen design is superseded by the 4-step flow, see `LOG.md`) |
 | `docs/SCORING_ENGINE.md` | Rule-based scoring spec grounded in open frameworks (JRC DMAT, acatech, SIRI, MITRE AI MM, TM Forum, CMMI) + deterministic classifier + RAG note |
 | `seed/baseline-2025.json` | 10 functions, 41 capabilities with 2025 self scores, 2026 priorities |
 | `seed/roadmap-2026-27.json` | 31 initiatives with status + proposed capability mapping, dependencies |
@@ -40,12 +40,13 @@ corepack pnpm seed:check
 corepack pnpm exec playwright test   # e2e incl. guided-tour smoke test (starts dev on :3100)
 ```
 
-Demo flow: open the Cockpit → **Run guided assessment** (top bar, ≈ 3 min, narrated in the Agent Console), or
-Evidence hub → **Load demo evidence**. `?theme=dark` forces the theme; `Ctrl/⌘ K` opens the palette; `?` lists shortcuts.
+Demo flow: 4 steps — Scope → Gather inputs → Review levels → Results. Click **Guided demo** (top bar, ≈ 70 s, narrated
+in the Agent Console), or on Gather inputs click **Load demo pack**. `?theme=dark` forces the theme; keys `1`–`4` jump
+between steps; `?` lists shortcuts.
 
 Dev tools: `scripts/calibrate.ts` (self vs evidence per capability), `scripts/demo-evidence-report.ts` (what the demo pack
 does to scores, contradictions, themes), `scripts/qa-screenshots.mjs` (every route, light + dark, console errors),
-`scripts/a11y-audit.mjs` (Lighthouse accessibility per route), `scripts/print-synthesis.mjs` (synthesis → PDF),
+`scripts/a11y-audit.mjs` (Lighthouse accessibility per route), `scripts/print-results.mjs` (Results → PDF),
 `scripts/time-tour.mjs`, `scripts/make-fixtures.mjs` (PDF/DOCX upload fixtures for e2e).
 
 ## Deploying to Vercel

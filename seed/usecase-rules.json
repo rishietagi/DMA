@@ -731,6 +731,33 @@
         "effort": "S",
         "dependsOn": []
       }
+    },
+    {
+      "id": "uc-wms-visibility",
+      "when": {
+        "capabilityIds": [],
+        "steps": [
+          "Warehousing"
+        ],
+        "dimension": "process",
+        "maxScore": 3
+      },
+      "useCase": {
+        "title": "Digital warehouse with live stock",
+        "description": "Handheld scanning for receipts, picks and cycle counts in a WMS linked to SAP, giving a live stock view by depot and bin.",
+        "aiPattern": "Process digitisation + anomaly detection",
+        "kpis": [
+          "Inventory accuracy",
+          "Stock-count effort",
+          "Dispatch lead time"
+        ],
+        "dataPrerequisites": [
+          "Bin master",
+          "Depot stock data"
+        ],
+        "effort": "M",
+        "dependsOn": []
+      }
     }
   ]
 }

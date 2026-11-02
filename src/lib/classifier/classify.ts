@@ -199,11 +199,27 @@ export function classifySegment(
   ctx: { docFunction: FunctionId | null },
 ): Omit<EvidenceItem, "id" | "docId" | "docTitle" | "category" | "sourceType" | "location" | "weight"> | null {
   const fnHits = functionHits(text);
-  const functionId = topFunction(fnHits) ?? ctx.docFunction;
+  const ownFunction = topFunction(fnHits);
+  const functionId = ownFunction ?? ctx.docFunction;
   const cap = tagCapability(text, functionId);
-  if (!cap.capabilityId) return null;
   const sig = levelSignal(text);
   const pol = polarity(text, sig);
+  if (!cap.capabilityId) {
+    // function-level signal (e.g. a warehousing step with no scored capability): kept for the
+    // process ladder (§11), ignored by capability scoring. Needs the function named in the sentence.
+    if (!ownFunction || sig.level === null) return null;
+    return {
+      quote: text,
+      functionId: ownFunction,
+      capabilityId: null,
+      dimension: sig.dimension,
+      level: sig.level,
+      polarity: pol,
+      gateKey: gateKeyFor(sig.dimension, sig.level),
+      cues: [...new Set([...sig.cues, ...cap.cues])],
+      themes: themesFor(text, sig.level, pol),
+    };
+  }
   if (sig.level === null && pol === "neutral") return null;
   const capFn = capById.get(cap.capabilityId)!;
   const fn = functionId && capFn.functionIds.includes(functionId) ? functionId : capFn.primaryFunctionId;

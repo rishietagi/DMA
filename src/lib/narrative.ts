@@ -1,46 +1,39 @@
-/**
- * Templated executive narrative. Every clause is filled from engine output — no free text is
- * generated, so each sentence is traceable.
- */
-import { formatMean, formatPct, formatScore, roundHalf, type AssessmentResult } from "@/lib/engine";
-import { capabilityLabel } from "@/lib/labels";
-import { seed } from "@/lib/seed";
+/** Templated executive summary for the Results step — every sentence comes from engine output. */
+import { LADDER, type FunctionProcessResult } from "@/lib/engine";
 
-export interface Narrative {
-  headline: string;
-  paragraphs: string[];
-}
+const listOf = (xs: string[]) => (xs.length < 2 ? (xs[0] ?? "") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
 
-export function buildNarrative(r: AssessmentResult): Narrative {
-  const ent = r.kpis.enterprise;
-  const cpd = r.kpis.cpd;
-  const moved = r.capabilities.filter((c) => c.inScope && c.hasEvidence && Math.abs(roundHalf(c.effectiveScore) - c.self) >= 1);
-  const down = moved.filter((c) => c.effectiveScore < c.self).sort((a, b) => a.effectiveScore - a.self - (b.effectiveScore - b.self));
-  const ws = Object.values(r.opportunities).filter((o) => o.alignment === "WHITESPACE");
-  const acc = Object.values(r.opportunities).filter((o) => o.alignment === "ACCELERATE");
-  const now = r.useCases.filter((u) => u.phase === "Now");
+export function processNarrative(r: FunctionProcessResult, fnName: string): string[] {
+  const scored = r.processes.filter((p) => p.level !== null);
+  if (r.overallLevel === null || r.overall === null || !scored.length) return [`${fnName} can't be rated yet: add documents or answer the quick check.`];
+  const below = scored.filter((p) => (p.gap ?? 0) > 0);
+  const sorted = [...scored].sort((a, b) => b.effective! - a.effective!);
+  const best = sorted[0]!;
+  const worst = sorted[sorted.length - 1]!;
+  const out: string[] = [];
 
-  const headline =
-    ent.mean < 2.5
-      ? `Enterprise functions average ${formatMean(ent.mean)} of 5: digitised, not yet integrated.`
-      : `Enterprise functions average ${formatMean(ent.mean)} of 5: integration is in place; automation is next.`;
-
-  const p1 = `${formatPct(ent.pctAtOrBelow2)} of the ${ent.capabilities} enterprise capabilities sit at level 2 or below and ${ent.countAt5 === 0 ? "none" : ent.countAt5} at level 5. CPD averages ${formatMean(cpd.mean)}, ahead of the enterprise functions${cpd.countAtOrAbove4 ? `, with ${cpd.countAtOrAbove4} capabilities at level 4 or above` : ""}.`;
-
-  const p2 =
-    moved.length === 0
-      ? "Evidence gathered so far supports the 2025 self-assessment; no capability moves by a full level."
-      : `Evidence moves ${moved.length} ${moved.length === 1 ? "capability" : "capabilities"} by a level or more against the 2025 self-assessment${
-          down[0]
-            ? ` — most notably ${capabilityLabel(down[0].capability.id)} (self ${formatScore(down[0].self)}, evidence ${formatScore(down[0].effectiveScore)})`
-            : ""
-        }. ${seed.baseline.meta.deckTagline}.`;
-
-  const names = ws.map((o) => capabilityLabel(o.capabilityId));
-  const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : (names[0] ?? "");
-  const p3 = `${ws.length === 0 ? "No capability has" : ws.length === 1 ? "One capability has" : `${ws.length} capabilities have`} a material gap and no initiative on the 2026-27 roadmap${ws.length ? `: ${list}` : ""}. ${
-    acc.length === 1 ? "One capability needs its roadmap initiative" : `${acc.length} capabilities need their roadmap initiatives`
-  } accelerated, and ${now.length} AI and digital use ${now.length === 1 ? "case is" : "cases are"} ready to start in the next six months.`;
-
-  return { headline, paragraphs: [p1, p2, p3] };
+  out.push(
+    `${fnName} sits at Level ${r.overallLevel} (${LADDER[r.overallLevel].name.toLowerCase()}) overall against a target of Level ${r.target}; ` +
+      (below.length ? `${below.length} of ${scored.length} processes are below target.` : "every process is at or above target."),
+  );
+  if (best.id !== worst.id) {
+    const nothing = worst.alignment === "WHITESPACE" ? ", with nothing on the 2026-27 roadmap to close it" : "";
+    out.push(`${best.name} is the most mature at L${best.level}; ${worst.name} is furthest behind at L${worst.level}${nothing}.`);
+  }
+  if (r.self !== null) {
+    const d = r.overall - r.self;
+    out.push(
+      Math.abs(d) < 0.25
+        ? `That is in line with the 2025 self-assessment.`
+        : `That is ${Math.abs(d).toFixed(1)} levels ${d < 0 ? "below" : "above"} what the 2025 self-assessment claimed, once documents and interviews are weighed in.`,
+    );
+  }
+  const now = r.ideas.filter((i) => i.phase === "Now");
+  if (now.length) {
+    const rest = r.ideas.length - now.length;
+    out.push(`Start now with ${listOf(now.map((i) => i.title))}${rest ? `; ${rest} more ${rest === 1 ? "idea follows" : "ideas follow"} once the foundations are in.` : "."}`);
+  }
+  const disagree = scored.filter((p) => p.flags.includes("INCONSISTENT"));
+  if (disagree.length) out.push(`Sources disagree on ${listOf(disagree.map((p) => p.name))} — settle that before sign-off.`);
+  return out;
 }

@@ -2,7 +2,7 @@
  * MockProvider: the POC's "AI". Deterministic classifier + engine, wrapped in a scripted,
  * streamed agent narrative. No external model is ever called.
  */
-import { assess } from "@/lib/engine";
+import { assessProcesses } from "@/lib/engine";
 import { classifyDocument } from "@/lib/classifier";
 import { agentScript } from "./scripts";
 import type { AIProvider, AgentEvent } from "./types";
@@ -12,7 +12,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export const MockProvider: AIProvider = {
   name: "MockProvider (deterministic)",
   simulated: true,
-  assess,
+  assessProcesses,
   classify: classifyDocument,
   async *runAgent(task, ctx, opts = {}): AsyncGenerator<AgentEvent> {
     const speed = opts.speed ?? 1;

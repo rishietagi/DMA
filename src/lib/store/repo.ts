@@ -7,7 +7,7 @@ import type { SessionState } from "./session";
 
 export type SessionSnapshot = Pick<
   SessionState,
-  "mode" | "weights" | "excluded" | "targetOverrides" | "responses" | "documents" | "evidence" | "notes" | "validations" | "audit"
+  "functionId" | "processes" | "target" | "quickCheck" | "documents" | "evidence" | "validations" | "audit"
 >;
 
 export interface SessionRepository {

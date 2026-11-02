@@ -28,6 +28,10 @@ Next.js 15 (App Router, TS strict)
 
 ## 2. Screens — the assessment journey
 
+> **Superseded 2026-11-02.** The app is now a 4-step flow — Scope → Gather inputs → Review levels → Results — rating
+> L1 processes of one function on the 0–5 ladder (`docs/SCORING_ENGINE.md §11`, `LOG.md §5`). The 10-screen design
+> below, the demo script in §5 and the shell description are kept for history.
+
 Global shell: left rail = 8-stage **journey stepper** with status dots; top bar = engagement switcher (Himalaya · CPD ▾ · FY26 DMA), command palette (⌘K), "Demo mode · simulated AI" badge, theme toggle. Right-side **Agent Console** drawer shows live agent step traces ("Reading Ecom_O2C_SOP.md… 14 evidence items… 2 contradictions") on every AI action.
 
 | # | Route | Screen | Swati capability | Core content |

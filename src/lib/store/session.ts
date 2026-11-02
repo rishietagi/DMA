@@ -1,16 +1,19 @@
 "use client";
 /**
  * Assessment session state (Zustand, persisted to localStorage). The engine never reads this
- * directly — the AssessmentProvider turns it into an AssessmentInput.
+ * directly — the ProcessProvider turns it into a ProcessInput.
  */
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { DEFAULT_WEIGHTS, type AssessmentMode, type EvidenceItem } from "@/lib/engine";
-import type { Dimension, FunctionId, Level, QuestionnaireResponse, Validation } from "@/lib/schema";
+import type { EvidenceItem, LadderLevel, ProcessValidation } from "@/lib/engine";
+import { l1Processes, processKey, type CustomQuestion } from "@/lib/process-input";
+import type { FunctionId, Level, QuestionnaireResponse } from "@/lib/schema";
 import { seed } from "@/lib/seed";
-import type { AgentRun, AgentStep, AuditEntry, EvidenceDoc, InterviewNote } from "./types";
+import type { AgentRun, AgentStep, AuditEntry, EvidenceDoc } from "./types";
 
 export const CONSULTANT = "A. Consultant (KPMG)";
+export const DEFAULT_FUNCTION: FunctionId = "supply-chain";
+export const DEFAULT_TARGET: LadderLevel = 3;
 
 function workshopDocs(): EvidenceDoc[] {
   const seen = new Map<string, EvidenceDoc>();
@@ -42,52 +45,49 @@ function workshopEvidence(): EvidenceItem[] {
   }));
 }
 
+const allProcesses = (fn: FunctionId) => l1Processes(fn).map((s) => processKey(fn, s));
+
 export interface SessionState {
   hydrated: boolean;
-  mode: AssessmentMode;
-  weights: Record<Dimension, number>;
-  excluded: string[];
-  targetOverrides: Record<string, number>;
+  functionId: FunctionId;
+  /** selected L1 processes, as process keys */
+  processes: string[];
+  target: LadderLevel;
+  /** quick-check answers on the 0–5 ladder, by process key */
+  quickCheck: Record<string, number>;
+  /** question-bank answers (1–5 rubric levels) */
   responses: QuestionnaireResponse[];
+  /** questions the consultant added, answered on the ladder */
+  customQuestions: CustomQuestion[];
   documents: EvidenceDoc[];
   evidence: EvidenceItem[];
-  notes: InterviewNote[];
-  validations: Record<string, Validation>;
+  validations: Record<string, ProcessValidation>;
   audit: AuditEntry[];
   runs: AgentRun[];
   agentOpen: boolean;
-  ragView: boolean;
   tourCompleted: boolean;
-  visited: string[];
-  sidebarCollapsed: boolean;
-  /** simple = plain-language essentials; detailed = full analysis */
-  view: "simple" | "detailed";
 
-  markVisited: (href: string) => void;
-  setSidebarCollapsed: (v: boolean) => void;
-  setView: (v: "simple" | "detailed") => void;
-  setMode: (m: AssessmentMode) => void;
-  setWeight: (d: Dimension, v: number) => void;
-  resetWeights: () => void;
-  toggleScope: (capabilityId: string) => void;
-  setTarget: (capabilityId: string, target: number | null) => void;
-  setResponse: (r: { questionId: string; functionId: FunctionId; level: Level | null; notes?: string; answeredBy?: string }) => void;
+  setFunction: (fn: FunctionId) => void;
+  toggleProcess: (key: string) => void;
+  setTarget: (t: LadderLevel) => void;
+  setQuickCheck: (key: string, level: LadderLevel | null) => void;
+  setResponse: (r: { questionId: string; functionId: FunctionId; level: Level | null }) => void;
+  addQuestion: (q: Omit<CustomQuestion, "id">) => void;
+  answerQuestion: (id: string, answer: LadderLevel | null) => void;
+  removeQuestion: (id: string) => void;
   upsertDocuments: (docs: EvidenceDoc[]) => void;
   updateDocument: (id: string, patch: Partial<EvidenceDoc>) => void;
   addEvidence: (items: EvidenceItem[]) => void;
   removeDocument: (id: string) => void;
-  addNotes: (notes: InterviewNote[]) => void;
-  removeNote: (id: string) => void;
-  accept: (capabilityId: string, score: number, rationale?: string) => void;
-  override: (capabilityId: string, before: number, after: number, rationale: string) => void;
-  bulkAccept: (items: { capabilityId: string; score: number }[]) => void;
-  revert: (capabilityId: string) => void;
+  accept: (processId: string, score: number) => void;
+  acceptAll: (items: { processId: string; score: number }[]) => void;
+  change: (processId: string, before: number, after: number, rationale: string) => void;
+  revert: (processId: string) => void;
   startRun: (run: AgentRun) => void;
   pushStep: (runId: string, step: AgentStep) => void;
   completeStep: (runId: string, stepId: string, detail?: string) => void;
   finishRun: (runId: string, summary?: string, status?: AgentRun["status"]) => void;
   setAgentOpen: (open: boolean) => void;
-  setRagView: (on: boolean) => void;
   setTourCompleted: (v: boolean) => void;
   resetDemo: () => void;
 }
@@ -96,23 +96,19 @@ const now = () => new Date().toISOString();
 const uid = (p: string) => `${p}-${Math.random().toString(36).slice(2, 9)}`;
 
 const initial = () => ({
-  mode: "evidence" as AssessmentMode,
-  weights: { ...DEFAULT_WEIGHTS },
-  excluded: [] as string[],
-  targetOverrides: {} as Record<string, number>,
-  responses: seed.demoResponses.responses,
+  functionId: DEFAULT_FUNCTION,
+  processes: allProcesses(DEFAULT_FUNCTION),
+  target: DEFAULT_TARGET,
+  quickCheck: { ...seed.demoResponses.quickCheck },
+  responses: [...seed.demoResponses.responses],
+  customQuestions: [] as CustomQuestion[],
   documents: workshopDocs(),
   evidence: workshopEvidence(),
-  notes: [] as InterviewNote[],
-  validations: {} as Record<string, Validation>,
+  validations: {} as Record<string, ProcessValidation>,
   audit: [] as AuditEntry[],
   runs: [] as AgentRun[],
   agentOpen: false,
-  ragView: false,
   tourCompleted: false,
-  visited: [] as string[],
-  sidebarCollapsed: false,
-  view: "simple" as "simple" | "detailed",
 });
 
 export const useSession = create<SessionState>()(
@@ -121,26 +117,26 @@ export const useSession = create<SessionState>()(
       hydrated: false,
       ...initial(),
 
-      markVisited: (href) => set((s) => (s.visited.includes(href) ? {} : { visited: [...s.visited, href] })),
-      setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
-      setView: (view) => set({ view }),
-      setMode: (mode) => set({ mode }),
-      setWeight: (d, v) => set((s) => ({ weights: { ...s.weights, [d]: v } })),
-      resetWeights: () => set({ weights: { ...DEFAULT_WEIGHTS } }),
-      toggleScope: (id) =>
-        set((s) => ({ excluded: s.excluded.includes(id) ? s.excluded.filter((x) => x !== id) : [...s.excluded, id] })),
-      setTarget: (id, target) =>
+      setFunction: (functionId) => set({ functionId, processes: allProcesses(functionId) }),
+      toggleProcess: (key) =>
+        set((s) => ({ processes: s.processes.includes(key) ? s.processes.filter((x) => x !== key) : [...s.processes, key] })),
+      setTarget: (target) => set({ target }),
+      setQuickCheck: (key, level) =>
         set((s) => {
-          const next = { ...s.targetOverrides };
-          if (target === null) delete next[id];
-          else next[id] = target;
-          return { targetOverrides: next };
+          const quickCheck = { ...s.quickCheck };
+          if (level === null) delete quickCheck[key];
+          else quickCheck[key] = level;
+          return { quickCheck };
         }),
       setResponse: (r) =>
         set((s) => {
           const rest = s.responses.filter((x) => !(x.questionId === r.questionId && x.functionId === r.functionId));
-          return { responses: [...rest, { ...r, date: now().slice(0, 10) }] };
+          return { responses: [...rest, { ...r, answeredBy: CONSULTANT, date: now().slice(0, 10) }] };
         }),
+      addQuestion: (q) => set((s) => ({ customQuestions: [...s.customQuestions, { ...q, id: uid("cq") }] })),
+      answerQuestion: (id, answer) =>
+        set((s) => ({ customQuestions: s.customQuestions.map((q) => (q.id === id ? { ...q, answer } : q)) })),
+      removeQuestion: (id) => set((s) => ({ customQuestions: s.customQuestions.filter((q) => q.id !== id) })),
       upsertDocuments: (docs) =>
         set((s) => {
           const ids = new Set(docs.map((d) => d.id));
@@ -158,57 +154,42 @@ export const useSession = create<SessionState>()(
           documents: s.documents.filter((d) => d.id !== id),
           evidence: s.evidence.filter((e) => e.docId !== id),
         })),
-      addNotes: (notes) =>
-        set((s) => {
-          const ids = new Set(notes.map((n) => n.id));
-          return { notes: [...s.notes.filter((n) => !ids.has(n.id)), ...notes] };
-        }),
-      removeNote: (id) => set((s) => ({ notes: s.notes.filter((n) => n.id !== id) })),
 
-      accept: (capabilityId, score, rationale = "Accepted AI-suggested score") =>
-        set((s) => ({
-          validations: {
-            ...s.validations,
-            [capabilityId]: { capabilityId, kind: "accepted", before: score, after: score, rationale, by: CONSULTANT, at: now() },
-          },
-          audit: [
-            { id: uid("a"), at: now(), by: CONSULTANT, capabilityId, action: "accepted", before: score, after: score, rationale },
-            ...s.audit,
-          ],
-        })),
-      override: (capabilityId, before, after, rationale) =>
-        set((s) => ({
-          validations: {
-            ...s.validations,
-            [capabilityId]: { capabilityId, kind: "overridden", before, after, rationale, by: CONSULTANT, at: now() },
-          },
-          audit: [
-            { id: uid("a"), at: now(), by: CONSULTANT, capabilityId, action: "overridden", before, after, rationale },
-            ...s.audit,
-          ],
-        })),
-      bulkAccept: (items) =>
+      accept: (processId, score) =>
+        set((s) => {
+          const rationale = "Accepted the AI-suggested level";
+          return {
+            validations: { ...s.validations, [processId]: { kind: "accepted", before: score, after: score, rationale, by: CONSULTANT, at: now() } },
+            audit: [{ id: uid("a"), at: now(), by: CONSULTANT, processId, action: "accepted", before: score, after: score, rationale }, ...s.audit],
+          };
+        }),
+      acceptAll: (items) =>
         set((s) => {
           const at = now();
-          const rationale = "Bulk-accepted: high confidence, no open flags";
+          const rationale = "Accepted with all AI-suggested levels";
           const validations = { ...s.validations };
           const audit = [...s.audit];
-          for (const { capabilityId, score } of items) {
-            validations[capabilityId] = { capabilityId, kind: "accepted", before: score, after: score, rationale, by: CONSULTANT, at };
-            audit.unshift({ id: uid("a"), at, by: CONSULTANT, capabilityId, action: "bulk-accepted", before: score, after: score, rationale });
+          for (const { processId, score } of items) {
+            validations[processId] = { kind: "accepted", before: score, after: score, rationale, by: CONSULTANT, at };
+            audit.unshift({ id: uid("a"), at, by: CONSULTANT, processId, action: "bulk-accepted", before: score, after: score, rationale });
           }
           return { validations, audit };
         }),
-      revert: (capabilityId) =>
+      change: (processId, before, after, rationale) =>
+        set((s) => ({
+          validations: { ...s.validations, [processId]: { kind: "overridden", before, after, rationale, by: CONSULTANT, at: now() } },
+          audit: [{ id: uid("a"), at: now(), by: CONSULTANT, processId, action: "changed", before, after, rationale }, ...s.audit],
+        })),
+      revert: (processId) =>
         set((s) => {
-          const v = s.validations[capabilityId];
+          const v = s.validations[processId];
           if (!v) return {};
           const validations = { ...s.validations };
-          delete validations[capabilityId];
+          delete validations[processId];
           return {
             validations,
             audit: [
-              { id: uid("a"), at: now(), by: CONSULTANT, capabilityId, action: "reverted", before: v.after, after: v.before, rationale: "Returned to AI-suggested" },
+              { id: uid("a"), at: now(), by: CONSULTANT, processId, action: "reverted", before: v.after, after: v.before, rationale: "Returned to the AI suggestion" },
               ...s.audit,
             ],
           };
@@ -234,13 +215,12 @@ export const useSession = create<SessionState>()(
           ),
         })),
       setAgentOpen: (agentOpen) => set({ agentOpen }),
-      setRagView: (ragView) => set({ ragView }),
       setTourCompleted: (tourCompleted) => set({ tourCompleted }),
       resetDemo: () => set({ ...initial() }),
     }),
     {
-      name: "himalaya-dma-session-v1",
-      version: 1,
+      name: "himalaya-dma-session-v2",
+      version: 2,
       storage: createJSONStorage(() => localStorage),
       skipHydration: true,
       partialize: (s) => {

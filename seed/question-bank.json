@@ -2027,6 +2027,14 @@
         "Order fulfilment & fill rate",
         "Sustainability"
       ],
+      "l1Keywords": {
+        "Demand planning / IBP": ["demand", "forecast", "ibp", "s&op", "consensus"],
+        "Supply & production planning": ["production plan", "production plans", "capacity", "supply plan", "mrp"],
+        "Warehousing": ["warehouse", "warehouses", "warehousing", "depot", "depots", "cycle count", "cycle counts", "goods receipt", "goods receipts", "bin"],
+        "Transportation": ["transport", "transporter", "transporters", "freight", "tms", "load", "loads", "proof of delivery", "truck", "trucks"],
+        "Order fulfilment & fill rate": ["fill rate", "fill-rate", "otif", "order fulfilment", "cuts"],
+        "Sustainability": ["sustainability", "emissions", "esg", "water", "energy", "brsr"]
+      },
       "questions": [
         {
           "id": "scm-q01",

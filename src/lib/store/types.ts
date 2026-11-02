@@ -19,15 +19,6 @@ export interface EvidenceDoc {
   error?: string;
 }
 
-export interface InterviewNote {
-  id: string;
-  stakeholder: string;
-  functionId: FunctionId;
-  date: string;
-  text: string;
-  source: "demo" | "pasted" | "upload";
-}
-
 export type AgentStepKind = "plan" | "read" | "extract" | "map" | "detect" | "score" | "draft" | "check" | "narrate";
 
 export interface AgentStep {
@@ -52,8 +43,8 @@ export interface AuditEntry {
   id: string;
   at: string;
   by: string;
-  capabilityId: string;
-  action: "accepted" | "overridden" | "reverted" | "bulk-accepted";
+  processId: string;
+  action: "accepted" | "changed" | "reverted" | "bulk-accepted";
   before: number;
   after: number;
   rationale: string;

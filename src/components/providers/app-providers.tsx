@@ -6,7 +6,7 @@ import { ThemeProvider, useTheme } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useSession } from "@/lib/store/session";
-import { AssessmentProvider } from "./assessment-provider";
+import { ProcessProvider } from "./process-provider";
 
 /** `?theme=dark|light` switches the theme (demos, audits). */
 function ThemeFromUrl() {
@@ -31,7 +31,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <MotionConfig reducedMotion="user">
           <TooltipProvider delayDuration={250}>
-            <AssessmentProvider>{children}</AssessmentProvider>
+            <ProcessProvider>{children}</ProcessProvider>
             <Toaster position="bottom-right" />
           </TooltipProvider>
         </MotionConfig>
