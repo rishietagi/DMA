@@ -1,12 +1,13 @@
 "use client";
 import * as React from "react";
-import { FileUp, Loader2, MessageSquarePlus, ThumbsDown, ThumbsUp, Users } from "lucide-react";
+import { FileUp, Loader2, MessageSquarePlus, Sparkles, ThumbsDown, ThumbsUp, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Textarea } from "@/components/ui/form-controls";
 import { Label } from "@/components/ui/misc";
-import { ingest } from "@/lib/actions";
+import { ingest, loadSampleTranscript } from "@/lib/actions";
+import { SAMPLE_TRANSCRIPT } from "@/lib/demo-evidence";
 import { toLadder, type EvidenceItem } from "@/lib/engine";
 import { functionName } from "@/lib/labels";
 import { stepForEvidence } from "@/lib/process-input";
@@ -59,6 +60,7 @@ const nameFromFile = (f: string) => f.replace(/\.[^.]+$/, "").replace(/^intervie
 
 /** Upload a transcript or paste notes; each sentence is classified and placed on a process. */
 function AddInterview() {
+  const sampleLoaded = useSession((s) => s.documents.some((d) => d.id === SAMPLE_TRANSCRIPT.id));
   const [who, setWho] = React.useState("");
   const [text, setText] = React.useState("");
   const [busy, setBusy] = React.useState(false);
@@ -160,10 +162,16 @@ function AddInterview() {
                 e.target.value = "";
               }}
             />
-            <Button variant="outline" size="xs" onClick={() => input.current?.click()} disabled={busy}>
-              {busy ? <Loader2 className="animate-spin" /> : null}
-              Upload transcript
-            </Button>
+            <div className="flex flex-wrap justify-center gap-2">
+              <Button variant="outline" size="xs" onClick={() => input.current?.click()} disabled={busy}>
+                {busy ? <Loader2 className="animate-spin" /> : null}
+                Upload transcript
+              </Button>
+              <Button variant="ai" size="xs" onClick={() => void run(loadSampleTranscript)} disabled={busy || sampleLoaded} data-testid="load-transcript">
+                {busy ? <Loader2 className="animate-spin" /> : <Sparkles />}
+                {busy ? "Reading transcript…" : sampleLoaded ? "Sample transcript loaded" : "Load sample transcript"}
+              </Button>
+            </div>
           </div>
         </div>
         <div className="flex flex-col gap-1.5">

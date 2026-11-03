@@ -9,7 +9,7 @@ import { sourceBreakdown } from "@/lib/process-why";
 import { processAreas } from "@/lib/process-areas";
 import { processLens } from "@/lib/process-lens";
 import { capabilityInput } from "@/lib/store/build-input";
-import { DEMO_DOCS } from "@/lib/demo-evidence";
+import { DEMO_DOCS, SAMPLE_TRANSCRIPT, withoutRetiredSamples } from "@/lib/demo-evidence";
 import { parseText } from "@/lib/parse-text";
 import { answersForStep, assessAllFunctions, buildProcessInput, capabilitiesForStep, capabilitiesOf, type CustomProcess, type CustomQuestion, l1Processes, processKey, renameProcessKeys, stepForEvidence, stepKeywords } from "@/lib/process-input";
 import { seed } from "@/lib/seed";
@@ -272,5 +272,41 @@ describe("processes the consultant adds (§11.3)", () => {
     expect(gone.quickCheck).toEqual({});
     expect(gone.customQuestions).toHaveLength(1);
     expect(gone.audit).toHaveLength(1);
+  });
+});
+
+describe("sample interview transcript (Illustrative)", () => {
+  const items = classifyDocument({
+    id: SAMPLE_TRANSCRIPT.id,
+    title: SAMPLE_TRANSCRIPT.title,
+    category: SAMPLE_TRANSCRIPT.category,
+    stakeholder: SAMPLE_TRANSCRIPT.stakeholder,
+    segments: parseText(SAMPLE_TRANSCRIPT.fileName, readFileSync(join("public/demo-evidence", SAMPLE_TRANSCRIPT.fileName), "utf8")),
+  });
+  const placed = items.filter((e) => e.level !== null && stepForEvidence(FN, e));
+
+  it("gives supply-chain strengths and pain points across several processes", () => {
+    expect(items.every((e) => e.sourceType === "interview")).toBe(true);
+    expect(new Set(placed.map((e) => stepForEvidence(FN, e)))).toEqual(new Set(["Warehousing", "Transportation", "Order fulfilment & fill rate", "Sustainability"]));
+    expect(placed.some((e) => e.polarity === "strength")).toBe(true);
+    expect(placed.some((e) => e.polarity !== "strength")).toBe(true);
+  });
+});
+
+describe("retired sample documents", () => {
+  it("drops sample documents no longer shipped, with their sentences, and keeps everything else", () => {
+    const ev = (docId: string) => ({ ...demo[0]!, id: `x-${docId}`, docId });
+    const s = {
+      documents: [
+        { id: "demo-ecom-sop", source: "demo" },
+        { id: "demo-scm-sop", source: "demo" },
+        { id: SAMPLE_TRANSCRIPT.id, source: "demo" },
+        { id: "upload-x", source: "upload" },
+      ],
+      evidence: [ev("demo-ecom-sop"), ev("demo-scm-sop"), ev("upload-x")],
+    };
+    const out = withoutRetiredSamples(s);
+    expect(out.documents.map((d) => d.id)).toEqual(["demo-scm-sop", SAMPLE_TRANSCRIPT.id, "upload-x"]);
+    expect(out.evidence.map((e) => e.docId)).toEqual(["demo-scm-sop", "upload-x"]);
   });
 });

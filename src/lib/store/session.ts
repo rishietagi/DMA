@@ -8,6 +8,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import type { EvidenceItem, LadderLevel, ProcessValidation } from "@/lib/engine";
 import { l1Processes, processKey, renameProcessKeys, type CustomProcess, type CustomQuestion } from "@/lib/process-input";
 import type { FunctionId, Level, QuestionnaireResponse } from "@/lib/schema";
+import { withoutRetiredSamples } from "@/lib/demo-evidence";
 import { seed } from "@/lib/seed";
 import type { AgentRun, AgentStep, AuditEntry, EvidenceDoc } from "./types";
 
@@ -256,10 +257,11 @@ export const useSession = create<SessionState>()(
     }),
     {
       name: "himalaya-dma-session-v2",
-      version: 3,
+      version: 4,
       migrate: (state, version) => {
         const s = state as Partial<SessionState>;
         if (version < 3) s.customProcesses = [];
+        if (version < 4 && s.documents && s.evidence) Object.assign(s, withoutRetiredSamples({ documents: s.documents, evidence: s.evidence }));
         return s as SessionState;
       },
       storage: createJSONStorage(() => localStorage),

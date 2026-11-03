@@ -82,6 +82,9 @@ test("every step shows its visuals, and the details sheet explains a level", asy
   await page.getByTestId("tab-interviews").click();
   await expect(page.getByText("What people told us")).toBeVisible();
   await expect(page.getByTestId("transcript-input")).toBeAttached();
+  await page.getByTestId("load-transcript").click();
+  await expect(page.getByTestId("load-transcript")).toHaveText(/Sample transcript loaded/, { timeout: 60_000 });
+  await expect(page.getByText(/Warehouse & Logistics Manager/).first()).toBeVisible();
 
   await page.goto("/review");
   await row(page, "Demand planning / IBP").getByTestId("details").click();

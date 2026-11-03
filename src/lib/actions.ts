@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { ai } from "@/lib/ai";
 import { runAgent } from "@/lib/ai/client";
 import type { EvidenceItem, FunctionProcessResult } from "@/lib/engine";
-import { DEMO_DOCS } from "@/lib/demo-evidence";
+import { DEMO_DOCS, SAMPLE_TRANSCRIPT, withoutRetiredSamples, type DemoDoc } from "@/lib/demo-evidence";
 import { functionName } from "@/lib/labels";
 import { buildProcessInput, stepForEvidence } from "@/lib/process-input";
 import type { EvidenceCategory, FunctionId } from "@/lib/schema";
@@ -134,8 +134,18 @@ export async function ingest(files: IngestFile[]): Promise<{ items: number; move
 }
 
 export async function loadDemoEvidence() {
-  const files = await Promise.all(
-    DEMO_DOCS.map(async (d) => {
+  useSession.setState((s) => withoutRetiredSamples(s));
+  return ingest(await sampleFiles(DEMO_DOCS));
+}
+
+/** The Illustrative interview transcript, read like an uploaded one. */
+export async function loadSampleTranscript() {
+  return ingest(await sampleFiles([SAMPLE_TRANSCRIPT]));
+}
+
+async function sampleFiles(docs: readonly DemoDoc[]) {
+  return Promise.all(
+    docs.map(async (d) => {
       const res = await fetch(`/demo-evidence/${d.fileName}`);
       return {
         blob: await res.blob(),
@@ -148,7 +158,6 @@ export async function loadDemoEvidence() {
       };
     }),
   );
-  return ingest(files);
 }
 
 export async function runScoring() {
