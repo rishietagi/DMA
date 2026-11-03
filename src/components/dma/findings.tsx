@@ -10,7 +10,8 @@ import { ProcessCoverage } from "./process-chain";
 export function useLens() {
   const functionId = useSession((s) => s.functionId);
   const evidence = useSession((s) => s.evidence);
-  return React.useMemo(() => processLens(functionId, evidence), [functionId, evidence]);
+  const custom = useSession((s) => s.customProcesses);
+  return React.useMemo(() => processLens(functionId, evidence, custom), [functionId, evidence, custom]);
 }
 
 /** Coverage card for the first tab. */

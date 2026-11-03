@@ -5,7 +5,7 @@
  */
 import { fragmentationIndex, handoffsIn, isManualWorkaround, systemsIn } from "@/lib/classifier/insights";
 import type { EvidenceItem } from "@/lib/engine";
-import { capabilitiesForStep, l1Processes, processKey, stepForEvidence } from "@/lib/process-input";
+import { capabilitiesForStep, l1Processes, processKey, stepForEvidence, type CustomProcess } from "@/lib/process-input";
 import type { FunctionId } from "@/lib/schema";
 import { seed } from "@/lib/seed";
 
@@ -30,9 +30,9 @@ export interface FunctionLens {
   index: number;
 }
 
-export function processLens(functionId: FunctionId, evidence: readonly EvidenceItem[]): FunctionLens {
-  const steps = l1Processes(functionId).map((step): StepLens => {
-    const ev = evidence.filter((e) => stepForEvidence(functionId, e) === step);
+export function processLens(functionId: FunctionId, evidence: readonly EvidenceItem[], custom: readonly CustomProcess[] = []): FunctionLens {
+  const steps = l1Processes(functionId, custom).map((step): StepLens => {
+    const ev = evidence.filter((e) => stepForEvidence(functionId, e, custom) === step);
     const systems = [
       ...new Set([
         ...capabilitiesForStep(functionId, step)

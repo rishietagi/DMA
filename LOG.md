@@ -27,8 +27,8 @@ L1 processes of one function on the client's **Level 0–5 ladder**. The capabil
   4 steps** on the client's Level 0–5 ladder. The 10-screen workbench is gone; old URLs redirect.
 - **Tests:** all green.
   - typecheck, lint, `seed:check`;
-  - 134 Vitest unit tests (capability engine untouched, plus process ladder, mapping and demo-pack acceptance);
-  - 6 Playwright e2e tests (upload lowers Transportation, change needs a reason and reaches Results, every
+  - 138 Vitest unit tests (capability engine untouched, plus process ladder, mapping and demo-pack acceptance);
+  - 7 Playwright e2e tests (add / rename / delete your own process, upload lowers Transportation, change needs a reason and reaches Results, every
     step's visuals + details sheet, questionnaire + own question move the level, old links redirect, guided demo);
   - Lighthouse accessibility 100 on all 4 routes in light and dark;
   - 0 console errors in dev.
@@ -107,7 +107,7 @@ supply chain (`HIDDEN_CAPABILITIES`).
 
 | Step | Route | What it shows |
 |---|---|---|
-| 1 Define & Focus | `/` | "Where are we today?" (2025 self-assessment per capability on the ladder) and "What matters in 2026 (focus areas)" with roadmap items; function cards (bar + "2025 baseline"); priority process cards (capability count, names only when selected); target maturity level (full width, horizon 2–3 years); KPI strip; maturity ladder |
+| 1 Define & Focus | `/` | "Where are we today?" (2025 self-assessment per capability on the ladder) and "What matters in 2026 (focus areas)" with roadmap items; function cards (bar + "2025 baseline"); priority process cards (capability count, names only when selected) plus **your own processes** ("+ Add a process": name + optional words that point to it; edit / delete with undo; "Added by you"); target maturity level (full width, horizon 2–3 years); KPI strip; maturity ladder |
 | 2 Assess & Validate | `/inputs` | Context line (function · processes in scope · target). Tabs: **Evidence** (drop zone, "Load sample documents" with hover note, document list, coverage matrix: Process · Systems (application) · Data · Policies · KPIs). **Assess** (questionnaire per process: name + stage, why on hover; bank questions; your own questions). **AI insights** (per process: AI stage, evidence references, quick-check dropdown). **Interviews** (upload transcript or paste notes; strengths / pain points board) |
 | 3 Diagnose | `/review` | Title "Validate maturity findings". Context line + "n/n reviewed"; **validation summary** (evidence conflicts · not enough evidence · reviewer adjustments · confirmed, reconciliation warning, **Confirm all remaining (n)**); per process: status tag, "Stage n · name", source breakdown (Interview · Questionnaire · Documents · Baseline), Sources, **Review evidence** (details sheet), Change (reason required), **Confirm level**; reviewed cards show "Validated by … · time" + Undo; audit trail |
 | 4 Prioritize & Roadmap | `/results` | Headline "Function \| Current maturity x → Target y" + strip (current · target · avg. gap · below target) + current→target slider + **3 AI insights** (strength, critical gap, priority); **diagnostic table** (overall · process · people · data & analytics heatmap + gap to target, "nothing planned" marked); 2025 self assessment vs our findings bars; value × ease idea matrix + detail; roadmap swimlanes; all functions compared |
@@ -276,3 +276,15 @@ or `when.steps`.
     sample documents" with a hover note (answering "what does Reload demo pack do?").
   - Verified: typecheck, lint, 134 unit, 6 e2e, seed check, a11y 100 × 8, production build, 0 console errors,
     no horizontal scroll at 390 px.
+
+- **2026-11-03 — session 3c: your own processes** (user: "I want to add my own processes … addable and editable")
+  - `CustomProcess` + `renameProcessKeys` in `process-input.ts`; `l1Processes`, `stepKeywords`, `stepForEvidence`,
+    `buildProcessInput`, `assessAllFunctions`, `processLens` take the custom list (pure, defaulted to `[]`).
+  - Store: `customProcesses`, `addProcess` (selects it), `updateProcess` (rename moves quick check, validations,
+    own questions, selection, audit), `removeProcess` (returns an undo); persist v3 with a migrate.
+  - Define & Focus: "+ Add a process" tile and inline form (unique name, optional comma-separated words);
+    custom cards tagged "Added by you" with edit / delete (toast undo). Seed processes stay select-only.
+  - Custom processes are checked **before** seed ones when placing a sentence (their words are deliberate).
+    They own no 2025 capabilities, so they are scored from the quick check, own questions and sentences.
+  - Verified: typecheck, lint, 138 unit, 7 e2e, a11y 100 × 8, build.
+

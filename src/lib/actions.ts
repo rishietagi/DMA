@@ -110,8 +110,8 @@ export async function ingest(files: IngestFile[]): Promise<{ items: number; move
   const ids = new Set(newItems.map((i) => i.id));
   const after = [...before.filter((e) => !ids.has(e.id)), ...newItems];
   const moves = levelMoves(before, after);
-  const fn = useSession.getState().functionId;
-  const mapped = newItems.filter((e) => e.level !== null && stepForEvidence(fn, e)).length;
+  const { functionId: fn, customProcesses } = useSession.getState();
+  const mapped = newItems.filter((e) => e.level !== null && stepForEvidence(fn, e, customProcesses)).length;
 
   await runAgent("analyze-evidence", {
     functionName: functionName(fn),

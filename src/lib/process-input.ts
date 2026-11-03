@@ -26,14 +26,26 @@ function bankFor(functionId: FunctionId) {
   return seed.questionBank.functions.find((f) => f.functionId === functionId);
 }
 
-/** The function's L1 process chain. */
-export function l1Processes(functionId: FunctionId): string[] {
-  return bankFor(functionId)?.l1Chain ?? [];
+/** A process the consultant added to a function; scored like any other, with no 2025 capabilities. */
+export interface CustomProcess {
+  id: string;
+  functionId: FunctionId;
+  name: string;
+  /** words that place a sentence on it; empty = the distinctive words of its name */
+  keywords: string[];
 }
 
-/** Words that place a sentence on a step: the seed list, else the distinctive words of its name. */
-export function stepKeywords(functionId: FunctionId, step: string): string[] {
-  const listed = bankFor(functionId)?.l1Keywords?.[step];
+const customFor = (functionId: FunctionId, custom: readonly CustomProcess[]) => custom.filter((c) => c.functionId === functionId);
+
+/** The function's L1 process chain: the seed chain, then the processes the consultant added. */
+export function l1Processes(functionId: FunctionId, custom: readonly CustomProcess[] = []): string[] {
+  return [...(bankFor(functionId)?.l1Chain ?? []), ...customFor(functionId, custom).map((c) => c.name)];
+}
+
+/** Words that place a sentence on a step: the seed or custom list, else the distinctive words of its name. */
+export function stepKeywords(functionId: FunctionId, step: string, custom: readonly CustomProcess[] = []): string[] {
+  const own = customFor(functionId, custom).find((c) => c.name === step)?.keywords;
+  const listed = own?.length ? own : bankFor(functionId)?.l1Keywords?.[step];
   if (listed) return listed;
   return step
     .toLowerCase()
@@ -54,9 +66,11 @@ export function belongsToFunction(e: EvidenceItem, functionId: FunctionId): bool
 }
 
 /** A step named in the sentence wins; otherwise the step of the tagged capability. */
-export function stepForEvidence(functionId: FunctionId, e: EvidenceItem): string | null {
+export function stepForEvidence(functionId: FunctionId, e: EvidenceItem, custom: readonly CustomProcess[] = []): string | null {
   if (isHiddenCapability(e.capabilityId) || !belongsToFunction(e, functionId)) return null;
-  for (const step of l1Processes(functionId)) if (matchCues(e.quote, stepKeywords(functionId, step)).length) return step;
+  // the consultant's own processes are checked first: their words are the more deliberate signal
+  const order = [...customFor(functionId, custom).map((c) => c.name), ...l1Processes(functionId)];
+  for (const step of order) if (matchCues(e.quote, stepKeywords(functionId, step, custom)).length) return step;
   return e.capabilityId ? stepForCapability(functionId, e.capabilityId) : null;
 }
 
@@ -116,13 +130,14 @@ export interface ProcessSession {
   processValidations: Record<string, ProcessValidation>;
   responses?: readonly QuestionnaireResponse[];
   customQuestions?: readonly CustomQuestion[];
+  customProcesses?: readonly CustomProcess[];
   /** capability value / feasibility / risk from the capability engine, when available */
   ideaScores?: ProcessInput["ideaScores"];
 }
 
 /** Every function on the ladder with all its processes, same evidence (cross-function view). */
 export function assessAllFunctions(
-  s: Pick<ProcessSession, "evidence" | "quickCheck" | "target" | "responses" | "customQuestions">,
+  s: Pick<ProcessSession, "evidence" | "quickCheck" | "target" | "responses" | "customQuestions" | "customProcesses">,
   assess: (input: ProcessInput) => FunctionProcessResult,
 ): FunctionProcessResult[] {
   return FUNCTION_IDS.map((functionId) =>
@@ -130,7 +145,7 @@ export function assessAllFunctions(
       buildProcessInput({
         ...s,
         functionId,
-        processes: l1Processes(functionId).map((step) => processKey(functionId, step)),
+        processes: l1Processes(functionId, s.customProcesses).map((step) => processKey(functionId, step)),
         processValidations: {},
       }),
     ),
@@ -138,11 +153,12 @@ export function assessAllFunctions(
 }
 
 export function buildProcessInput(s: ProcessSession): ProcessInput {
-  const chain = l1Processes(s.functionId);
+  const custom = s.customProcesses ?? [];
+  const chain = l1Processes(s.functionId, custom);
   const steps = chain.filter((step) => s.processes.includes(processKey(s.functionId, step)));
   const byStep = new Map<string, EvidenceItem[]>();
   for (const e of s.evidence) {
-    const step = stepForEvidence(s.functionId, e);
+    const step = stepForEvidence(s.functionId, e, custom);
     if (step) byStep.set(step, [...(byStep.get(step) ?? []), e]);
   }
   const processes: ProcessDef[] = steps.map((step) => {
@@ -162,4 +178,39 @@ export function buildProcessInput(s: ProcessSession): ProcessInput {
     };
   });
   return { functionId: s.functionId, target: s.target, processes, rules: seed.useCaseRules.rules, ideaScores: s.ideaScores };
+}
+
+/** The session fields keyed by process. */
+export interface ProcessKeyed {
+  processes: string[];
+  quickCheck: Record<string, number>;
+  validations: Record<string, ProcessValidation>;
+  customQuestions: CustomQuestion[];
+  audit: { processId: string }[];
+}
+
+/**
+ * Moves everything keyed on a process from one name to another (rename), or drops it (`to` null, delete).
+ * Audit entries are renamed but never dropped.
+ */
+export function renameProcessKeys<T extends ProcessKeyed>(s: T, functionId: FunctionId, from: string, to: string | null): Pick<T, keyof ProcessKeyed> {
+  const oldKey = processKey(functionId, from);
+  const newKey = to === null ? null : processKey(functionId, to);
+  const move = <V>(rec: Record<string, V>) => {
+    const out: Record<string, V> = {};
+    for (const [k, v] of Object.entries(rec)) {
+      if (k !== oldKey) out[k] = v;
+      else if (newKey) out[newKey] = v;
+    }
+    return out;
+  };
+  return {
+    processes: s.processes.flatMap((k) => (k !== oldKey ? [k] : newKey ? [newKey] : [])),
+    quickCheck: move(s.quickCheck),
+    validations: move(s.validations),
+    customQuestions: s.customQuestions.flatMap((q) =>
+      q.functionId !== functionId || q.step !== from ? [q] : to === null ? [] : [{ ...q, step: to }],
+    ),
+    audit: s.audit.map((a) => (a.processId === oldKey && newKey ? { ...a, processId: newKey } : a)),
+  } as Pick<T, keyof ProcessKeyed>;
 }

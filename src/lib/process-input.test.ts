@@ -11,7 +11,7 @@ import { processLens } from "@/lib/process-lens";
 import { capabilityInput } from "@/lib/store/build-input";
 import { DEMO_DOCS } from "@/lib/demo-evidence";
 import { parseText } from "@/lib/parse-text";
-import { answersForStep, assessAllFunctions, buildProcessInput, capabilitiesForStep, capabilitiesOf, type CustomQuestion, l1Processes, processKey, stepForEvidence } from "@/lib/process-input";
+import { answersForStep, assessAllFunctions, buildProcessInput, capabilitiesForStep, capabilitiesOf, type CustomProcess, type CustomQuestion, l1Processes, processKey, renameProcessKeys, stepForEvidence, stepKeywords } from "@/lib/process-input";
 import { seed } from "@/lib/seed";
 
 const FN = "supply-chain" as const;
@@ -203,5 +203,74 @@ describe("MDM left out of the process view", () => {
     const mdmItem = workshop.find((e) => e.capabilityId === "mdm")!;
     expect(stepForEvidence(FN, mdmItem)).toBeNull();
     expect(run([...workshop, ...demo]).ideas.map((i) => i.id)).not.toContain("uc-mdm-quality");
+  });
+});
+
+describe("processes the consultant adds (§11.3)", () => {
+  const q = (over: Partial<CustomQuestion>): CustomQuestion => ({
+    id: "cq-1",
+    functionId: FN,
+    step: "Transportation",
+    text: "Is proof of delivery digital?",
+    dimension: "process",
+    weight: 2,
+    answer: 2,
+    ...over,
+  });
+  const returns: CustomProcess = { id: "cp-1", functionId: FN, name: "Returns management", keywords: ["returns", "reverse logistics"] };
+  const sentence = { ...demo.find((e) => e.functionId === FN && e.level !== null)!, id: "ret-1", quote: "Customer returns are logged on paper at the depot.", capabilityId: null };
+
+  it("adds the process to its own function's chain only", () => {
+    expect(l1Processes(FN, [returns]).at(-1)).toBe("Returns management");
+    expect(l1Processes("finance", [returns])).not.toContain("Returns management");
+  });
+
+  it("places sentences by its words, else by the distinctive words of its name", () => {
+    expect(stepForEvidence(FN, sentence, [returns])).toBe("Returns management");
+    expect(stepKeywords(FN, "Returns management", [{ ...returns, keywords: [] }])).toEqual(["returns"]);
+  });
+
+  it("scores it from the quick check, own questions and its sentences, with no capabilities", () => {
+    const key = processKey(FN, returns.name);
+    const r = assessProcesses(
+      buildProcessInput({
+        functionId: FN,
+        processes: [key],
+        target: 3,
+        evidence: [sentence],
+        quickCheck: { [key]: 1 },
+        customQuestions: [{ id: "cq-r", functionId: FN, step: returns.name, text: "Are returns tracked in SAP?", dimension: "process", weight: 2, answer: 2 }],
+        customProcesses: [returns],
+        processValidations: {},
+      }),
+    );
+    const p = r.processes[0]!;
+    expect(p.self).toBeNull();
+    expect(p.indicators.map((i) => i.kind).sort()).toEqual(["evidence", "question", "quick-check"]);
+    expect(p.level).not.toBeNull();
+  });
+
+  it("moves everything keyed on a process when it is renamed, and drops it when deleted", () => {
+    const oldKey = processKey(FN, "Returns management");
+    const newKey = processKey(FN, "Returns & reverse logistics");
+    const state = {
+      processes: [processKey(FN, "Warehousing"), oldKey],
+      quickCheck: { [oldKey]: 2 },
+      validations: { [oldKey]: { kind: "accepted" as const, before: 2, after: 2, rationale: "ok", by: "A", at: "t" } },
+      customQuestions: [q({ step: "Returns management" }), q({ id: "cq-2" })],
+      audit: [{ processId: oldKey }],
+    };
+    const renamed = renameProcessKeys(state, FN, "Returns management", "Returns & reverse logistics");
+    expect(renamed.processes).toEqual([processKey(FN, "Warehousing"), newKey]);
+    expect(renamed.quickCheck).toEqual({ [newKey]: 2 });
+    expect(Object.keys(renamed.validations)).toEqual([newKey]);
+    expect(renamed.customQuestions.map((x) => x.step)).toEqual(["Returns & reverse logistics", "Transportation"]);
+    expect(renamed.audit[0]!.processId).toBe(newKey);
+
+    const gone = renameProcessKeys(state, FN, "Returns management", null);
+    expect(gone.processes).toEqual([processKey(FN, "Warehousing")]);
+    expect(gone.quickCheck).toEqual({});
+    expect(gone.customQuestions).toHaveLength(1);
+    expect(gone.audit).toHaveLength(1);
   });
 });

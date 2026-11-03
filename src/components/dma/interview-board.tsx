@@ -37,6 +37,7 @@ function Statement({ e, step }: { e: EvidenceItem; step: string | null }) {
 }
 
 function Column({ title, icon, items, empty, fn }: { title: string; icon: React.ReactNode; items: EvidenceItem[]; empty: string; fn: FunctionId }) {
+  const custom = useSession((s) => s.customProcesses);
   return (
     <section className="flex flex-col gap-2" aria-label={title}>
       <h3 className="flex items-center gap-1.5 text-[13px] font-semibold">
@@ -46,7 +47,7 @@ function Column({ title, icon, items, empty, fn }: { title: string; icon: React.
       </h3>
       <ul className="flex flex-col gap-2">
         {items.map((e) => (
-          <Statement key={e.id} e={e} step={stepForEvidence(fn, e)} />
+          <Statement key={e.id} e={e} step={stepForEvidence(fn, e, custom)} />
         ))}
         {!items.length && <li className="text-[12px] text-muted-foreground">{empty}</li>}
       </ul>

@@ -136,3 +136,41 @@ test("old workbench links land on the matching step", async ({ page }) => {
   await page.goto("/synthesis");
   await expect(page).toHaveURL(/\/results$/);
 });
+
+test("you can add, rename and delete your own process", async ({ page }) => {
+  const errors = watchConsole(page);
+  await freshSession(page);
+
+  await page.getByTestId("add-process").click();
+  await page.getByTestId("cp-name").fill("Transportation");
+  await expect(page.getByText("A process with this name already exists.")).toBeVisible();
+  await expect(page.getByTestId("cp-save")).toBeDisabled();
+  await page.getByTestId("cp-name").fill("Returns management");
+  await page.getByTestId("cp-words").fill("returns, reverse logistics");
+  await page.getByTestId("cp-save").click();
+  const card = page.getByTestId("custom-process-Returns management");
+  await expect(card).toContainText("Added by you");
+  await expect(card.locator("[aria-pressed]")).toHaveAttribute("aria-pressed", "true");
+
+  // answer its quick check, then rename it: the answer moves with it
+  await page.goto("/inputs");
+  await page.getByTestId("tab-insights").click();
+  await page.getByTestId("qc-Returns management").click();
+  await page.getByRole("option", { name: /Stage 2 · Real-time/ }).click();
+  await page.goto("/");
+  await card.getByTestId("cp-edit").click();
+  await page.getByTestId("cp-name").fill("Returns & reverse logistics");
+  await page.getByTestId("cp-save").click();
+  const renamed = page.getByTestId("custom-process-Returns & reverse logistics");
+  await expect(renamed).toBeVisible();
+
+  await page.goto("/review");
+  await expect(row(page, "Returns & reverse logistics").getByRole("img", { name: /Stage 2 of 5/ })).toBeVisible();
+
+  await page.goto("/");
+  await renamed.getByTestId("cp-delete").click();
+  await expect(renamed).toHaveCount(0);
+  await page.goto("/review");
+  await expect(row(page, "Returns & reverse logistics")).toHaveCount(0);
+  expect(errors, errors.join("\n")).toEqual([]);
+});

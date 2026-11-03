@@ -31,11 +31,12 @@ export function ProcessProvider({ children }: { children: React.ReactNode }) {
   const validations = useSession((s) => s.validations);
   const responses = useSession((s) => s.responses);
   const customQuestions = useSession((s) => s.customQuestions);
+  const customProcesses = useSession((s) => s.customProcesses);
 
   const caps = React.useMemo(() => assess(capabilityInput(evidence, documents, responses)), [evidence, documents, responses]);
   const all = React.useMemo(
-    () => assessAllFunctions({ evidence, quickCheck, target, responses, customQuestions }, ai.assessProcesses),
-    [evidence, quickCheck, target, responses, customQuestions],
+    () => assessAllFunctions({ evidence, quickCheck, target, responses, customQuestions, customProcesses }, ai.assessProcesses),
+    [evidence, quickCheck, target, responses, customQuestions, customProcesses],
   );
 
   const value = React.useMemo<Ctx>(() => {
@@ -47,11 +48,12 @@ export function ProcessProvider({ children }: { children: React.ReactNode }) {
       quickCheck,
       responses,
       customQuestions,
+      customProcesses,
       processValidations: validations,
       ideaScores: ideaScoresFrom(caps),
     });
     return { input, result: ai.assessProcesses(input), caps, all };
-  }, [functionId, processes, target, evidence, quickCheck, responses, customQuestions, validations, caps, all]);
+  }, [functionId, processes, target, evidence, quickCheck, responses, customQuestions, customProcesses, validations, caps, all]);
 
   return <ProcessContext.Provider value={value}>{children}</ProcessContext.Provider>;
 }

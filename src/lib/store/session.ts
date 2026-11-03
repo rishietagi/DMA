@@ -6,7 +6,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { EvidenceItem, LadderLevel, ProcessValidation } from "@/lib/engine";
-import { l1Processes, processKey, type CustomQuestion } from "@/lib/process-input";
+import { l1Processes, processKey, renameProcessKeys, type CustomProcess, type CustomQuestion } from "@/lib/process-input";
 import type { FunctionId, Level, QuestionnaireResponse } from "@/lib/schema";
 import { seed } from "@/lib/seed";
 import type { AgentRun, AgentStep, AuditEntry, EvidenceDoc } from "./types";
@@ -45,7 +45,7 @@ function workshopEvidence(): EvidenceItem[] {
   }));
 }
 
-const allProcesses = (fn: FunctionId) => l1Processes(fn).map((s) => processKey(fn, s));
+const allProcesses = (fn: FunctionId, custom: readonly CustomProcess[] = []) => l1Processes(fn, custom).map((s) => processKey(fn, s));
 
 export interface SessionState {
   hydrated: boolean;
@@ -59,6 +59,8 @@ export interface SessionState {
   responses: QuestionnaireResponse[];
   /** questions the consultant added, answered on the ladder */
   customQuestions: CustomQuestion[];
+  /** processes the consultant added to a function */
+  customProcesses: CustomProcess[];
   documents: EvidenceDoc[];
   evidence: EvidenceItem[];
   validations: Record<string, ProcessValidation>;
@@ -75,6 +77,10 @@ export interface SessionState {
   addQuestion: (q: Omit<CustomQuestion, "id">) => void;
   answerQuestion: (id: string, answer: LadderLevel | null) => void;
   removeQuestion: (id: string) => void;
+  addProcess: (functionId: FunctionId, name: string, keywords: string[]) => void;
+  updateProcess: (id: string, name: string, keywords: string[]) => void;
+  /** deletes a process; returns a function that puts it (and everything keyed on it) back */
+  removeProcess: (id: string) => (() => void) | undefined;
   upsertDocuments: (docs: EvidenceDoc[]) => void;
   updateDocument: (id: string, patch: Partial<EvidenceDoc>) => void;
   addEvidence: (items: EvidenceItem[]) => void;
@@ -102,6 +108,7 @@ const initial = () => ({
   quickCheck: { ...seed.demoResponses.quickCheck },
   responses: [...seed.demoResponses.responses],
   customQuestions: [] as CustomQuestion[],
+  customProcesses: [] as CustomProcess[],
   documents: workshopDocs(),
   evidence: workshopEvidence(),
   validations: {} as Record<string, ProcessValidation>,
@@ -113,11 +120,11 @@ const initial = () => ({
 
 export const useSession = create<SessionState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       hydrated: false,
       ...initial(),
 
-      setFunction: (functionId) => set({ functionId, processes: allProcesses(functionId) }),
+      setFunction: (functionId) => set((s) => ({ functionId, processes: allProcesses(functionId, s.customProcesses) })),
       toggleProcess: (key) =>
         set((s) => ({ processes: s.processes.includes(key) ? s.processes.filter((x) => x !== key) : [...s.processes, key] })),
       setTarget: (target) => set({ target }),
@@ -137,6 +144,35 @@ export const useSession = create<SessionState>()(
       answerQuestion: (id, answer) =>
         set((s) => ({ customQuestions: s.customQuestions.map((q) => (q.id === id ? { ...q, answer } : q)) })),
       removeQuestion: (id) => set((s) => ({ customQuestions: s.customQuestions.filter((q) => q.id !== id) })),
+      addProcess: (functionId, name, keywords) =>
+        set((s) => ({
+          customProcesses: [...s.customProcesses, { id: uid("cp"), functionId, name, keywords }],
+          processes: s.functionId === functionId ? [...s.processes, processKey(functionId, name)] : s.processes,
+        })),
+      updateProcess: (id, name, keywords) =>
+        set((s) => {
+          const old = s.customProcesses.find((c) => c.id === id);
+          if (!old) return {};
+          return {
+            ...(old.name === name ? {} : renameProcessKeys(s, old.functionId, old.name, name)),
+            customProcesses: s.customProcesses.map((c) => (c.id === id ? { ...c, name, keywords } : c)),
+          };
+        }),
+      removeProcess: (id) => {
+        const s = get();
+        const old = s.customProcesses.find((c) => c.id === id);
+        if (!old) return undefined;
+        const snapshot = {
+          customProcesses: s.customProcesses,
+          processes: s.processes,
+          quickCheck: s.quickCheck,
+          validations: s.validations,
+          customQuestions: s.customQuestions,
+          audit: s.audit,
+        };
+        set({ ...renameProcessKeys(s, old.functionId, old.name, null), customProcesses: s.customProcesses.filter((c) => c.id !== id) });
+        return () => set(snapshot);
+      },
       upsertDocuments: (docs) =>
         set((s) => {
           const ids = new Set(docs.map((d) => d.id));
@@ -220,7 +256,12 @@ export const useSession = create<SessionState>()(
     }),
     {
       name: "himalaya-dma-session-v2",
-      version: 2,
+      version: 3,
+      migrate: (state, version) => {
+        const s = state as Partial<SessionState>;
+        if (version < 3) s.customProcesses = [];
+        return s as SessionState;
+      },
       storage: createJSONStorage(() => localStorage),
       skipHydration: true,
       partialize: (s) => {

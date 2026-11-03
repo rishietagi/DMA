@@ -325,6 +325,12 @@ meanings closely enough for a deterministic demo.
 - **Sentences → process:** the sentence must belong to the function (its own tag or its capability's primary
   function). If it names a step (`l1Keywords` in the question bank, else the distinctive words of the step
   name) it goes there; otherwise it follows its capability.
+- **Processes the consultant adds** (`CustomProcess`): appended to the function's chain. Their keywords are the
+  ones the consultant typed, else the distinctive words of the name. When placing a sentence they are checked
+  **before** the seed steps, because their words are a deliberate choice. They own no capabilities, so no 2025
+  self score, no initiatives and no capability-based ideas; they are scored from the quick check, own questions
+  and their sentences. Renaming moves every process-keyed record (`renameProcessKeys`); deleting drops them,
+  except the audit trail.
 
 ### 11.4 Ideas and phasing
 A use-case rule belongs to a process through its capabilities or `when.steps`; it fires when that process is

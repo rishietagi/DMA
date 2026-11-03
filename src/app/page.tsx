@@ -1,9 +1,13 @@
 "use client";
-import { Check, Flag } from "lucide-react";
+import * as React from "react";
+import { Check, Flag, PenLine, Trash2, UserPen } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/misc";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/overlays";
 import { BaselineBars } from "@/components/dma/charts";
+import { AddProcessTile, ProcessForm } from "@/components/dma/custom-process";
 import { KpiStrip } from "@/components/dma/kpi-strip";
 import { LadderChart, ladderStyle } from "@/components/dma/ladder";
 import { Page, PageHeader } from "@/components/dma/page-header";
@@ -63,8 +67,14 @@ export default function ScopePage() {
   const setFunction = useSession((s) => s.setFunction);
   const toggleProcess = useSession((s) => s.toggleProcess);
   const setTarget = useSession((s) => s.setTarget);
+  const custom = useSession((s) => s.customProcesses);
+  const addProcess = useSession((s) => s.addProcess);
+  const updateProcess = useSession((s) => s.updateProcess);
+  const removeProcess = useSession((s) => s.removeProcess);
+  /** "new", a custom process id, or null */
+  const [editing, setEditing] = React.useState<string | null>(null);
 
-  const chain = l1Processes(functionId);
+  const chain = l1Processes(functionId, custom);
   const selected = chain.filter((step) => processes.includes(processKey(functionId, step))).length;
   const caps = capsOf(functionId);
   const priorities = seed.baseline.priorities2026.filter((p) => p.capabilityIds.some((c) => caps.some((x) => x.id === c)));
@@ -145,35 +155,92 @@ export default function ScopePage() {
                 const key = processKey(functionId, step);
                 const on = processes.includes(key);
                 const owned = capabilitiesForStep(functionId, step);
+                const mine = custom.find((c) => c.functionId === functionId && c.name === step);
+                if (mine && editing === mine.id)
+                  return (
+                    <ProcessForm
+                      key={key}
+                      initial={mine}
+                      taken={chain.filter((x) => x !== step)}
+                      onSave={(name, words) => {
+                        updateProcess(mine.id, name, words);
+                        setEditing(null);
+                      }}
+                      onCancel={() => setEditing(null)}
+                    />
+                  );
                 return (
-                  <button
-                    key={key}
-                    type="button"
-                    aria-pressed={on}
-                    onClick={() => toggleProcess(key)}
-                    className={cn(
-                      "flex items-start gap-2.5 rounded-lg border px-3 py-2.5 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
-                      on ? "border-primary/50 bg-primary/8" : "text-muted-foreground hover:bg-accent",
-                    )}
-                  >
-                    <span
-                      className={cn("mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border", on && "border-primary bg-primary text-primary-foreground")}
-                      aria-hidden
-                    >
-                      {on && <Check className="size-3" />}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-[13px] font-medium text-foreground">{step}</span>
-                      <span className="block text-[11px] text-muted-foreground tabular">
-                        {owned.length} {owned.length === 1 ? "capability" : "capabilities"}
-                      </span>
-                      {on && owned.length > 0 && (
-                        <span className="mt-1 block text-[11px] leading-snug text-muted-foreground">{owned.map(capabilityLabel).join(" · ")}</span>
+                  <div key={key} className="relative" data-testid={mine ? `custom-process-${step}` : undefined}>
+                    <button
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => toggleProcess(key)}
+                      className={cn(
+                        "flex h-full w-full items-start gap-2.5 rounded-lg border px-3 py-2.5 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+                        on ? "border-primary/50 bg-primary/8" : "text-muted-foreground hover:bg-accent",
+                        mine && "pr-16",
                       )}
-                    </span>
-                  </button>
+                    >
+                      <span
+                        className={cn("mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border", on && "border-primary bg-primary text-primary-foreground")}
+                        aria-hidden
+                      >
+                        {on && <Check className="size-3" />}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-[13px] font-medium text-foreground">{step}</span>
+                        {mine ? (
+                          <span className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px]">
+                            <span className="inline-flex items-center gap-1 rounded bg-validated/15 px-1.5 py-px font-medium text-validated">
+                              <UserPen className="size-3" aria-hidden />
+                              Added by you
+                            </span>
+                            {mine.keywords.length > 0 && <span className="text-muted-foreground">{mine.keywords.join(", ")}</span>}
+                          </span>
+                        ) : (
+                          <span className="block text-[11px] text-muted-foreground tabular">
+                            {owned.length} {owned.length === 1 ? "capability" : "capabilities"}
+                          </span>
+                        )}
+                        {on && owned.length > 0 && (
+                          <span className="mt-1 block text-[11px] leading-snug text-muted-foreground">{owned.map(capabilityLabel).join(" · ")}</span>
+                        )}
+                      </span>
+                    </button>
+                    {mine && (
+                      <span className="absolute top-1.5 right-1.5 flex">
+                        <Button variant="ghost" size="icon-sm" onClick={() => setEditing(mine.id)} aria-label={`Edit ${step}`} data-testid="cp-edit">
+                          <PenLine />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Delete ${step}`}
+                          data-testid="cp-delete"
+                          onClick={() => {
+                            const undo = removeProcess(mine.id);
+                            if (undo) toast(`Removed “${step}”`, { action: { label: "Undo", onClick: undo } });
+                          }}
+                        >
+                          <Trash2 />
+                        </Button>
+                      </span>
+                    )}
+                  </div>
                 );
               })}
+              {editing === "new" ? (
+                <ProcessForm
+                  taken={chain}
+                  onSave={(name, words) => {
+                    addProcess(functionId, name, words);
+                    setEditing(null);
+                  }}
+                  onCancel={() => setEditing(null)}
+                />
+              ) : (
+                <AddProcessTile onClick={() => setEditing("new")} />
+              )}
             </div>
           </fieldset>
         </CardContent>
