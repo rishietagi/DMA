@@ -16,7 +16,7 @@ KPMG POC for Himalaya: a stepwise, AI-enabled Digital Maturity Assessment workbe
 - Next.js 15 App Router · TypeScript `strict` · pnpm
 - Tailwind CSS v4 · shadcn/ui (zinc base) · lucide-react · framer-motion · Recharts via shadcn `chart`
 - Zustand (persisted session state) · TanStack Query · TanStack Table · zod
-- File parsing: `unpdf`, `mammoth`, `papaparse`
+- File parsing: `unpdf`, `mammoth`, `papaparse` · PDF export: `@react-pdf/renderer` (loaded on click)
 - Tests: Vitest (engine + classifier), Playwright smoke test for the guided demo (phase 4)
 
 ## Commands
@@ -93,4 +93,5 @@ private/                  # gitignored — real client files never committed
 - 2026-11-03 — Review feedback, two rounds — Round 1: Scope trimmed; MDM hidden in supply chain (`HIDDEN_CAPABILITIES`); e-com SOP, IT strategy and MDM policy dropped from the sample pack; coverage matrix cut to Process · Systems · Data · Policies · KPIs; "What the AI found" removed; Interviews = transcript upload + strengths / pain points; levels read "Stage 0–5". Round 2 (annotated mock-ups): phases renamed Define & Focus → Assess & Validate → Diagnose → Prioritize & Roadmap; Inputs tabs Evidence · Assess · AI insights (quick check moved here) · Interviews; Diagnose has a validation summary (conflicts, adjustments, confirmed, "Confirm all remaining"), source breakdown per process, "Validated by … · time" badge; Results has a current → target strip and slider, 3 AI insights, one heatmap diagnostic table, full-width 2025-vs-findings bars, no radar. New pure helpers `sourceBreakdown`, `processInsights`. 134 unit + 6 e2e green; a11y 100 × 8; build green.
 - 2026-11-03 — Your own processes — Define & Focus: add a process to any function (name + optional words that point to it), rename or delete it (undo via toast); it flows through quick check, own questions, evidence, Diagnose and Results like the seed processes. Pure `CustomProcess` / `renameProcessKeys` in `process-input.ts`; store `customProcesses` (persist v3). Custom processes win sentence placement over seed ones. 138 unit + 7 e2e green; a11y 100 × 8; build green.
 - 2026-11-03 — Retired samples + sample transcript — Saved sessions drop sample documents no longer shipped (`withoutRetiredSamples`, persist v4); Interviews tab gets "Load sample transcript" (Illustrative Warehouse & Logistics Manager transcript). 140 unit + 7 e2e green.
+- 2026-11-03 — Real PDF export — Results "Export PDF" downloads a designed A4 report built with `@react-pdf/renderer` from engine output (pure `buildReport` in `src/lib/report`): summary + insights + diagnostic heatmap, 2025 vs findings, process-by-process with sources and quotes, ideas by phase, method and sources, page numbers. Replaces `window.print()`. 145 unit + 8 e2e green; a11y 100; build green.
 

@@ -27,8 +27,8 @@ L1 processes of one function on the client's **Level 0–5 ladder**. The capabil
   4 steps** on the client's Level 0–5 ladder. The 10-screen workbench is gone; old URLs redirect.
 - **Tests:** all green.
   - typecheck, lint, `seed:check`;
-  - 140 Vitest unit tests (capability engine untouched, plus process ladder, mapping and demo-pack acceptance);
-  - 7 Playwright e2e tests (add / rename / delete your own process, upload lowers Transportation, change needs a reason and reaches Results, every
+  - 145 Vitest unit tests (capability engine untouched, plus process ladder, mapping and demo-pack acceptance);
+  - 8 Playwright e2e tests (Export PDF downloads a real report, add / rename / delete your own process, upload lowers Transportation, change needs a reason and reaches Results, every
     step's visuals + details sheet, questionnaire + own question move the level, old links redirect, guided demo);
   - Lighthouse accessibility 100 on all 4 routes in light and dark;
   - 0 console errors in dev.
@@ -110,7 +110,7 @@ supply chain (`HIDDEN_CAPABILITIES`).
 | 1 Define & Focus | `/` | "Where are we today?" (2025 self-assessment per capability on the ladder) and "What matters in 2026 (focus areas)" with roadmap items; function cards (bar + "2025 baseline"); priority process cards (capability count, names only when selected) plus **your own processes** ("+ Add a process": name + optional words that point to it; edit / delete with undo; "Added by you"); target maturity level (full width, horizon 2–3 years); KPI strip; maturity ladder |
 | 2 Assess & Validate | `/inputs` | Context line (function · processes in scope · target). Tabs: **Evidence** (drop zone, "Load sample documents" with hover note, document list, coverage matrix: Process · Systems (application) · Data · Policies · KPIs). **Assess** (questionnaire per process: name + stage, why on hover; bank questions; your own questions). **AI insights** (per process: AI stage, evidence references, quick-check dropdown). **Interviews** (upload transcript, **Load sample transcript**, or paste notes; strengths / pain points board) |
 | 3 Diagnose | `/review` | Title "Validate maturity findings". Context line + "n/n reviewed"; **validation summary** (evidence conflicts · not enough evidence · reviewer adjustments · confirmed, reconciliation warning, **Confirm all remaining (n)**); per process: status tag, "Stage n · name", source breakdown (Interview · Questionnaire · Documents · Baseline), Sources, **Review evidence** (details sheet), Change (reason required), **Confirm level**; reviewed cards show "Validated by … · time" + Undo; audit trail |
-| 4 Prioritize & Roadmap | `/results` | Headline "Function \| Current maturity x → Target y" + strip (current · target · avg. gap · below target) + current→target slider + **3 AI insights** (strength, critical gap, priority); **diagnostic table** (overall · process · people · data & analytics heatmap + gap to target, "nothing planned" marked); 2025 self assessment vs our findings bars; value × ease idea matrix + detail; roadmap swimlanes; all functions compared |
+| 4 Prioritize & Roadmap | `/results` | Headline "Function \| Current maturity x → Target y" + strip (current · target · avg. gap · below target) + current→target slider + **3 AI insights** (strength, critical gap, priority); **diagnostic table** (overall · process · people · data & analytics heatmap + gap to target, "nothing planned" marked); 2025 self assessment vs our findings bars; value × ease idea matrix + detail; roadmap swimlanes; all functions compared; **Export PDF** downloads a designed A4 report (see below) |
 
 Old routes redirect: `/scope` → `/`; `/evidence`, `/interviews`, `/process` → `/inputs`; `/scoring`,
 `/compare` → `/review`; `/opportunities`, `/roadmap`, `/synthesis` → `/results`.
@@ -296,4 +296,18 @@ or `when.steps`.
     `Transcript_Warehouse_and_Logistics_Manager.md` (Illustrative, `SAMPLE_TRANSCRIPT`, not part of the sample
     pack): strengths and pain points on Warehousing, Transportation, Order fulfilment and Sustainability.
   - Verified: typecheck, lint, 140 unit, 7 e2e; an old saved session with the two docs loads without them.
+
+- **2026-11-03 — session 3e: real PDF export** (user: the PDF "is taking a screenshot")
+  - `window.print()` replaced by **Export PDF**: `@react-pdf/renderer@4.3.0`, loaded on click, builds a vector
+    A4 report in the browser and downloads `Himalaya_DMA_<Function>_<date>.pdf`.
+  - `src/lib/report/report-data.ts` (pure, tested): `buildReport` from engine output + `ladderHex` (hex ramp that
+    mirrors `--maturity-*`). `src/components/report/results-report.tsx`: 5 pages — cover + headline strip +
+    current→target bar + AI insights + diagnostic heatmap; 2025 vs findings bars + process-by-process (stage,
+    status, source breakdown, why, rationale, 2 quotes); ideas by Now / Next / Later + gaps with nothing planned;
+    method (ladder, how a level is calculated, sources) + Illustrative disclaimer. Header and "Page x of y" on
+    every page.
+  - react-pdf gotchas: footer must be positioned with `top` (not `bottom`), and the page-number Text needs its
+    own `fixed`; Helvetica is WinAnsi-only, so `t()` maps → ₹ ≥ ≤ × and strips other non-Latin characters.
+  - `scripts/print-results.mjs` now downloads the report. Results-only print CSS removed.
+  - Verified: typecheck, lint, 145 unit, 8 e2e, a11y 100 on /results, build (/results first load 325 kB).
 

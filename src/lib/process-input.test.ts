@@ -6,6 +6,7 @@ import { classifyDocument } from "@/lib/classifier";
 import { assess, assessProcesses, type EvidenceItem } from "@/lib/engine";
 import { processInsights, processNarrative } from "@/lib/narrative";
 import { sourceBreakdown } from "@/lib/process-why";
+import { buildReport, ladderHex } from "@/lib/report/report-data";
 import { processAreas } from "@/lib/process-areas";
 import { processLens } from "@/lib/process-lens";
 import { capabilityInput } from "@/lib/store/build-input";
@@ -308,5 +309,59 @@ describe("retired sample documents", () => {
     const out = withoutRetiredSamples(s);
     expect(out.documents.map((d) => d.id)).toEqual(["demo-scm-sop", SAMPLE_TRANSCRIPT.id, "upload-x"]);
     expect(out.evidence.map((e) => e.docId)).toEqual(["demo-scm-sop", "upload-x"]);
+  });
+});
+
+describe("PDF report model", () => {
+  const evidence = [...workshop, ...demo];
+  const r = run(evidence);
+  const input = buildProcessInput({
+    functionId: FN,
+    processes: l1Processes(FN).map((s) => processKey(FN, s)),
+    target: 3,
+    evidence,
+    quickCheck: seed.demoResponses.quickCheck,
+    responses: seed.demoResponses.responses,
+    processValidations: {},
+  });
+  const areas = processAreas(input.processes, assess(capabilityInput(evidence, [])));
+  const m = buildReport(r, areas, { functionName: "Supply Chain", date: "3 November 2026", sources: [{ title: "SOP", kind: "Document", sentences: 10 }] });
+
+  it("carries the engine's headline numbers and three insights", () => {
+    expect(m.headline.current).toBe(r.overall);
+    expect(m.headline.target).toBe(3);
+    expect(m.headline.below).toBe(r.processes.filter((p) => (p.gap ?? 0) > 0).length);
+    expect(m.insights).toHaveLength(3);
+  });
+
+  it("keeps process order in the diagnostic table and marks unplanned gaps", () => {
+    expect(m.diagnostic.map((d) => d.name)).toEqual(r.processes.map((p) => p.name));
+    const t = m.diagnostic.find((d) => d.name === "Transportation")!;
+    expect(t.nothingPlanned).toBe(true);
+    expect(m.nothingPlanned.map((g) => g.name)).toContain("Transportation");
+  });
+
+  it("groups ideas by phase and names their dependencies", () => {
+    const all = [...m.ideas.Now, ...m.ideas.Next, ...m.ideas.Later];
+    expect(all).toHaveLength(r.ideas.length);
+    for (const i of r.ideas) expect(m.ideas[i.phase].some((x) => x.title === i.title)).toBe(true);
+    const deps = all.flatMap((i) => i.dependsOn);
+    for (const d of deps) expect(all.some((i) => i.title === d)).toBe(true);
+  });
+
+  it("gives every process a stage, a status and at most two quotes", () => {
+    for (const p of m.processes) {
+      expect(p.status).toMatch(/^(AI suggested|Validated by|Changed by)/);
+      expect(p.quotes.length).toBeLessThanOrEqual(2);
+    }
+    expect(m.ladder.filter((l) => l.isTarget).map((l) => l.stage)).toEqual(["Stage 3"]);
+  });
+
+  it("colours the ladder like the app and keeps text readable", () => {
+    expect(ladderHex(null).fill).toBe("#f1f1f3");
+    expect(ladderHex(0).fill).toBe("#eef4fc");
+    expect(ladderHex(5).fill).toBe("#2d47a8");
+    expect(ladderHex(5).text).toBe("#ffffff");
+    expect(ladderHex(1).text).toBe("#18181b");
   });
 });

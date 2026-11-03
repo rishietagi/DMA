@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
-import { AlertTriangle, Printer, ShieldCheck, Sparkles, Target, ThumbsUp } from "lucide-react";
+import { AlertTriangle, Download, Loader2, ShieldCheck, Sparkles, Target, ThumbsUp } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DiagnosticTable } from "@/components/dma/area-heatmap";
@@ -15,6 +16,8 @@ import { type ProcessIdea } from "@/lib/engine";
 import { functionName } from "@/lib/labels";
 import { processInsights } from "@/lib/narrative";
 import { processAreas } from "@/lib/process-areas";
+import { exportReportPdf } from "@/lib/report/export-pdf";
+import { useSession } from "@/lib/store/session";
 import { cn } from "@/lib/utils";
 
 const EFFORT: Record<ProcessIdea["effort"], string> = { S: "Small", M: "Medium", L: "Large" };
@@ -139,6 +142,19 @@ export default function ResultsPage() {
   const idea = result.ideas.find((i) => i.id === (selected ?? result.ideas[0]?.id));
   const areas = React.useMemo(() => processAreas(input.processes, caps), [input.processes, caps]);
   const fn = functionName(result.functionId);
+  const documents = useSession((s) => s.documents);
+  const [exporting, setExporting] = React.useState(false);
+  const exportPdf = async () => {
+    setExporting(true);
+    try {
+      const name = await exportReportPdf({ result, areas, functionName: fn, documents });
+      toast.success("PDF ready", { description: name });
+    } catch (e) {
+      toast.error("Couldn't build the PDF", { description: String(e) });
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <Page className="print:max-w-none print:gap-4 print:p-0">
@@ -146,9 +162,9 @@ export default function ResultsPage() {
         stage={4}
         title="Prioritize & Roadmap"
         actions={
-          <Button variant="outline" size="sm" onClick={() => window.print()}>
-            <Printer />
-            Print or save as PDF
+          <Button size="sm" onClick={() => void exportPdf()} disabled={exporting} data-testid="export-pdf">
+            {exporting ? <Loader2 className="animate-spin" /> : <Download />}
+            {exporting ? "Building PDF…" : "Export PDF"}
           </Button>
         }
       />

@@ -177,3 +177,25 @@ test("you can add, rename and delete your own process", async ({ page }) => {
   await expect(row(page, "Returns & reverse logistics")).toHaveCount(0);
   expect(errors, errors.join("\n")).toEqual([]);
 });
+
+test("Export PDF downloads a real report document", async ({ page }) => {
+  const errors = watchConsole(page);
+  await freshSession(page);
+  await page.goto("/inputs");
+  await page.getByTestId("load-demo").click();
+  await expect(page.getByText(/sentences? mapped to Supply Chain/).first()).toBeVisible({ timeout: 60_000 });
+  await page.goto("/review");
+  await page.getByTestId("accept-all").click();
+  await page.goto("/results");
+
+  const [download] = await Promise.all([page.waitForEvent("download", { timeout: 60_000 }), page.getByTestId("export-pdf").click()]);
+  expect(download.suggestedFilename()).toMatch(/^Himalaya_DMA_Supply_Chain_\d{4}-\d{2}-\d{2}\.pdf$/);
+  const path = await download.path();
+  const { readFileSync, copyFileSync } = await import("node:fs");
+  const bytes = readFileSync(path!);
+  expect(bytes.subarray(0, 4).toString()).toBe("%PDF");
+  expect(bytes.length).toBeGreaterThan(10_000);
+  if (process.env.PDF_OUT) copyFileSync(path!, process.env.PDF_OUT);
+  await expect(page.getByText("PDF ready")).toBeVisible();
+  expect(errors, errors.join("\n")).toEqual([]);
+});

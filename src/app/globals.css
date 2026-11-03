@@ -263,12 +263,6 @@
     overflow: visible !important;
     zoom: 0.84;
   }
-  /* Results fits one A4 landscape page: flatten the staircase */
-  [data-ladder-step] {
-    min-height: 0 !important;
-    padding: 6px 8px !important;
-    gap: 4px !important;
-  }
   * {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
