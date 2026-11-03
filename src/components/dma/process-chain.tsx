@@ -2,7 +2,7 @@
 import { ArrowRight, Shuffle, ThumbsDown, ThumbsUp, Wrench } from "lucide-react";
 import { EVIDENCE_CATEGORY_LABELS, type EvidenceItem, type ProcessResult } from "@/lib/engine";
 import type { StepLens } from "@/lib/process-lens";
-import { EVIDENCE_CATEGORIES, type EvidenceCategory } from "@/lib/schema";
+import type { EvidenceCategory } from "@/lib/schema";
 import { cn } from "@/lib/utils";
 import { LevelChip } from "./ladder";
 
@@ -63,11 +63,14 @@ export function ProcessChain({ steps, results }: { steps: readonly StepLens[]; r
   );
 }
 
+/** The document types the coverage matrix tracks. */
+const COVERAGE_CATEGORIES: EvidenceCategory[] = ["process_docs", "application_landscape", "data_architecture", "policies_sops", "kpi_extracts"];
+
 const SHORT_CAT: Record<EvidenceCategory, string> = {
   self_assessment: "2025",
   it_strategy: "Strategy",
   process_docs: "Process",
-  application_landscape: "Systems",
+  application_landscape: "Systems (application)",
   data_architecture: "Data",
   policies_sops: "Policies",
   transformation_portfolio: "Portfolio",
@@ -77,15 +80,15 @@ const SHORT_CAT: Record<EvidenceCategory, string> = {
 
 /** Processes × evidence types: how many sentences of each kind back each process. */
 export function ProcessCoverage({ steps }: { steps: readonly StepLens[] }) {
-  const cats = EVIDENCE_CATEGORIES.filter((c) => c !== "self_assessment");
+  const cats = COVERAGE_CATEGORIES;
   const count = (ev: readonly EvidenceItem[], c: EvidenceCategory) => ev.filter((e) => e.category === c).length;
   const gaps = steps.flatMap((s) =>
-    (["process_docs", "kpi_extracts", "interview_notes"] as const).filter((c) => count(s.evidence, c) === 0).map((c) => ({ step: s.step, c })),
+    (["process_docs", "kpi_extracts"] as const).filter((c) => count(s.evidence, c) === 0).map((c) => ({ step: s.step, c })),
   );
   return (
     <div className="flex flex-col gap-3">
       <div className="overflow-x-auto scrollbar-thin">
-        <table className="w-full min-w-[560px] border-separate border-spacing-0.5 text-[12px]">
+        <table className="w-full min-w-[480px] border-separate border-spacing-0.5 text-[12px]">
           <caption className="sr-only">Sentences per process and evidence type</caption>
           <thead>
             <tr>

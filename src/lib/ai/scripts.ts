@@ -38,8 +38,8 @@ export function agentScript(task: AgentTask, ctx: AgentContext): AgentScript {
             ms: 300,
           })),
           { kind: "extract", label: "Pick out sentences that show how work gets done", detail: `${s(ctx.items)} sentences kept; ${s(ctx.negated)} negated phrases ignored`, ms: 460 },
-          { kind: "map", label: "Place each sentence on a process and a ladder level", detail: `${s(ctx.mapped)} sentences about ${s(ctx.functionName)}`, ms: 420 },
-          { kind: "score", label: "Re-score the processes", detail: s(ctx.moves, "No process changed level"), ms: 400 },
+          { kind: "map", label: "Place each sentence on a process and a ladder stage", detail: `${s(ctx.mapped)} sentences about ${s(ctx.functionName)}`, ms: 420 },
+          { kind: "score", label: "Re-score the processes", detail: s(ctx.moves, "No process changed stage"), ms: 400 },
         ],
         summary: `${s(ctx.mapped)} sentences mapped to ${s(ctx.functionName)} processes.`,
       };
@@ -48,7 +48,7 @@ export function agentScript(task: AgentTask, ctx: AgentContext): AgentScript {
       return {
         title: "Scoring processes",
         steps: [
-          { kind: "plan", label: `Plan: score ${plural(n(ctx.processes), "process", "processes")} on the Level 0–5 ladder`, ms: 380 },
+          { kind: "plan", label: `Plan: score ${plural(n(ctx.processes), "process", "processes")} on the Stage 0–5 ladder`, ms: 380 },
           { kind: "read", label: "Combine quick-check answers, document quotes and the 2025 self-assessment", detail: `${s(ctx.indicators)} signals`, ms: 480 },
           { kind: "score", label: "Weigh each signal by how reliable its source is", ms: 420 },
           { kind: "check", label: "Check confidence and where sources disagree", detail: `${plural(n(ctx.disagree), "process", "processes")} to look at`, ms: 440 },

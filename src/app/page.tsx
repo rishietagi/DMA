@@ -5,18 +5,18 @@ import { Label } from "@/components/ui/misc";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/overlays";
 import { BaselineBars } from "@/components/dma/charts";
 import { KpiStrip } from "@/components/dma/kpi-strip";
-import { LadderChart, LevelChip, ladderStyle } from "@/components/dma/ladder";
+import { LadderChart, ladderStyle } from "@/components/dma/ladder";
 import { Page, PageHeader } from "@/components/dma/page-header";
 import { StepNav } from "@/components/shell/step-nav";
-import { LADDER, LADDER_LEVELS, mean, toLadder, type LadderLevel } from "@/lib/engine";
+import { LADDER, LADDER_LEVELS, mean, stageLabel, toLadder, type LadderLevel } from "@/lib/engine";
 import { capabilityLabel, FUNCTION_SHORT, functionName } from "@/lib/labels";
-import { capabilitiesForStep, l1Processes, processKey } from "@/lib/process-input";
+import { capabilitiesForStep, capabilitiesOf, isHiddenCapability, l1Processes, processKey } from "@/lib/process-input";
 import { FUNCTION_IDS, type FunctionId } from "@/lib/schema";
 import { seed } from "@/lib/seed";
 import { useSession } from "@/lib/store/session";
 import { cn } from "@/lib/utils";
 
-const capsOf = (fn: FunctionId) => seed.baseline.capabilities.filter((c) => c.functionIds.includes(fn));
+const capsOf = capabilitiesOf;
 const selfLevel = (fn: FunctionId) => {
   const caps = capsOf(fn);
   return caps.length ? toLadder(mean(caps.map((c) => c.selfScore))) : null;
@@ -48,12 +48,7 @@ function FunctionCards({ value, onChange }: { value: FunctionId; onChange: (fn: 
             <span className="h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden>
               <span className="block h-full rounded-full" style={{ width: `${((self ?? 0) / 5) * 100}%`, background: ladderStyle(self).background }} />
             </span>
-            <span className="flex items-center justify-between text-[11px] text-muted-foreground tabular">
-              <span>
-                {l1Processes(fn).length} processes · {capsOf(fn).length} capabilities
-              </span>
-              <span>2025 {self === null ? "—" : self.toFixed(1)}</span>
-            </span>
+            <span className="text-[11px] text-muted-foreground tabular">2025 baseline {self === null ? "—" : self.toFixed(1)}</span>
           </button>
         );
       })}
@@ -72,32 +67,81 @@ export default function ScopePage() {
   const chain = l1Processes(functionId);
   const selected = chain.filter((step) => processes.includes(processKey(functionId, step))).length;
   const caps = capsOf(functionId);
-  const self = selfLevel(functionId);
   const priorities = seed.baseline.priorities2026.filter((p) => p.capabilityIds.some((c) => caps.some((x) => x.id === c)));
-  const initiatives = seed.roadmap.initiatives.filter((i) => i.functionId === functionId);
+  const initiatives = seed.roadmap.initiatives.filter((i) => i.functionId === functionId && !i.mapsTo.every(isHiddenCapability));
 
   return (
     <Page>
-      <PageHeader stage={1} title="Scope" description="Pick a function and the processes to assess, and set where they should get to." />
+      <PageHeader stage={1} title="Define & Focus" />
+
+      <div className="grid items-start gap-6 lg:grid-cols-2 [&>*]:min-w-0">
+        <Card>
+          <CardHeader>
+            <CardTitle>Where are we today?</CardTitle>
+            <p className="text-[13px] text-muted-foreground">
+              Each capability is self-assessed and mapped to the maturity ladder, creating the baseline for our assessment.
+            </p>
+          </CardHeader>
+          <CardContent>
+            {caps.length ? (
+              <BaselineBars items={caps.map((c) => ({ id: c.id, name: c.name, level: toLadder(c.selfScore) }))} />
+            ) : (
+              <p className="text-sm text-muted-foreground">No 2025 capabilities for this function.</p>
+            )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              What matters in 2026 <span className="font-normal text-muted-foreground">(focus areas)</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <ul className="flex flex-col gap-2">
+              {priorities.map((p) => (
+                <li key={p.id} className="flex gap-2.5 text-[13px]">
+                  <Flag className="mt-0.5 size-3.5 shrink-0 text-ai" aria-hidden />
+                  <span>
+                    <span className="font-medium">#{p.rank} {p.title}</span>
+                    <span className="block text-[12px] text-muted-foreground">{p.detail}</span>
+                  </span>
+                </li>
+              ))}
+              {!priorities.length && <li className="text-sm text-muted-foreground">No 2026 focus areas for this function.</li>}
+            </ul>
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">On the 2026-27 roadmap</p>
+              <ul className="flex flex-wrap gap-1.5">
+                {initiatives.map((i) => (
+                  <li key={i.id} className="rounded-md border px-2 py-1 text-[11px]">
+                    {i.title} <span className="text-muted-foreground">· {i.status.replace("_", " ")}</span>
+                  </li>
+                ))}
+                {!initiatives.length && <li className="text-[12px] text-muted-foreground">Nothing planned yet.</li>}
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <section className="flex flex-col gap-3" aria-labelledby="fn-h">
         <h2 id="fn-h" className="text-sm font-semibold">
-          1 · Function <span className="font-normal text-muted-foreground">(L0) · bar = 2025 self-assessment on the ladder</span>
+          Select function <span className="font-normal text-muted-foreground">(baseline maturity shown for reference)</span>
         </h2>
         <FunctionCards value={functionId} onChange={setFunction} />
       </section>
 
       <Card data-tour="scope">
-        <CardContent className="grid gap-6 pt-5 md:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
+        <CardContent className="pt-5">
           <fieldset className="flex flex-col gap-2">
             <legend className="mb-2 flex w-full items-baseline justify-between text-sm font-semibold">
-              2 · Processes (L1) for {functionName(functionId)}
+              Select priority processes
               <span className="text-xs font-normal text-muted-foreground tabular">
                 {selected} of {chain.length} selected
               </span>
             </legend>
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {chain.map((step, i) => {
+              {chain.map((step) => {
                 const key = processKey(functionId, step);
                 const on = processes.includes(key);
                 const owned = capabilitiesForStep(functionId, step);
@@ -113,48 +157,48 @@ export default function ScopePage() {
                     )}
                   >
                     <span
-                      className={cn(
-                        "mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border text-[10px] font-semibold tabular",
-                        on && "border-primary bg-primary text-primary-foreground",
-                      )}
+                      className={cn("mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border", on && "border-primary bg-primary text-primary-foreground")}
                       aria-hidden
                     >
-                      {on ? <Check className="size-3" /> : i + 1}
+                      {on && <Check className="size-3" />}
                     </span>
                     <span className="min-w-0">
                       <span className="block text-[13px] font-medium text-foreground">{step}</span>
-                      <span className="block truncate text-[11px] text-muted-foreground">
-                        {owned.length ? owned.map(capabilityLabel).join(", ") : "No 2025 capability — scored from documents"}
+                      <span className="block text-[11px] text-muted-foreground tabular">
+                        {owned.length} {owned.length === 1 ? "capability" : "capabilities"}
                       </span>
+                      {on && owned.length > 0 && (
+                        <span className="mt-1 block text-[11px] leading-snug text-muted-foreground">{owned.map(capabilityLabel).join(" · ")}</span>
+                      )}
                     </span>
                   </button>
                 );
               })}
             </div>
           </fieldset>
+        </CardContent>
+      </Card>
 
-          <div className="flex flex-col gap-2">
+      <Card>
+        <CardContent className="flex flex-col gap-3 pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
             <Label htmlFor="target" className="text-sm font-semibold">
-              3 · Target level
+              Target maturity level
             </Label>
-            <Select value={String(target)} onValueChange={(v) => setTarget(Number(v) as LadderLevel)}>
-              <SelectTrigger id="target" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {LADDER_LEVELS.map((l) => (
-                  <SelectItem key={l} value={String(l)}>
-                    Level {l} · {LADDER[l].short}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">Where these processes should be in 2–3 years.</p>
-            <div className="mt-2 rounded-lg border bg-muted/30 p-3 text-[12px]">
-              <p className="font-medium">{LADDER[target].name}</p>
-              <p className="mt-0.5 text-muted-foreground">{LADDER[target].meaning}</p>
-            </div>
+            <p className="mt-0.5 text-xs text-muted-foreground">Target horizon 2–3 years</p>
           </div>
+          <Select value={String(target)} onValueChange={(v) => setTarget(Number(v) as LadderLevel)}>
+            <SelectTrigger id="target" className="w-full sm:w-72">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LADDER_LEVELS.map((l) => (
+                <SelectItem key={l} value={String(l)}>
+                  {stageLabel(l)} · {LADDER[l].short}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </CardContent>
       </Card>
 
@@ -162,78 +206,19 @@ export default function ScopePage() {
         stats={[
           { label: "Processes in scope", value: selected, format: (n) => String(Math.round(n)), note: `of ${chain.length} in ${FUNCTION_SHORT[functionId]}` },
           { label: "Capabilities", value: caps.length, format: (n) => String(Math.round(n)), note: "from the 2025 self-assessment" },
-          { label: "2025 self level", value: self ?? 0, format: (n) => `L${n.toFixed(1)}`, note: self === null ? "Not assessed" : LADDER[Math.round(self) as LadderLevel].short },
-          { label: "2026 priorities", value: priorities.length, format: (n) => String(Math.round(n)), note: "touch this function", tone: priorities.length ? "ai" : "default" },
-          {
-            label: "Roadmap initiatives",
-            value: initiatives.length,
-            format: (n) => String(Math.round(n)),
-            note: `${initiatives.filter((i) => i.status === "in_progress").length} in progress · ${initiatives.filter((i) => i.status === "planned").length} planned`,
-          },
+          { label: "2026 focus areas", value: priorities.length, format: (n) => String(Math.round(n)), tone: priorities.length ? "ai" : "default" },
         ]}
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>The maturity ladder</CardTitle>
-          <p className="text-[13px] text-muted-foreground">Every process is rated on these six levels. The outlined step is your target.</p>
+          <CardTitle>Maturity ladder</CardTitle>
+          <p className="text-[13px] text-muted-foreground">Each process is rated on these six levels.</p>
         </CardHeader>
         <CardContent>
           <LadderChart target={target} />
         </CardContent>
       </Card>
-
-      <div className="grid items-start gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Where {FUNCTION_SHORT[functionId]} said it was in 2025</CardTitle>
-            <p className="text-[13px] text-muted-foreground">Self-assessment per capability, converted to the ladder. This is the baseline we test.</p>
-          </CardHeader>
-          <CardContent>
-            {caps.length ? (
-              <BaselineBars items={caps.map((c) => ({ id: c.id, name: c.name, level: toLadder(c.selfScore) }))} />
-            ) : (
-              <p className="text-sm text-muted-foreground">No 2025 capabilities for this function.</p>
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>What matters in 2026</CardTitle>
-            <p className="text-[13px] text-muted-foreground">Company priorities and planned work that touch this function.</p>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <ul className="flex flex-col gap-2">
-              {priorities.map((p) => (
-                <li key={p.id} className="flex gap-2.5 text-[13px]">
-                  <Flag className="mt-0.5 size-3.5 shrink-0 text-ai" aria-hidden />
-                  <span>
-                    <span className="font-medium">#{p.rank} {p.title}</span>
-                    <span className="block text-[12px] text-muted-foreground">{p.detail}</span>
-                  </span>
-                </li>
-              ))}
-              {!priorities.length && <li className="text-sm text-muted-foreground">None of the five 2026 priorities touch this function.</li>}
-            </ul>
-            <div>
-              <p className="mb-1.5 text-xs font-medium text-muted-foreground">On the 2026-27 roadmap</p>
-              <ul className="flex flex-wrap gap-1.5">
-                {initiatives.map((i) => (
-                  <li key={i.id} className="rounded-md border px-2 py-1 text-[11px]">
-                    {i.title} <span className="text-muted-foreground">· {i.status.replace("_", " ")}</span>
-                  </li>
-                ))}
-                {!initiatives.length && <li className="text-[12px] text-muted-foreground">Nothing planned yet.</li>}
-              </ul>
-            </div>
-            {self !== null && (
-              <p className="flex items-center gap-2 text-[12px] text-muted-foreground">
-                2025 average <LevelChip score={self} size="sm" withName />
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
 
       <StepNav step={1} />
     </Page>

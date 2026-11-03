@@ -21,12 +21,13 @@ function Stepper() {
           const done = s.step < current;
           return (
             <li key={s.href} className="flex items-center gap-1">
-              {i > 0 && <span aria-hidden className={cn("h-px w-3 sm:w-6", done || active ? "bg-primary/60" : "bg-border")} />}
+              {i > 0 && <span aria-hidden className={cn("h-px w-2 sm:w-4", done || active ? "bg-primary/60" : "bg-border")} />}
               <Link
                 href={s.href}
                 aria-current={active ? "step" : undefined}
+                title={s.label}
                 className={cn(
-                  "flex h-8 items-center gap-2 rounded-full px-1.5 text-[13px] text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring sm:px-3",
+                  "flex h-8 items-center gap-1.5 rounded-full px-1.5 text-[13px] whitespace-nowrap text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring sm:px-2.5",
                   active && "bg-card font-medium text-foreground shadow-xs ring-1 ring-border",
                 )}
               >
@@ -40,7 +41,9 @@ function Stepper() {
                   <span className="sr-only">Step </span>
                   {done ? <Check className="size-3" aria-label={String(s.step)} /> : s.step}
                 </span>
-                <span className={cn("sr-only lg:not-sr-only", active && "sm:not-sr-only")}>{s.label}</span>
+                <span className={cn("sr-only min-[1400px]:not-sr-only", active && "sm:not-sr-only")}>
+                  <span className="whitespace-nowrap">{s.label}</span>
+                </span>
               </Link>
             </li>
           );

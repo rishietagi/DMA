@@ -29,7 +29,7 @@ export const TRANSPORT_RATIONALE =
 export const TOUR_STEPS: TourStep[] = [
   {
     stage: 1,
-    title: "Pick the scope",
+    title: "Define & Focus",
     route: "/",
     target: "scope",
     action: () => {
@@ -38,12 +38,12 @@ export const TOUR_STEPS: TourStep[] = [
       s.setTarget(3);
     },
     intro: () => [
-      `We assess one function at a time. ${functionName(FN)} is picked, with its six L1 processes and a target of Level 3 · ${LADDER[3].short}.`,
+      `We assess one function at a time. ${functionName(FN)} is picked, with its six L1 processes and a target of stage 3 · ${LADDER[3].short}.`,
     ],
   },
   {
     stage: 2,
-    title: "Add documents",
+    title: "Assess & Validate",
     route: "/inputs",
     target: "documents",
     intro: () => [
@@ -60,12 +60,12 @@ export const TOUR_STEPS: TourStep[] = [
   },
   {
     stage: 3,
-    title: "Review the levels",
+    title: "Diagnose",
     route: "/review",
     target: "process-Transportation",
     intro: () => {
       const p = liveResult().processes.find((x) => x.id === TRANSPORT);
-      return p ? [`The AI suggests Transportation at L${p.level}. ${whyLine(p)}`] : [];
+      return p ? [`The AI suggests Transportation at stage ${p.level}. ${whyLine(p)}`] : [];
     },
     action: () => {
       const s = useSession.getState();
@@ -76,12 +76,12 @@ export const TOUR_STEPS: TourStep[] = [
       s.acceptAll(pending.map((x) => ({ processId: x.id, score: x.suggested! })));
     },
     outro: () => [
-      "The consultant moves it to L1 and records why; the before and after are kept. The rest are accepted in one click.",
+      "The consultant moves it to stage 1 and records why; the before and after are kept. The rest are accepted in one click.",
     ],
   },
   {
     stage: 4,
-    title: "The result",
+    title: "Prioritize & Roadmap",
     route: "/results",
     target: "headline",
     intro: () => [],
@@ -92,9 +92,9 @@ export const TOUR_STEPS: TourStep[] = [
       const r = liveResult();
       const now = r.ideas.filter((i) => i.phase === "Now").map((i) => i.title);
       return [
-        r.overallLevel === null
+        r.overall === null
           ? "Not enough input to rate the function."
-          : `${functionName(FN)} lands at Level ${r.overallLevel} · ${LADDER[r.overallLevel].short}, against a target of Level ${r.target}.`,
+          : `${functionName(FN)} is at ${r.overall.toFixed(1)} against a target of ${r.target}.0. The diagnostic table shows where the gap sits by process, people and data.`,
         now.length ? `Start now with: ${now.join("; ")}. Print it as a one-page PDF.` : "Print it as a one-page PDF.",
       ];
     },

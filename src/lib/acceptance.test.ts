@@ -65,9 +65,10 @@ describe("phase 2 acceptance — uploading a reconciliation statement", () => {
 });
 
 describe("demo evidence pack (Illustrative)", () => {
-  it("covers all 9 evidence categories with the workshop pack", () => {
+  it("covers every evidence category except IT strategy (dropped from the pack) with the workshop pack", () => {
     const cats = new Set([...DEMO_DOCS.map((d) => d.category), ...workshop.map((w) => w.category), "self_assessment"]);
-    expect(cats.size).toBe(9);
+    expect(cats.size).toBe(8);
+    expect(cats.has("it_strategy")).toBe(false);
   });
   it("surfaces at least two contradictions", () => {
     const c = findContradictions([...workshop, ...demo]);

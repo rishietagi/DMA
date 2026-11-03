@@ -4,13 +4,14 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { classifyDocument } from "@/lib/classifier";
 import { assess, assessProcesses, type EvidenceItem } from "@/lib/engine";
-import { processNarrative } from "@/lib/narrative";
+import { processInsights, processNarrative } from "@/lib/narrative";
+import { sourceBreakdown } from "@/lib/process-why";
 import { processAreas } from "@/lib/process-areas";
 import { processLens } from "@/lib/process-lens";
 import { capabilityInput } from "@/lib/store/build-input";
 import { DEMO_DOCS } from "@/lib/demo-evidence";
 import { parseText } from "@/lib/parse-text";
-import { answersForStep, assessAllFunctions, buildProcessInput, capabilitiesForStep, type CustomQuestion, l1Processes, processKey, stepForEvidence } from "@/lib/process-input";
+import { answersForStep, assessAllFunctions, buildProcessInput, capabilitiesForStep, capabilitiesOf, type CustomQuestion, l1Processes, processKey, stepForEvidence } from "@/lib/process-input";
 import { seed } from "@/lib/seed";
 
 const FN = "supply-chain" as const;
@@ -133,9 +134,24 @@ describe("results helpers on the demo pack", () => {
 
   it("writes a summary that names the weakest process and the ideas to start now", () => {
     const lines = processNarrative(r, "Supply Chain");
-    expect(lines[0]).toMatch(/^Supply Chain sits at Level 1/);
-    expect(lines.join(" ")).toMatch(/Transportation is furthest behind at L0, with nothing on the 2026-27 roadmap/);
+    expect(lines[0]).toMatch(/^Supply Chain sits at stage 1/);
+    expect(lines.join(" ")).toMatch(/Transportation is furthest behind at stage 0, with nothing on the 2026-27 roadmap/);
     expect(lines.join(" ")).toMatch(/Start now with/);
+  });
+
+  it("gives three insights: closest to target, the unplanned gap, where to start", () => {
+    const ins = processInsights(r);
+    expect(ins.map((i) => i.kind)).toEqual(["strength", "gap", "priority"]);
+    expect(ins[1]!.text).toMatch(/^Transportation remains \d levels? below target with no initiative currently mapped\.$/);
+    expect(ins[2]!.text).toMatch(/^Start with .+ on .+\.$/);
+  });
+
+  it("breaks each process down by source, in a fixed order", () => {
+    const t = r.processes.find((p) => p.name === "Transportation")!;
+    const rows = sourceBreakdown(t);
+    expect(rows.map((x) => x.source)).toEqual(["Interview", "Questionnaire", "Documents", "Baseline"].filter((s) => rows.some((x) => x.source === s)));
+    expect(rows.every((x) => /^Stages? \d(–\d)?$/.test(x.stages))).toBe(true);
+    expect(sourceBreakdown({ indicators: [] })).toEqual([]);
   });
 
   it("rates every function on the ladder for comparison", () => {
@@ -179,3 +195,13 @@ describe("questionnaire answers and custom questions (§11.1)", () => {
   });
 });
 
+
+describe("MDM left out of the process view", () => {
+  it("drops MDM from Supply & production planning, the function's capabilities and its evidence", () => {
+    expect(capabilitiesForStep(FN, "Supply & production planning")).not.toContain("mdm");
+    expect(capabilitiesOf(FN).map((c) => c.id)).not.toContain("mdm");
+    const mdmItem = workshop.find((e) => e.capabilityId === "mdm")!;
+    expect(stepForEvidence(FN, mdmItem)).toBeNull();
+    expect(run([...workshop, ...demo]).ideas.map((i) => i.id)).not.toContain("uc-mdm-quality");
+  });
+});

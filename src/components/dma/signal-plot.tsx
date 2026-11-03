@@ -24,7 +24,7 @@ export function SignalPlot({ indicators, suggested, effective }: { indicators: r
       className="w-full"
       role="img"
       aria-label={`Signals on the 0 to 5 ladder: ${ROWS.map((r) => {
-        const vs = indicators.filter((i) => i.kind === r.kind).map((i) => `L${ladderLevel(i.value)}`);
+        const vs = indicators.filter((i) => i.kind === r.kind).map((i) => `stage ${ladderLevel(i.value)}`);
         return `${r.label} ${vs.length ? vs.join(", ") : "none"}`;
       }).join("; ")}. Suggested ${suggested === null ? "none" : suggested.toFixed(1)}.`}
     >
@@ -32,7 +32,7 @@ export function SignalPlot({ indicators, suggested, effective }: { indicators: r
         <g key={l}>
           <line x1={x(l)} x2={x(l)} y1={PAD.t} y2={H - PAD.b} stroke="var(--border)" />
           <text x={x(l)} y={H - 8} textAnchor="middle" className="fill-muted-foreground text-[11px] tabular">
-            L{l}
+            {l}
           </text>
         </g>
       ))}

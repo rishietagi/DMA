@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/form-controls";
 import { Label } from "@/components/ui/misc";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/overlays";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useProcesses } from "@/components/providers/process-provider";
 import { DIMENSION_LABELS, LADDER, LADDER_LEVELS, ladderLevel, toLadder, type LadderLevel, type ProcessResult } from "@/lib/engine";
 import { questionsForStep, type CustomQuestion } from "@/lib/process-input";
@@ -192,14 +193,14 @@ function AddQuestion({ step }: { step: string }) {
           <Label htmlFor="cq-answer">Answer</Label>
           <Select value={answer} onValueChange={setAnswer}>
             <SelectTrigger id="cq-answer" className="w-full" data-testid="cq-answer">
-              <SelectValue>{answer === "none" ? "Not answered yet" : `L${answer} · ${LADDER[Number(answer) as LadderLevel].short}`}</SelectValue>
+              <SelectValue>{answer === "none" ? "Not answered yet" : `Stage ${answer} · ${LADDER[Number(answer) as LadderLevel].short}`}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">Not answered yet</SelectItem>
               {LADDER_LEVELS.map((l) => (
                 <SelectItem key={l} value={String(l)}>
                   <span className="font-medium">
-                    L{l} · {LADDER[l].short}
+                    Stage {l} · {LADDER[l].short}
                   </span>
                   <span className="block text-[11px] text-muted-foreground">{LADDER[l].meaning}</span>
                 </SelectItem>
@@ -267,19 +268,23 @@ export function Questionnaire() {
         })}
       </div>
 
-      <Card className="ai-surface" data-tour="questionnaire">
-        <CardHeader className="flex-row flex-wrap items-center justify-between gap-3 pb-4">
-          <div className="min-w-0">
-            <CardTitle className="text-base">{p.name}</CardTitle>
-            <p className="mt-0.5 text-[13px] text-muted-foreground">{whyLine(p)}</p>
-          </div>
-          <div className="flex items-center gap-2" aria-live="polite" data-testid="q-level">
-            <span className="text-[11px] text-muted-foreground">Level now</span>
-            <LevelChip score={p.effective} size="lg" provenance={p.status === "suggested" ? "ai" : "validated"} />
-            <span className="text-[12px] tabular text-muted-foreground">{p.effective === null ? "—" : p.effective.toFixed(2)}</span>
-          </div>
-        </CardHeader>
-      </Card>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Card className="ai-surface" data-tour="questionnaire" tabIndex={0} aria-describedby="q-why">
+            <CardHeader className="flex-row items-center justify-between gap-3 py-3">
+              <CardTitle className="min-w-0 text-base">{p.name}</CardTitle>
+              <div className="flex items-center gap-2" aria-live="polite" data-testid="q-level">
+                <LevelChip score={p.effective} provenance={p.status === "suggested" ? "ai" : "validated"} />
+                <span className="text-[12px] tabular text-muted-foreground">{p.effective === null ? "—" : p.effective.toFixed(2)}</span>
+              </div>
+              <span id="q-why" className="sr-only">
+                {whyLine(p)}
+              </span>
+            </CardHeader>
+          </Card>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">{whyLine(p)}</TooltipContent>
+      </Tooltip>
 
       <ol className="flex flex-col gap-3">
         <li className="flex flex-col gap-2.5 rounded-xl border bg-card p-4">
@@ -309,8 +314,7 @@ export function Questionnaire() {
       )}
       <AddQuestion step={p.name} />
       <p className="text-[11px] text-muted-foreground">
-        Each answer counts as an interview signal (reliability 0.85) weighted by its importance. Bank options map to the ladder: their 1–5 rubric level × 1.25, e.g. L
-        {ladderLevel(toLadder(3))} for an “integrated” answer.
+        Each answer counts as an interview signal (reliability 0.85) weighted by its importance. Bank options map to the ladder: their 1–5 rubric level − 1, × 1.25, e.g. stage {ladderLevel(toLadder(3))} for an “integrated” answer.
       </p>
     </div>
   );

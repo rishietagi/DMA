@@ -117,7 +117,7 @@ export function ProcessSheet({ process: p, onOpenChange }: { process: ProcessRes
                       <td className="py-1.5" colSpan={3}>
                         AI suggestion
                       </td>
-                      <td className="py-1.5 text-right tabular">{p.suggested === null ? "—" : `${p.suggested.toFixed(2)} → L${ladderLevel(p.suggested)}`}</td>
+                      <td className="py-1.5 text-right tabular">{p.suggested === null ? "—" : `${p.suggested.toFixed(2)} → Stage ${ladderLevel(p.suggested)}`}</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -185,7 +185,7 @@ export function ProcessSheet({ process: p, onOpenChange }: { process: ProcessRes
                     <li key={h.id} className="flex gap-2">
                       <History className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" aria-hidden />
                       <span>
-                        <span className="font-medium capitalize">{h.action.replace("-", " ")}</span> · L{ladderLevel(h.before)} → L{ladderLevel(h.after)} · {h.by.split(" (")[0]}
+                        <span className="font-medium capitalize">{h.action.replace("-", " ")}</span> · Stage {ladderLevel(h.before)} → {ladderLevel(h.after)} · {h.by.split(" (")[0]}
                         <span className="block text-muted-foreground">“{h.rationale}”</span>
                       </span>
                     </li>

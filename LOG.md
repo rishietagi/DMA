@@ -21,19 +21,19 @@ L1 processes of one function on the client's **Level 0–5 ladder**. The capabil
 - **All demo data is synthetic** and labelled Illustrative. Never commit real client files (`private/` is
   git-ignored).
 
-## 2. Status (2026-11-02)
+## 2. Status (2026-11-03)
 
 - **Built:** phases 0–4 from `PLAN.md §4`, a simplification pass, Vercel prep, then (2026-11-02) a **rebuild into
   4 steps** on the client's Level 0–5 ladder. The 10-screen workbench is gone; old URLs redirect.
 - **Tests:** all green.
   - typecheck, lint, `seed:check`;
-  - 130 Vitest unit tests (capability engine untouched, plus process ladder, mapping and demo-pack acceptance);
+  - 134 Vitest unit tests (capability engine untouched, plus process ladder, mapping and demo-pack acceptance);
   - 6 Playwright e2e tests (upload lowers Transportation, change needs a reason and reaches Results, every
     step's visuals + details sheet, questionnaire + own question move the level, old links redirect, guided demo);
   - Lighthouse accessibility 100 on all 4 routes in light and dark;
   - 0 console errors in dev.
-- **Git:** 7 local commits on `master`. **No remote yet** — the user pushes to GitHub themselves, then deploys
-  on Vercel (steps in `README.md`; no env vars needed).
+- **Git:** branch `main` with an `origin` remote; latest commit "cleaned version of the app". The two
+  2026-11-03 review rounds are **uncommitted** until the user asks. Deploy on Vercel (steps in `README.md`).
 - **Local server:** the user may have `pnpm dev` running on http://localhost:3000.
 
 ## 3. Environment and commands
@@ -100,25 +100,26 @@ public/demo-evidence/  12 synthetic docs (strategy, e-com SOP, supply-chain ops 
 
 ## 5. Screens (what each does)
 
-One function at a time (L0 dropdown, Supply chain by default), assessed through its **L1 processes** on the
-**0–5 ladder** from the client slide: L0 Digitized · L1 Connected · L2 Real-time · L3 Visibility · L4 Predictive ·
-L5 Autonomous.
+One function at a time (L0, Supply chain by default), assessed through its **L1 processes** on the **0–5 ladder**
+from the client slide. Maturity levels are written **"Stage 0–5"** (Digitized · Connected · Real-time ·
+Visibility · Predictive · Autonomous) so they never read like the L0 / L1 hierarchy. **MDM is hidden** in
+supply chain (`HIDDEN_CAPABILITIES`).
 
 | Step | Route | What it shows |
 |---|---|---|
-| 1 Scope | `/` | 10 function cards (2025 level bar), L1 process cards with the capabilities each owns, target level + meaning, snapshot KPIs, the ladder, 2025 baseline bars per capability, 2026 priorities and roadmap items for the function |
-| 2 Gather inputs | `/inputs` | Tabs. **Questionnaire:** per process, the overall question + every question-bank question (options on the ladder, demo answers pre-filled) + **your own questions** (add / answer / delete), live "level now". **Documents & quick check:** one drop zone + Load demo pack, one dropdown per process, coverage matrix (process × document type, what's missing). **What the AI found:** KPIs, process chain (level, systems, manual work, hand-offs, strengths/pains per step), filterable quote feed. **Interviews:** strengths / pain points, where sources disagree, recurring themes, paste notes |
-| 3 Review levels | `/review` | Summary strip (progress, level distribution, confidence mix, flags); per process AI level, why, confidence, flags, Sources, **Details** sheet (signal plot, calculation table, capabilities × area, quotes, history), Accept / Change (reason required) / Undo, Accept all; audit trail |
-| 4 Results | `/results` | Narrative summary, 7 KPIs, ladder, radar (today / target / 2025), 2025-vs-today bars, gap table with roadmap status, area heatmap, value × ease idea matrix + detail, roadmap swimlanes (planned today, gaps with nothing planned, Now / Next / Later, dependency arrows), all functions compared; prints over a few A4 pages |
+| 1 Define & Focus | `/` | "Where are we today?" (2025 self-assessment per capability on the ladder) and "What matters in 2026 (focus areas)" with roadmap items; function cards (bar + "2025 baseline"); priority process cards (capability count, names only when selected); target maturity level (full width, horizon 2–3 years); KPI strip; maturity ladder |
+| 2 Assess & Validate | `/inputs` | Context line (function · processes in scope · target). Tabs: **Evidence** (drop zone, "Load sample documents" with hover note, document list, coverage matrix: Process · Systems (application) · Data · Policies · KPIs). **Assess** (questionnaire per process: name + stage, why on hover; bank questions; your own questions). **AI insights** (per process: AI stage, evidence references, quick-check dropdown). **Interviews** (upload transcript or paste notes; strengths / pain points board) |
+| 3 Diagnose | `/review` | Title "Validate maturity findings". Context line + "n/n reviewed"; **validation summary** (evidence conflicts · not enough evidence · reviewer adjustments · confirmed, reconciliation warning, **Confirm all remaining (n)**); per process: status tag, "Stage n · name", source breakdown (Interview · Questionnaire · Documents · Baseline), Sources, **Review evidence** (details sheet), Change (reason required), **Confirm level**; reviewed cards show "Validated by … · time" + Undo; audit trail |
+| 4 Prioritize & Roadmap | `/results` | Headline "Function \| Current maturity x → Target y" + strip (current · target · avg. gap · below target) + current→target slider + **3 AI insights** (strength, critical gap, priority); **diagnostic table** (overall · process · people · data & analytics heatmap + gap to target, "nothing planned" marked); 2025 self assessment vs our findings bars; value × ease idea matrix + detail; roadmap swimlanes; all functions compared |
 
 Old routes redirect: `/scope` → `/`; `/evidence`, `/interviews`, `/process` → `/inputs`; `/scoring`,
 `/compare` → `/review`; `/opportunities`, `/roadmap`, `/synthesis` → `/results`.
 
 **Global:**
-- **Top bar:** 4-step stepper, "Demo mode · simulated AI" badge, **Guided demo**, agent console, reset demo,
+- **Top bar:** 4-step stepper (all labels from 1400 px; below that only the current step's, others on hover), "Demo mode · simulated AI" badge, **Guided demo**, agent console, reset demo,
   shortcuts, theme. No sidebar, no ⌘K palette, no Simple/Detailed switch.
-- **Guided demo.** 4 beats, about 70 s: picks Supply chain → loads the demo pack → changes Transportation to L1
-  with a reason and accepts the rest → shows Results.
+- **Guided demo.** 4 beats, about 70 s: picks Supply chain → loads the sample documents → changes Transportation
+  to Stage 1 with a reason and confirms the rest → shows Prioritize & Roadmap.
 - **Shortcuts.** `1`–`4` (steps), `.` (agent console), `T` (theme), `?` (help).
 - **URL params.** `?theme=dark` forces the theme; `?tourSpeed=0.05` speeds up the tour (tests).
 
@@ -182,15 +183,16 @@ or `when.steps`.
   - gt-reco-beat 5 → ~3.5;
   - sales-control-tower 3 → ~2.5;
   - proc-invoice-automation 2.5 → ~3.0.
-- **Two designed contradictions:**
-  - e-com PO induction: Head of E-commerce says automated vs the SOP/KPI saying manual;
-  - IBP plan: Supply Chain Planning Lead vs Finance Controller.
+- **Designed contradiction:** IBP plan — Supply Chain Planning Lead vs Finance Controller. (The e-com
+  contradiction left with the e-com SOP, 2026-11-03.)
+- **Sample pack** (2026-11-03): the e-com O2C SOP, Digital & IT strategy FY27 and the master-data policy were
+  removed (not CPG supply-chain relevant per the user).
 - **"Manual reconciliation"** recurs in Finance, NMT and E-com. **HR has no KPI extract** (designed coverage gap).
 - **Whitespaces** (baseline and evidence mode): mkt-dam, scm-tms, fin-reconciliation, hr-analytics.
 - **After loading the demo pack:** about 11 high-confidence capabilities; 35/41 within ±0.5 of the 2025 score.
-- **Supply chain on the ladder (target L3):** workshop pack only → overall L2; after the demo pack → overall
-  **L1**: Demand planning L2 (sources disagree), Supply & production planning L2, Warehousing L1,
-  Transportation **L0**, Order fulfilment L3 (on target), Sustainability L1. Ideas in Now: TMS optimisation,
+- **Supply chain on the ladder (target Stage 3):** after the sample documents → overall **1.4** (Stage 1):
+  Demand planning Stage 2, Supply & production planning Stage 2 (both "evidence conflict"), Warehousing 1,
+  Transportation **0**, Order fulfilment 3 (on target), Sustainability 1. After the guided demo: Stage 1. Ideas in Now: TMS optimisation,
   ESG data capture, digital warehouse. New doc: `SCM_Warehouse_and_Logistics_SOP.md` (Illustrative).
 
 ## 9. Open items
@@ -257,3 +259,20 @@ or `when.steps`.
     Transportation still lands on L0 after the demo pack. After the guided demo (Transportation changed to L1,
     rest accepted) supply chain reads **Level 2** overall.
 
+- **2026-11-03 — session 3: review feedback, round 1** (approved plan; user chose transcript upload +
+  strengths / pain points only, MDM out of supply chain, "Stage 0–5" naming)
+  - Scope trimmed (target box, 2025-level and roadmap KPIs, sublines); "2026 focus areas", "Self assessment 2025".
+  - MDM hidden (`HIDDEN_CAPABILITIES` in `process-input.ts`); e-com SOP, IT strategy and MDM policy removed from
+    the pack and deleted. Coverage matrix: Process · Systems (application) · Data · Policies · KPIs.
+  - "What the AI found" tab removed; Interviews = upload transcript / paste notes + strengths / pain points.
+  - Levels read "Stage N" everywhere (`stageLabel`).
+
+- **2026-11-03 — session 3b: review feedback, round 2** (annotated mock-ups for all four steps)
+  - Phases renamed: **Define & Focus → Assess & Validate → Diagnose → Prioritize & Roadmap** (see §5).
+  - New pure helpers + tests: `sourceBreakdown(p)` (`process-why.ts`), `processInsights(r)` (`narrative.ts`).
+  - New UI: `ScopeLine`, `MaturitySlider`, `DiagnosticTable` (replaces gap table + area heatmap; AI column
+    dropped as in the mock-up); radar removed; `processNarrative` no longer shown (kept, tested).
+  - Kept "Stage" although the mock-ups say "L3" (the user's earlier ask). "Reload demo pack" is now "Load
+    sample documents" with a hover note (answering "what does Reload demo pack do?").
+  - Verified: typecheck, lint, 134 unit, 6 e2e, seed check, a11y 100 × 8, production build, 0 console errors,
+    no horizontal scroll at 390 px.

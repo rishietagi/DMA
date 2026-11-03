@@ -72,7 +72,7 @@ function levelMoves(before: EvidenceItem[], after: EvidenceItem[]): string[] {
   return b.processes.flatMap((p) => {
     const old = a.processes.find((x) => x.id === p.id)!;
     if (old.level === p.level) return [];
-    return [`${p.name} L${old.level ?? "–"} → L${p.level ?? "–"}`];
+    return [`${p.name} stage ${old.level ?? "–"} → ${p.level ?? "–"}`];
   });
 }
 
@@ -128,7 +128,7 @@ export async function ingest(files: IngestFile[]): Promise<{ items: number; move
     st.updateDocument(f.docId, { status: "analysed", segments: r.segments, itemCount: r.items.length, dominantFunctionId: r.dominantFunctionId });
 
   toast.success(`${mapped} ${mapped === 1 ? "sentence" : "sentences"} mapped to ${functionName(fn)}`, {
-    description: moves.length ? `Level changed: ${moves.slice(0, 3).join("; ")}` : "No process changed level.",
+    description: moves.length ? `Stage changed: ${moves.slice(0, 3).join("; ")}` : "No process changed stage.",
   });
   return { items: newItems.length, moves };
 }
@@ -158,7 +158,7 @@ export async function runScoring() {
     processes: r.processes.length,
     indicators: r.processes.reduce((a, p) => a + p.indicators.length, 0),
     disagree: r.processes.filter((p) => p.flags.includes("INCONSISTENT")).length,
-    headline: top ? `Lowest: ${top.name} at L${top.level}.` : "",
+    headline: top ? `Lowest: ${top.name} at stage ${top.level}.` : "",
   });
 }
 
@@ -172,7 +172,7 @@ export async function runResults() {
     headline:
       r.overallLevel === null
         ? "Not enough input to rate this function yet."
-        : `${functionName(r.functionId)} is at Level ${r.overallLevel} overall against a target of Level ${r.target}.`,
+        : `${functionName(r.functionId)} is at stage ${r.overallLevel} overall against a target of stage ${r.target}.`,
   });
 }
 

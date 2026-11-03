@@ -152,7 +152,7 @@ export function ProcessRoadmap({
                     <span role="img" className={cn("mt-1 size-2 shrink-0 rounded-full", STATUS_DOT[i.status])} aria-label={STATUS_LABEL[i.status]} />
                     <span className="min-w-0 flex-1 leading-snug">{i.title}</span>
                     {proc.alignment === "ACCELERATE" && (
-                      <span className="inline-flex shrink-0 items-center gap-0.5 rounded bg-conf-med/20 px-1 text-[10px] font-medium" title="Gap of 2 or more levels against target">
+                      <span className="inline-flex shrink-0 items-center gap-0.5 rounded bg-conf-med/20 px-1 text-[10px] font-medium" title="Gap of 2 or more stages against target">
                         <FastForward className="size-3" aria-hidden /> Speed up
                       </span>
                     )}
@@ -167,7 +167,7 @@ export function ProcessRoadmap({
                   <div className="hatch rounded-md border border-whitespace/60 px-2 py-1 text-xs font-medium" data-testid={`whitespace-${proc.name}`}>
                     Gap with nothing planned
                     <span className="block text-[10px] font-normal text-muted-foreground">
-                      {proc.gap} {proc.gap === 1 ? "level" : "levels"} short · no initiative
+                      {proc.gap} {proc.gap === 1 ? "stage" : "stages"} short · no initiative
                     </span>
                   </div>
                 )}

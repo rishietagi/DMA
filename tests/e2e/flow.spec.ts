@@ -21,19 +21,21 @@ test("an uploaded note saying transport runs by phone lowers Transportation", as
   await page.goto("/inputs");
 
   // with no interview answer, only the 2025 self score speaks for Transportation
+  await page.getByTestId("tab-insights").click();
   await page.getByTestId("qc-Transportation").click();
   await page.getByRole("option", { name: "Not answered" }).click();
 
+  await page.getByTestId("tab-evidence").click();
   await page.getByTestId("file-input").setInputFiles({
     name: "Logistics_notes.md",
     mimeType: "text/markdown",
     buffer: Buffer.from("# Logistics notes\n\nTransport is planned by phone with transporters; there is no TMS.\n"),
   });
   await expect(page.getByText("Logistics notes").first()).toBeVisible();
-  await expect(page.getByText("Level changed: Transportation L1 → L0")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText("Stage changed: Transportation stage 1 → 0")).toBeVisible({ timeout: 60_000 });
 
   await page.goto("/review");
-  await expect(row(page, "Transportation").getByRole("img", { name: /Level 0 of 5/ })).toBeVisible();
+  await expect(row(page, "Transportation").getByRole("img", { name: /Stage 0 of 5/ })).toBeVisible();
   await row(page, "Transportation").getByRole("button", { name: "Sources" }).click();
   await expect(row(page, "Transportation").getByText(/Transport is planned by phone/)).toBeVisible();
   expect(errors, errors.join("\n")).toEqual([]);
@@ -47,7 +49,7 @@ test("changing a level needs a reason and flows to the results", async ({ page }
   const r = row(page, "Sustainability");
   await r.getByTestId("change").click();
   await r.getByTestId("change-level").click();
-  await page.getByRole("option", { name: /L2 · Real-time/ }).click();
+  await page.getByRole("option", { name: /Stage 2 · Real-time/ }).click();
   await expect(r.getByTestId("change-save")).toBeDisabled();
   await r.getByTestId("change-reason").fill("Plant energy meters stream into the EHS system every hour.");
   await r.getByTestId("change-save").click();
@@ -55,12 +57,14 @@ test("changing a level needs a reason and flows to the results", async ({ page }
   await expect(r.getByText(/Plant energy meters/)).toBeVisible();
 
   await page.getByTestId("accept-all").click();
-  await expect(page.getByText("6 of 6 reviewed")).toBeVisible();
+  await expect(page.getByText("6/6 reviewed")).toBeVisible();
+
+  await expect(r.getByTestId("validated-badge")).toContainText("Changed by A. Consultant");
 
   await page.goto("/results");
-  const table = page.getByRole("table");
-  // columns: 2025 · today · target
-  await expect(table.getByRole("row", { name: /Sustainability/ }).locator("td").nth(1).getByRole("img", { name: /Level 2 of 5/ })).toBeVisible();
+  const table = page.getByRole("table", { name: /Diagnostic table/ });
+  // columns: overall · process · people · data · gap
+  await expect(table.getByRole("row", { name: /Sustainability/ }).locator("td").first()).toHaveText("2.0");
   await expect(page.getByText("All levels reviewed")).toBeVisible();
   expect(errors, errors.join("\n")).toEqual([]);
 });
@@ -72,10 +76,12 @@ test("every step shows its visuals, and the details sheet explains a level", asy
   await page.getByTestId("load-demo").click();
   await expect(page.getByText(/sentences? mapped to Supply Chain/).first()).toBeVisible({ timeout: 60_000 });
 
-  await page.getByTestId("tab-found").click();
-  await expect(page.getByRole("list", { name: "Process chain" })).toBeVisible();
+  await page.getByTestId("tab-insights").click();
+  await expect(page.getByTestId("insight-Transportation")).toContainText(/\d+ evidence references?/);
+
   await page.getByTestId("tab-interviews").click();
-  await expect(page.getByText("Where sources disagree")).toBeVisible();
+  await expect(page.getByText("What people told us")).toBeVisible();
+  await expect(page.getByTestId("transcript-input")).toBeAttached();
 
   await page.goto("/review");
   await row(page, "Demand planning / IBP").getByTestId("details").click();
@@ -85,7 +91,9 @@ test("every step shows its visuals, and the details sheet explains a level", asy
   await page.keyboard.press("Escape");
 
   await page.goto("/results");
-  for (const name of [/Radar: today versus target/, /Bar chart, 2025 versus today/, /Bar chart of functions on the ladder/])
+  await expect(page.getByLabel("AI generated insights").getByRole("listitem")).toHaveCount(3);
+  await expect(page.getByRole("img", { name: /Current maturity \d\.\d, target 3\.0/ })).toBeVisible();
+  for (const name of [/Bar chart, 2025 versus today/, /Bar chart of functions on the ladder/])
     await expect(page.getByRole("img", { name }).first()).toBeVisible();
   await expect(page.getByRole("group", { name: "Value versus ease of the ideas" })).toBeVisible();
   await expect(page.getByTestId("whitespace-Transportation")).toBeVisible();
@@ -109,7 +117,7 @@ test("answering the questionnaire and adding your own question move the level", 
   await page.getByTestId("add-question").click();
   await page.getByTestId("cq-text").fill("Do drivers use a mobile app for proof of delivery");
   await page.getByTestId("cq-answer").click();
-  await page.getByRole("option", { name: /L4 · Predictive/ }).click();
+  await page.getByRole("option", { name: /Stage 4 · Predictive/ }).click();
   await page.getByTestId("cq-save").click();
   const own = page.getByTestId("custom-question");
   await expect(own).toContainText("Do drivers use a mobile app for proof of delivery?");

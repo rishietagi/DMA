@@ -42,6 +42,11 @@ export function toLadder(engineLevel: number): number {
   return clamp((engineLevel - 1) * 1.25, 0, 5);
 }
 
+/** How a ladder level is written in the UI — "Stage", so it never reads like the L0 / L1 process hierarchy. */
+export function stageLabel(level: number): string {
+  return `Stage ${level}`;
+}
+
 /** The ladder level a score sits on (whole level, half rounds up). */
 export function ladderLevel(score: number): LadderLevel {
   return clamp(Math.round(score + 1e-9), 0, 5) as LadderLevel;

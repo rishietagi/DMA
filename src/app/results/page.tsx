@@ -1,93 +1,93 @@
 "use client";
 import * as React from "react";
-import { Printer, ShieldCheck, Sparkles } from "lucide-react";
+import { AlertTriangle, Printer, ShieldCheck, Sparkles, Target, ThumbsUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AreaHeatmap } from "@/components/dma/area-heatmap";
-import { FunctionCompare, ProcessRadar, SelfVsToday } from "@/components/dma/charts";
+import { DiagnosticTable } from "@/components/dma/area-heatmap";
+import { FunctionCompare, SelfVsToday } from "@/components/dma/charts";
 import { IdeaMatrix } from "@/components/dma/idea-matrix";
-import { KpiStrip } from "@/components/dma/kpi-strip";
-import { LadderChart, LevelChip } from "@/components/dma/ladder";
+import { MaturitySlider } from "@/components/dma/ladder";
 import { Page, PageHeader } from "@/components/dma/page-header";
 import { ProcessRoadmap } from "@/components/dma/process-roadmap";
 import { useProcesses } from "@/components/providers/process-provider";
 import { StepNav } from "@/components/shell/step-nav";
-import { LADDER, type ProcessIdea } from "@/lib/engine";
-import { ALIGNMENT_LABEL, functionName } from "@/lib/labels";
-import { processNarrative } from "@/lib/narrative";
+import { type ProcessIdea } from "@/lib/engine";
+import { functionName } from "@/lib/labels";
+import { processInsights } from "@/lib/narrative";
 import { processAreas } from "@/lib/process-areas";
 import { cn } from "@/lib/utils";
 
 const EFFORT: Record<ProcessIdea["effort"], string> = { S: "Small", M: "Medium", L: "Large" };
 
+const INSIGHT_ICON = { strength: ThumbsUp, gap: AlertTriangle, priority: Target } as const;
+const INSIGHT_TONE = { strength: "text-validated", gap: "text-conf-low", priority: "text-ai" } as const;
+
 function Headline() {
   const { result } = useProcesses();
   const ai = result.processes.length - result.validated;
-  const lines = processNarrative(result, functionName(result.functionId));
+  const scored = result.processes.filter((p) => p.gap !== null);
+  const avgGap = scored.length ? scored.reduce((a, p) => a + p.gap!, 0) / scored.length : 0;
+  const insights = processInsights(result);
+  const fn = functionName(result.functionId);
+  const strip = [
+    { label: "Current maturity", value: result.overall === null ? "—" : result.overall.toFixed(1) },
+    { label: "Target", value: String(result.target) },
+    { label: "Avg. gap", value: avgGap.toFixed(1) },
+    { label: "Below target", value: `${scored.filter((p) => p.gap! > 0).length}/${scored.length}` },
+  ];
   return (
     <Card data-tour="headline" data-testid="headline" className="print-avoid">
-      <CardContent className="flex flex-col gap-4 py-5 md:flex-row">
-        <LevelChip score={result.overall} size="lg" className="self-start" />
-        <div className="min-w-0 flex-1">
-          <p className="text-xl font-semibold tracking-tight">
-            {result.overallLevel === null
-              ? `${functionName(result.functionId)} can't be rated yet`
-              : `${functionName(result.functionId)} is at Level ${result.overallLevel} · ${LADDER[result.overallLevel].name}`}
+      <CardContent className="flex flex-col gap-5 py-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xl font-semibold tracking-tight">
+              {fn} <span className="text-muted-foreground" aria-hidden>|</span> Current maturity{" "}
+              <span className="tabular">{result.overall === null ? "—" : result.overall.toFixed(1)}</span> → Target{" "}
+              <span className="tabular">{result.target.toFixed(1)}</span>
+            </p>
+            <p className="mt-0.5 text-[13px] text-muted-foreground">Evidence-backed assessment across process, people and data</p>
+          </div>
+          <p className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
+            {ai === 0 ? <ShieldCheck className="size-4 text-validated" aria-hidden /> : <Sparkles className="size-4 text-ai" aria-hidden />}
+            {ai === 0 ? "All levels reviewed" : `${result.validated} reviewed · ${ai} still AI suggested`}
           </p>
-          <ul className="mt-2 flex flex-col gap-1 text-[13px] leading-relaxed text-muted-foreground" aria-label="Executive summary">
-            {lines.slice(1).map((l) => (
-              <li key={l}>{l}</li>
-            ))}
-          </ul>
         </div>
-        <p className="flex shrink-0 items-center gap-1.5 self-start text-xs text-muted-foreground">
-          {ai === 0 ? <ShieldCheck className="size-4 text-validated" aria-hidden /> : <Sparkles className="size-4 text-ai" aria-hidden />}
-          {ai === 0 ? "All levels reviewed" : `${result.validated} reviewed · ${ai} still AI suggested`}
-        </p>
+
+        <dl className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-y py-2.5 text-[13px]">
+          {strip.map((s, i) => (
+            <div key={s.label} className="flex items-baseline gap-1.5">
+              {i > 0 && <span className="mr-1 text-muted-foreground" aria-hidden>|</span>}
+              <dd className="text-lg font-semibold tabular">{s.value}</dd>
+              <dt className="text-muted-foreground">{s.label}</dt>
+            </div>
+          ))}
+        </dl>
+
+        <MaturitySlider current={result.overall} target={result.target} />
+
+        {insights.length > 0 && (
+          <div className="ai-surface rounded-xl p-4">
+            <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-ai-foreground">
+              <Sparkles className="size-3.5" aria-hidden />
+              AI generated insights
+            </p>
+            <ul className="flex flex-col gap-1.5 text-[13px]" aria-label="AI generated insights">
+              {insights.map((x) => {
+                const Icon = INSIGHT_ICON[x.kind];
+                return (
+                  <li key={x.kind} className="flex items-start gap-2">
+                    <Icon className={cn("mt-0.5 size-4 shrink-0", INSIGHT_TONE[x.kind])} aria-hidden />
+                    <span>
+                      <span className="font-semibold">{x.label}:</span> {x.text}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
       </CardContent>
     </Card>
-  );
-}
-
-function GapTable() {
-  const { result } = useProcesses();
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[520px] text-[13px]">
-        <thead>
-          <tr className="border-b text-left text-xs text-muted-foreground">
-            <th scope="col" className="py-2 font-medium">Process</th>
-            <th scope="col" className="py-2 font-medium">2025</th>
-            <th scope="col" className="py-2 font-medium">Today</th>
-            <th scope="col" className="py-2 font-medium">Target</th>
-            <th scope="col" className="py-2 font-medium">Roadmap</th>
-            <th scope="col" className="py-2 text-right font-medium">Gap</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y">
-          {result.processes.map((p) => (
-            <tr key={p.id}>
-              <th scope="row" className="py-2 pr-2 text-left font-medium">{p.name}</th>
-              <td className="py-2">
-                <LevelChip score={p.self} size="sm" />
-              </td>
-              <td className="py-2">
-                <LevelChip score={p.effective} size="sm" provenance={p.status === "suggested" ? "ai" : "validated"} />
-              </td>
-              <td className="py-2">
-                <LevelChip score={result.target} size="sm" />
-              </td>
-              <td className={cn("py-2 text-[12px]", p.alignment === "WHITESPACE" && "font-medium text-whitespace")}>
-                {p.alignment === null ? "—" : p.alignment === "WHITESPACE" ? "Nothing planned" : ALIGNMENT_LABEL[p.alignment]}
-              </td>
-              <td className={cn("py-2 text-right font-semibold tabular", (p.gap ?? 0) >= 2 && "text-conf-low")}>
-                {p.gap === null ? "—" : p.gap === 0 ? "On target" : `${p.gap} ${p.gap === 1 ? "level" : "levels"}`}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
   );
 }
 
@@ -127,7 +127,7 @@ function IdeaDetail({ idea }: { idea: ProcessIdea | undefined }) {
       </p>
       <p className="text-[12px]">
         <span className="text-muted-foreground">Effort: </span>
-        {EFFORT[idea.effort]} · closes a {idea.gap}-level gap
+        {EFFORT[idea.effort]} · closes a {idea.gap}-stage gap
       </p>
     </div>
   );
@@ -138,16 +138,13 @@ export default function ResultsPage() {
   const [selected, setSelected] = React.useState<string | null>(null);
   const idea = result.ideas.find((i) => i.id === (selected ?? result.ideas[0]?.id));
   const areas = React.useMemo(() => processAreas(input.processes, caps), [input.processes, caps]);
-  const scored = result.processes.filter((p) => p.gap !== null);
-  const avgGap = scored.length ? scored.reduce((a, p) => a + p.gap!, 0) / scored.length : 0;
   const fn = functionName(result.functionId);
 
   return (
     <Page className="print:max-w-none print:gap-4 print:p-0">
       <PageHeader
         stage={4}
-        title="Results"
-        description={<span className="print:hidden">The final picture: where each process sits, how far it is from target, and what to do about it.</span>}
+        title="Prioritize & Roadmap"
         actions={
           <Button variant="outline" size="sm" onClick={() => window.print()}>
             <Printer />
@@ -157,74 +154,23 @@ export default function ResultsPage() {
       />
       <Headline />
 
-      <KpiStrip
-        className="print-avoid"
-        stats={[
-          { label: "Overall level", value: result.overall ?? 0, format: (n) => `L${n.toFixed(1)}`, note: result.overallLevel === null ? "—" : LADDER[result.overallLevel].short, tone: "ai" },
-          { label: "Target", value: result.target, format: (n) => `L${Math.round(n)}`, note: LADDER[result.target].short },
-          { label: "Average gap", value: avgGap, format: (n) => `${n.toFixed(1)} lvl`, tone: avgGap >= 1.5 ? "warn" : "default" },
-          { label: "Below target", value: scored.filter((p) => p.gap! > 0).length, format: (n) => `${Math.round(n)} / ${scored.length}` },
-          {
-            label: "Change vs 2025",
-            value: result.self === null || result.overall === null ? 0 : result.overall - result.self,
-            format: (n) => `${n > 0 ? "+" : n < 0 ? "−" : ""}${Math.abs(n).toFixed(1)}`,
-            note: result.self === null ? "No 2025 score" : `2025 was L${result.self.toFixed(1)}`,
-          },
-          { label: "Ideas", value: result.ideas.length, format: (n) => String(Math.round(n)), note: `${result.ideas.filter((i) => i.phase === "Now").length} to start now` },
-          { label: "Reviewed", value: result.processes.length ? result.validated / result.processes.length : 0, format: (n) => `${Math.round(n * 100)}%` },
-        ]}
-      />
-
       <Card className="print-avoid">
         <CardHeader>
-          <CardTitle>{fn} on the maturity ladder</CardTitle>
-          <p className="text-[13px] text-muted-foreground">Each process on its level. The outlined step is the target.</p>
+          <CardTitle>Diagnostic table</CardTitle>
         </CardHeader>
-        <CardContent>
-          <LadderChart processes={result.processes} target={result.target} />
+        <CardContent className="pt-1">
+          <DiagnosticTable processes={result.processes} areas={areas} />
         </CardContent>
       </Card>
 
-      <div className="grid items-start gap-6 lg:grid-cols-2 [&>*]:min-w-0">
-        <Card className="print-avoid">
-          <CardHeader>
-            <CardTitle>Today vs target vs 2025</CardTitle>
-            <p className="text-[13px] text-muted-foreground">The bigger the gap between the blue shape and the dashed ring, the more work there is.</p>
-          </CardHeader>
-          <CardContent>
-            <ProcessRadar processes={result.processes} target={result.target} />
-          </CardContent>
-        </Card>
-        <Card className="print-avoid">
-          <CardHeader>
-            <CardTitle>What the 2025 self-assessment said vs what we found</CardTitle>
-            <p className="text-[13px] text-muted-foreground">Processes with no 2025 bar had no matching capability in the self-assessment.</p>
-          </CardHeader>
-          <CardContent>
-            <SelfVsToday processes={result.processes} />
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid items-start gap-6 xl:grid-cols-2 [&>*]:min-w-0">
-        <Card className="print-avoid">
-          <CardHeader>
-            <CardTitle>Process by process</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-1">
-            <GapTable />
-          </CardContent>
-        </Card>
-        <Card className="print-avoid">
-          <CardHeader>
-            <CardTitle>Strengths and gaps by area</CardTitle>
-            <p className="text-[13px] text-muted-foreground">Process, data, AI and people scored separately, on the same ladder.</p>
-          </CardHeader>
-          <CardContent className="pt-1">
-            <AreaHeatmap processes={result.processes} areas={areas} />
-          </CardContent>
-        </Card>
-      </div>
+      <Card className="print-avoid">
+        <CardHeader>
+          <CardTitle>2025 self assessment compared with our findings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SelfVsToday processes={result.processes} />
+        </CardContent>
+      </Card>
 
       <Card data-tour="ideas" className="print-break">
         <CardHeader>

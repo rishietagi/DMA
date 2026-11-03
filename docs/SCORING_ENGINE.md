@@ -347,5 +347,13 @@ rule). At most 6 ideas are shown.
 - **Areas** (`src/lib/process-areas.ts`): process × (process / data / AI / people) = the capability engine's area
   finals of owned capabilities, crosswalked; a process with no capabilities uses its own sentences tagged with
   that area.
+- **Source breakdown** (`sourceBreakdown(p)`, `src/lib/process-why.ts`): per indicator kind, in the order
+  Interview (quick check) · Questionnaire · Documents · Baseline (2025 self), the stage range its values round to.
+- **Insights** (`processInsights(r)`, `src/lib/narrative.ts`): *Strength* = smallest gap (ties: highest score);
+  *Critical gap* = largest gap > 0 (notes "no initiative currently mapped" for a whitespace); *Priority* = the
+  highest-priority Now idea.
+- **Hidden capabilities:** `HIDDEN_CAPABILITIES` (`mdm`) are left out of the process view — no step, no
+  self score, no ideas, no initiatives — while the capability engine still scores them.
+- **Wording:** levels on this ladder are shown as "Stage 0–5" (`stageLabel`), never "L0–L5".
 - **Cross-function view:** every function assessed with all its L1 processes, the same evidence and quick-check
   answers, and no validations.

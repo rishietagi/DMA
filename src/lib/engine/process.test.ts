@@ -8,6 +8,7 @@ import {
   levelDistribution,
   ladderLevel,
   scoreProcess,
+  stageLabel,
   toLadder,
   type ProcessDef,
   type ProcessInput,
@@ -56,6 +57,9 @@ const input = (processes: ProcessDef[], rules: UseCaseRule[] = [], target: Proce
 });
 
 describe("process ladder crosswalk (§11.2)", () => {
+  it("writes levels as stages, never as L0–L5", () => {
+    expect(stageLabel(3)).toBe("Stage 3");
+  });
   it("maps engine 1–5 linearly onto ladder 0–5", () => {
     expect([1, 2, 3, 4, 5].map(toLadder)).toEqual([0, 1.25, 2.5, 3.75, 5]);
     expect(toLadder(2.5)).toBe(1.875);

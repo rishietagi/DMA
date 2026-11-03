@@ -9,6 +9,15 @@ import { FUNCTION_IDS, type Dimension, type FunctionId, type Question, type Ques
 import { seed } from "@/lib/seed";
 
 const capById = new Map(seed.baseline.capabilities.map((c) => [c.id, c]));
+
+/** Capabilities left out of the process view (MDM: not a CPG process in this demo). */
+export const HIDDEN_CAPABILITIES: readonly string[] = ["mdm"];
+export const isHiddenCapability = (id: string | null | undefined) => !!id && HIDDEN_CAPABILITIES.includes(id);
+
+/** 2025 capabilities shown for a function. */
+export function capabilitiesOf(functionId: FunctionId) {
+  return seed.baseline.capabilities.filter((c) => c.functionIds.includes(functionId) && !isHiddenCapability(c.id));
+}
 const STOP = new Set(["planning", "management", "process", "processes", "control", "tower", "analytics", "visibility", "execution"]);
 
 export const processKey = (functionId: FunctionId, step: string) => `${functionId}:${step}`;
@@ -46,7 +55,7 @@ export function belongsToFunction(e: EvidenceItem, functionId: FunctionId): bool
 
 /** A step named in the sentence wins; otherwise the step of the tagged capability. */
 export function stepForEvidence(functionId: FunctionId, e: EvidenceItem): string | null {
-  if (!belongsToFunction(e, functionId)) return null;
+  if (isHiddenCapability(e.capabilityId) || !belongsToFunction(e, functionId)) return null;
   for (const step of l1Processes(functionId)) if (matchCues(e.quote, stepKeywords(functionId, step)).length) return step;
   return e.capabilityId ? stepForCapability(functionId, e.capabilityId) : null;
 }
@@ -56,7 +65,7 @@ export function capabilitiesForStep(functionId: FunctionId, step: string): strin
   const bank = bankFor(functionId);
   if (!bank) return [];
   const ids = new Set(bank.questions.filter((q) => q.l2 === step).flatMap((q) => q.capabilityIds));
-  return [...ids].filter((id) => capById.has(id) && stepForCapability(functionId, id) === step);
+  return [...ids].filter((id) => capById.has(id) && !isHiddenCapability(id) && stepForCapability(functionId, id) === step);
 }
 
 /** A question the consultant added to a process; answered directly on the ladder. */
@@ -95,7 +104,7 @@ export function answersForStep(
 
 /** Roadmap initiatives that map to any of the given capabilities. */
 export function initiativesFor(capabilityIds: readonly string[]) {
-  return seed.roadmap.initiatives.filter((i) => i.mapsTo.some((c) => capabilityIds.includes(c)));
+  return seed.roadmap.initiatives.filter((i) => i.mapsTo.some((c) => capabilityIds.includes(c) && !isHiddenCapability(c)));
 }
 
 export interface ProcessSession {

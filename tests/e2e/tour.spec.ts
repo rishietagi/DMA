@@ -25,10 +25,10 @@ test("guided demo walks the four steps without console errors", async ({ page })
       { timeout: 120_000, intervals: [150] },
     )
     .toBe("Guided demo complete");
-  for (const t of ["Add documents", "Review the levels", "The result"]) expect([...seen], `missed step "${t}"`).toContain(t);
+  for (const t of ["Assess & Validate", "Diagnose", "Prioritize & Roadmap"]) expect([...seen], `missed step "${t}"`).toContain(t);
 
   await expect(page).toHaveURL(/\/results/);
-  await expect(page.getByTestId("headline")).toContainText("Supply Chain is at Level 2");
+  await expect(page.getByTestId("headline")).toContainText(/Supply Chain \| Current maturity \d\.\d → Target 3\.0/);
   await expect(page.getByText("All levels reviewed")).toBeVisible();
 
   // the change made during the tour is kept with its reason
