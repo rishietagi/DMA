@@ -197,7 +197,7 @@ function ProcessRow({ p, onDetails }: { p: ProcessResult; onDetails: () => void 
             ))}
           </ul>
           <p className="pb-1 text-[11px] text-muted-foreground tabular">
-            Exact score {p.effective?.toFixed(2)} on the 0–5 scale · {signals} quotes from {p.documents}{" "}
+            Exact score {p.effective?.toFixed(2)} on the 1–5 scale · {signals} quotes from {p.documents}{" "}
             {p.documents === 1 ? "document" : "documents"}, strongest shown
           </p>
         </div>

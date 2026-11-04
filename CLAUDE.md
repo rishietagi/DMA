@@ -54,7 +54,7 @@ private/                  # gitignored — real client files never committed
 2. **AI is simulated behind an interface.** All "AI" goes through `AIProvider`. `MockProvider` composes classifier + engine and streams scripted step events with small delays. Never call an external model. Never hard-code a score in UI — UI renders engine output.
 3. **Every AI output is explainable.** Any suggested score shows its indicators, evidence quotes with source + location, confidence, and flags. Every human override requires a rationale and is stored with before/after.
 4. **Synthetic data only.** Demo evidence, interview notes and KPI extracts are invented and labelled "Illustrative". Never commit real client documents. Never include content from other clients' questionnaires — structure only.
-5. **The UI rates L1 processes on the 0–5 ladder** (Digitized → Autonomous, `SCORING_ENGINE.md §11`); the capability engine underneath stays 1–5 and is crosswalked. Keep full precision internally; a process sits on `ladderLevel(score)`. Results use *validated* levels where they exist, else AI-suggested.
+5. **The UI rates L1 processes on the client's 1–5 maturity levels** (Initiated → Tested → Scaled → Optimized → Intelligent, `SCORING_ENGINE.md §11`), the same scale as the capability engine underneath. Keep full precision internally; a process sits on `ladderLevel(score)`. Results use *validated* levels where they exist, else AI-suggested.
 6. **Don't make it look like the PPT.** No full-width green banners, no slide-style tile walls. Follow `PLAN.md §3`.
 7. **Keep the "Demo mode · simulated AI" badge** visible in the shell.
 
@@ -69,9 +69,10 @@ private/                  # gitignored — real client files never committed
 
 ## Domain vocabulary
 - **Function (L0)**: marketing-design, sales-gt, sales-nmt, sales-ecom, sales-retail, supply-chain, procurement, finance, rnd-qa, hr
-- **Process (L1)**: a step of a function's `l1Chain` (e.g. supply-chain → Warehousing). The 4-step flow scores these on the **ladder** L0–L5. No L2/L3 in the UI.
+- **Process (L1)**: a step of a function's `l1Chain` (e.g. supply-chain → Warehousing). The 4-step flow scores these on **Stage 1–5**. No L2/L3 in the UI.
 - **Quick check**: one interview answer per process, on the ladder (lives in the AI insights tab).
-- **Stage**: a maturity level on the 0–5 ladder, always written "Stage N" (never "L2") so it is not confused with L0/L1.
+- **Stage**: a maturity level on the 1–5 scale, always written "Stage N" (never "L2") so it is not confused with L0/L1.
+- **Criticality / target**: per process; target = function ambition ±1 by criticality unless set (§11.6).
 - **Capability**: scored unit (e.g. `ecom-reconciliation`). May span functions (`functionIds`), has one `primaryFunctionId`.
 - **Dimension**: process · data · ai · people
 - **Indicator**: a question or evidence signal that yields a level 1–5 for (capability, dimension)
@@ -94,4 +95,5 @@ private/                  # gitignored — real client files never committed
 - 2026-11-03 — Your own processes — Define & Focus: add a process to any function (name + optional words that point to it), rename or delete it (undo via toast); it flows through quick check, own questions, evidence, Diagnose and Results like the seed processes. Pure `CustomProcess` / `renameProcessKeys` in `process-input.ts`; store `customProcesses` (persist v3). Custom processes win sentence placement over seed ones. 138 unit + 7 e2e green; a11y 100 × 8; build green.
 - 2026-11-03 — Retired samples + sample transcript — Saved sessions drop sample documents no longer shipped (`withoutRetiredSamples`, persist v4); Interviews tab gets "Load sample transcript" (Illustrative Warehouse & Logistics Manager transcript). 140 unit + 7 e2e green.
 - 2026-11-03 — Real PDF export — Results "Export PDF" downloads a designed A4 report built with `@react-pdf/renderer` from engine output (pure `buildReport` in `src/lib/report`): summary + insights + diagnostic heatmap, 2025 vs findings, process-by-process with sources and quotes, ideas by phase, method and sources, page numbers. Replaces `window.print()`. 145 unit + 8 e2e green; a11y 100; build green.
+- 2026-11-04 — Deck alignment — Maturity levels switched to the client's 1–5 scale (Initiated · Tested · Scaled · Optimized · Intelligent; no crosswalk; deck colours per level). Criticality and a target per process (ambition ±1, editable). Ideas scored on the deck's five criteria (value 30 · alignment 25 · feasibility 20 · risk 15 · dependencies 10) on a value × alignment matrix (Scale now / Quick wins / Strategic bets / Reframe / defer); horizons Now 0–6 · Next 6–18 · Beyond 18–36; dependents start a horizon later. Prioritize & Roadmap in 4 tabs with the 7 indicative outputs: executive story (4 KPIs, maturity by process, leadership narrative), criticality × maturity 2×2, detailed heatmap (+ criticality, Tech & AI), opportunity portfolio by theme, roadmap by layer, initiative charter, activation & value governance; scope toggle This function / All functions. Seed rules carry Illustrative theme / value pool / layer / value range and supply-chain charters. PDF rebuilt to 7 pages. New pure `lib/portfolio.ts`. 166 unit + 9 e2e green; a11y 100 × 8; build green.
 

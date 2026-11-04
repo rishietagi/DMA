@@ -48,7 +48,7 @@ export function agentScript(task: AgentTask, ctx: AgentContext): AgentScript {
       return {
         title: "Scoring processes",
         steps: [
-          { kind: "plan", label: `Plan: score ${plural(n(ctx.processes), "process", "processes")} on the Stage 0–5 ladder`, ms: 380 },
+          { kind: "plan", label: `Plan: score ${plural(n(ctx.processes), "process", "processes")} on the Stage 1–5 maturity scale`, ms: 380 },
           { kind: "read", label: "Combine quick-check answers, document quotes and the 2025 self-assessment", detail: `${s(ctx.indicators)} signals`, ms: 480 },
           { kind: "score", label: "Weigh each signal by how reliable its source is", ms: 420 },
           { kind: "check", label: "Check confidence and where sources disagree", detail: `${plural(n(ctx.disagree), "process", "processes")} to look at`, ms: 440 },

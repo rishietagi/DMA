@@ -18,24 +18,34 @@ const row = (page: Page, name: string) => page.getByTestId(`process-${name}`);
 test("an uploaded note saying transport runs by phone lowers Transportation", async ({ page }) => {
   const errors = watchConsole(page);
   await freshSession(page);
-  await page.goto("/inputs");
+  // the Assess tab shows the exact score next to the stage
+  const exact = async () => {
+    await page.goto("/inputs");
+    await page.getByTestId("tab-questions").click();
+    await page.getByTestId("qstep-Transportation").click();
+    const text = await page.getByTestId("q-level").innerText();
+    return Number(/(\d\.\d\d)/.exec(text)![1]);
+  };
 
-  // with no interview answer, only the 2025 self score speaks for Transportation
+  // the interview says Tested
+  await page.goto("/inputs");
   await page.getByTestId("tab-insights").click();
   await page.getByTestId("qc-Transportation").click();
-  await page.getByRole("option", { name: "Not answered" }).click();
+  await page.getByRole("option", { name: /Stage 2 · Tested/ }).click();
+  const before = await exact();
 
-  await page.getByTestId("tab-evidence").click();
+  await page.goto("/inputs");
   await page.getByTestId("file-input").setInputFiles({
     name: "Logistics_notes.md",
     mimeType: "text/markdown",
     buffer: Buffer.from("# Logistics notes\n\nTransport is planned by phone with transporters; there is no TMS.\n"),
   });
   await expect(page.getByText("Logistics notes").first()).toBeVisible();
-  await expect(page.getByText("Stage changed: Transportation stage 1 → 0")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText(/sentences? mapped to Supply Chain/).first()).toBeVisible({ timeout: 60_000 });
 
+  const after = await exact();
+  expect(after).toBeLessThan(before);
   await page.goto("/review");
-  await expect(row(page, "Transportation").getByRole("img", { name: /Stage 0 of 5/ })).toBeVisible();
   await row(page, "Transportation").getByRole("button", { name: "Sources" }).click();
   await expect(row(page, "Transportation").getByText(/Transport is planned by phone/)).toBeVisible();
   expect(errors, errors.join("\n")).toEqual([]);
@@ -49,7 +59,7 @@ test("changing a level needs a reason and flows to the results", async ({ page }
   const r = row(page, "Sustainability");
   await r.getByTestId("change").click();
   await r.getByTestId("change-level").click();
-  await page.getByRole("option", { name: /Stage 2 · Real-time/ }).click();
+  await page.getByRole("option", { name: /Stage 3 · Scaled/ }).click();
   await expect(r.getByTestId("change-save")).toBeDisabled();
   await r.getByTestId("change-reason").fill("Plant energy meters stream into the EHS system every hour.");
   await r.getByTestId("change-save").click();
@@ -63,8 +73,8 @@ test("changing a level needs a reason and flows to the results", async ({ page }
 
   await page.goto("/results");
   const table = page.getByRole("table", { name: /Diagnostic table/ });
-  // columns: overall · process · people · data · gap
-  await expect(table.getByRole("row", { name: /Sustainability/ }).locator("td").first()).toHaveText("2.0");
+  // columns: criticality · process · data · tech & AI · people · overall · gap
+  await expect(table.getByRole("row", { name: /Sustainability/ }).locator("td").nth(5)).toHaveText("3.0");
   await expect(page.getByText("All levels reviewed")).toBeVisible();
   expect(errors, errors.join("\n")).toEqual([]);
 });
@@ -89,17 +99,38 @@ test("every step shows its visuals, and the details sheet explains a level", asy
   await page.goto("/review");
   await row(page, "Demand planning / IBP").getByTestId("details").click();
   const sheet = page.getByTestId("process-sheet");
-  await expect(sheet.getByRole("img", { name: /Signals on the 0 to 5 ladder/ })).toBeVisible();
+  await expect(sheet.getByRole("img", { name: /Signals on the 1 to 5 scale/ })).toBeVisible();
   await expect(sheet.getByText("How the score is calculated")).toBeVisible();
   await page.keyboard.press("Escape");
 
   await page.goto("/results");
-  await expect(page.getByLabel("AI generated insights").getByRole("listitem")).toHaveCount(3);
-  await expect(page.getByRole("img", { name: /Current maturity \d\.\d, target 3\.0/ })).toBeVisible();
-  for (const name of [/Bar chart, 2025 versus today/, /Bar chart of functions on the ladder/])
+  // executive story: four numbers, narrative, 2×2, heatmap
+  await expect(page.getByLabel("Leadership narrative").getByRole("listitem")).toHaveCount(4);
+  await expect(page.getByRole("img", { name: /Current maturity \d\.\d, target \d\.\d/ })).toBeVisible();
+  await expect(page.getByRole("img", { name: /Criticality versus maturity/ })).toBeVisible();
+  for (const name of [/Bar chart, 2025 versus today/, /Bar chart of functions on the 1–5 scale/])
     await expect(page.getByRole("img", { name }).first()).toBeVisible();
-  await expect(page.getByRole("group", { name: "Value versus ease of the ideas" })).toBeVisible();
+
+  // opportunities: the deck's matrix, the criteria, a charter, the portfolio
+  await page.getByTestId("tab-opportunities").click();
+  await expect(page.getByRole("group", { name: /Prioritization matrix/ })).toBeVisible();
+  await expect(page.getByLabel("Scoring criteria").getByRole("listitem")).toHaveCount(5);
+  await page.getByTestId("open-charter").click();
+  const charter = page.getByTestId("charter-sheet");
+  for (const h of ["Business problem", "Target outcome", "Value hypothesis", "First 90 days"]) await expect(charter.getByText(h)).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("portfolio-idea-uc-tms-optimiser")).toBeVisible();
+
+  // roadmap by layer and by process
+  await page.getByTestId("tab-roadmap").click();
+  await expect(page.getByTestId("layer-roadmap")).toBeVisible();
   await expect(page.getByTestId("whitespace-Transportation")).toBeVisible();
+
+  // activation
+  await page.getByTestId("tab-activation").click();
+  await expect(page.getByTestId("governance").getByText("Decisions required")).toBeVisible();
+  await page.getByTestId("scope-function").click();
+  await expect(page.getByTestId("governance").getByText(/Release pilot funding for /)).toBeVisible();
   expect(errors, errors.join("\n")).toEqual([]);
 });
 
@@ -120,11 +151,11 @@ test("answering the questionnaire and adding your own question move the level", 
   await page.getByTestId("add-question").click();
   await page.getByTestId("cq-text").fill("Do drivers use a mobile app for proof of delivery");
   await page.getByTestId("cq-answer").click();
-  await page.getByRole("option", { name: /Stage 4 · Predictive/ }).click();
+  await page.getByRole("option", { name: /Stage 4 · Optimized/ }).click();
   await page.getByTestId("cq-save").click();
   const own = page.getByTestId("custom-question");
   await expect(own).toContainText("Do drivers use a mobile app for proof of delivery?");
-  await expect(own.getByRole("radio", { name: /Predictive/ })).toHaveAttribute("aria-checked", "true");
+  await expect(own.getByRole("radio", { name: /Optimized/ })).toHaveAttribute("aria-checked", "true");
 
   // it shows in the calculation on Review
   await page.goto("/review");
@@ -138,6 +169,22 @@ test("old workbench links land on the matching step", async ({ page }) => {
   await expect(page).toHaveURL(/\/review$/);
   await page.goto("/synthesis");
   await expect(page).toHaveURL(/\/results$/);
+});
+
+test("criticality sets each process's own target, and you can change it", async ({ page }) => {
+  const errors = watchConsole(page);
+  await freshSession(page);
+  const rowOf = (name: string) => page.getByTestId(`target-row-${name}`);
+  await expect(rowOf("Demand planning / IBP").getByTestId("target-Demand planning / IBP")).toContainText("Stage 4");
+  await expect(rowOf("Warehousing").getByTestId("target-Warehousing")).toContainText("Stage 2");
+  await rowOf("Warehousing").getByTestId("target-Warehousing").click();
+  await page.getByRole("option", { name: /Stage 3 · Scaled/ }).click();
+  await expect(rowOf("Warehousing").getByTestId("target-Warehousing")).toContainText("Stage 3");
+
+  await page.goto("/results");
+  const table = page.getByRole("table", { name: /Diagnostic table/ });
+  await expect(table.getByRole("row", { name: /Warehousing/ }).locator("td").nth(6)).toHaveAttribute("title", "Target stage 3");
+  expect(errors, errors.join("\n")).toEqual([]);
 });
 
 test("you can add, rename and delete your own process", async ({ page }) => {
@@ -159,7 +206,7 @@ test("you can add, rename and delete your own process", async ({ page }) => {
   await page.goto("/inputs");
   await page.getByTestId("tab-insights").click();
   await page.getByTestId("qc-Returns management").click();
-  await page.getByRole("option", { name: /Stage 2 · Real-time/ }).click();
+  await page.getByRole("option", { name: /Stage 2 · Tested/ }).click();
   await page.goto("/");
   await card.getByTestId("cp-edit").click();
   await page.getByTestId("cp-name").fill("Returns & reverse logistics");

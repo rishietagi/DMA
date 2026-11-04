@@ -314,7 +314,7 @@ export function Questionnaire() {
       )}
       <AddQuestion step={p.name} />
       <p className="text-[11px] text-muted-foreground">
-        Each answer counts as an interview signal (reliability 0.85) weighted by its importance. Bank options map to the ladder: their 1–5 rubric level − 1, × 1.25, e.g. stage {ladderLevel(toLadder(3))} for an “integrated” answer.
+        Each answer counts as an interview signal (reliability 0.85) weighted by its importance. Bank options sit on the same 1–5 scale as the stages, e.g. stage {ladderLevel(toLadder(3))} for an “integrated” answer.
       </p>
     </div>
   );

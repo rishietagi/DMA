@@ -2,8 +2,12 @@ import { describe, expect, it } from "vitest";
 import type { UseCaseRule } from "@/lib/schema";
 import {
   assessProcesses,
+  dependencyLoad,
   fallbackIdeaScores,
   ideaPhase,
+  ideaPriority,
+  ideaQuadrant,
+  LADDER,
   indicatorShares,
   levelDistribution,
   ladderLevel,
@@ -56,28 +60,29 @@ const input = (processes: ProcessDef[], rules: UseCaseRule[] = [], target: Proce
   rules,
 });
 
-describe("process ladder crosswalk (§11.2)", () => {
-  it("writes levels as stages, never as L0–L5", () => {
+describe("maturity scale 1–5 (§11.2)", () => {
+  it("uses the client's five levels and writes them as stages", () => {
     expect(stageLabel(3)).toBe("Stage 3");
+    expect([1, 2, 3, 4, 5].map((l) => LADDER[l as 1].name)).toEqual(["Initiated", "Tested", "Scaled", "Optimized", "Intelligent"]);
   });
-  it("maps engine 1–5 linearly onto ladder 0–5", () => {
-    expect([1, 2, 3, 4, 5].map(toLadder)).toEqual([0, 1.25, 2.5, 3.75, 5]);
-    expect(toLadder(2.5)).toBe(1.875);
+  it("passes capability-engine levels straight through, clamped to 1–5", () => {
+    expect([1, 2, 3, 4, 5].map(toLadder)).toEqual([1, 2, 3, 4, 5]);
+    expect(toLadder(2.5)).toBe(2.5);
+    expect(toLadder(0)).toBe(1);
   });
-  it("places a score on a whole level, half rounding up, clamped to 0–5", () => {
+  it("places a score on a whole level, half rounding up, clamped to 1–5", () => {
     expect(ladderLevel(2.5)).toBe(3);
     expect(ladderLevel(2.49)).toBe(2);
-    expect(ladderLevel(0.4)).toBe(0);
+    expect(ladderLevel(0.4)).toBe(1);
     expect(ladderLevel(7)).toBe(5);
-    expect(ladderLevel(-1)).toBe(0);
   });
 });
 
 describe("scoreProcess (§11.1)", () => {
   it("is a reliability × weight weighted mean of quick check, evidence and self score", () => {
     const p = scoreProcess(def({ quickCheck: 1, evidence: [ev("a", 1)], selfScores: [3] }), 3);
-    // quick check 1 × (3 × 0.85) + evidence 0 × (2 × 1.0) + self 2.5 × (1 × 0.5)
-    expect(p.suggested).toBeCloseTo((1 * 2.55 + 0 * 2 + 2.5 * 0.5) / (2.55 + 2 + 0.5), 10);
+    // quick check 1 × (3 × 0.85) + evidence 1 × (2 × 1.0) + self 3 × (1 × 0.5)
+    expect(p.suggested).toBeCloseTo((1 * 2.55 + 1 * 2 + 3 * 0.5) / (2.55 + 2 + 0.5), 10);
     expect(p.level).toBe(1);
     expect(p.gap).toBe(2);
     expect(p.status).toBe("suggested");
@@ -101,7 +106,7 @@ describe("scoreProcess (§11.1)", () => {
     expect(scoreProcess(def({ quickCheck: 2, selfScores: [2] }), 3).flags).toContain("LACKS_EVIDENCE");
   });
 
-  it("flags disagreement at a spread of 2.5 levels, ignoring the self score", () => {
+  it("flags disagreement at a spread of 2 levels, ignoring the self score", () => {
     expect(scoreProcess(def({ quickCheck: 3, evidence: [ev("a", 1)] }), 3).flags).toContain("INCONSISTENT");
     expect(scoreProcess(def({ quickCheck: 2, evidence: [ev("a", 1)] }), 3).flags).not.toContain("INCONSISTENT");
     expect(scoreProcess(def({ evidence: [ev("a", 1)], selfScores: [5] }), 3).flags).not.toContain("INCONSISTENT");
@@ -109,7 +114,7 @@ describe("scoreProcess (§11.1)", () => {
 
   it("rates confidence higher with more agreeing sources", () => {
     const thin = scoreProcess(def({ selfScores: [2] }), 3);
-    const rich = scoreProcess(def({ quickCheck: 1, evidence: [ev("a", 2), ev("b", 2, { docId: "doc-2" })] }), 3);
+    const rich = scoreProcess(def({ quickCheck: 2, evidence: [ev("a", 2), ev("b", 2, { docId: "doc-2" })] }), 3);
     expect(thin.band).toBe("low");
     expect(rich.band).toBe("high");
     expect(rich.documents).toBe(2);
@@ -117,14 +122,22 @@ describe("scoreProcess (§11.1)", () => {
 
   it("uses the consultant's level once changed, keeping the suggestion", () => {
     const p = scoreProcess(
-      def({ quickCheck: 0, validation: { kind: "overridden", before: 0, after: 1, rationale: "seen on site", by: "A", at: "t" } }),
+      def({ quickCheck: 1, validation: { kind: "overridden", before: 1, after: 2, rationale: "seen on site", by: "A", at: "t" } }),
       3,
     );
-    expect(p.suggested).toBe(0);
-    expect(p.effective).toBe(1);
-    expect(p.level).toBe(1);
+    expect(p.suggested).toBe(1);
+    expect(p.effective).toBe(2);
+    expect(p.level).toBe(2);
     expect(p.status).toBe("overridden");
+    expect(p.gap).toBe(1);
+  });
+
+  it("uses the process's own target when it has one", () => {
+    const p = scoreProcess(def({ quickCheck: 2, target: 4, criticality: "High" }), 3);
+    expect(p.target).toBe(4);
     expect(p.gap).toBe(2);
+    expect(p.criticality).toBe("High");
+    expect(scoreProcess(def({ quickCheck: 2 }), 3).target).toBe(3);
   });
 
   it("keeps at most three quotes, strongest source first", () => {
@@ -145,7 +158,7 @@ describe("ideas and phasing (§11.4)", () => {
   });
 
   it("matches rules by capability or by step name, only for gaps of a level or more", () => {
-    const transport = def({ quickCheck: 0 });
+    const transport = def({ quickCheck: 1 });
     const wh = def({ id: "supply-chain:Warehousing", name: "Warehousing", capabilityIds: [], quickCheck: 1 });
     const done = def({ id: "supply-chain:Order", name: "Order", capabilityIds: ["scm-dashboard"], quickCheck: 3 });
     const r = assessProcesses(
@@ -157,15 +170,15 @@ describe("ideas and phasing (§11.4)", () => {
     ]);
   });
 
-  it("never places an idea before its dependency", () => {
+  it("places an idea one horizon after its dependency", () => {
     const r = assessProcesses(
       input(
-        [def({ quickCheck: 0 }), def({ id: "supply-chain:Supply", name: "Supply", capabilityIds: ["mdm"], quickCheck: 2 })],
+        [def({ quickCheck: 1 }), def({ id: "supply-chain:Supply", name: "Supply", capabilityIds: ["mdm"], quickCheck: 2 })],
         [rule("dependent", {}, { dependsOn: ["foundation"], effort: "S" }), rule("foundation", { capabilityIds: ["mdm"] }, { effort: "S" })],
       ),
     );
     const phase = Object.fromEntries(r.ideas.map((i) => [i.id, i.phase]));
-    expect(phase).toEqual({ foundation: "Next", dependent: "Next" });
+    expect(phase).toEqual({ foundation: "Next", dependent: "Later" });
     expect(r.ideas.map((i) => i.id)).toEqual(["foundation", "dependent"]);
   });
 });
@@ -182,6 +195,7 @@ describe("assessProcesses", () => {
     expect(r.overall).toBe(2);
     expect(r.overallLevel).toBe(2);
     expect(r.validated).toBe(1);
+    expect(r.targetMean).toBe(3);
   });
 });
 
@@ -194,29 +208,60 @@ describe("explainability helpers (§11.5)", () => {
   });
 
   it("counts processes per level", () => {
-    expect(levelDistribution([{ level: 0 }, { level: 2 }, { level: 2 }, { level: null }])).toEqual([1, 0, 2, 0, 0, 0]);
+    expect(levelDistribution([{ level: 1 }, { level: 3 }, { level: 3 }, { level: null }])).toEqual([1, 0, 2, 0, 0]);
   });
 
   it("scores ideas from capability value / ease / risk, else from gap and effort", () => {
     expect(fallbackIdeaScores(3, "S")).toEqual({ value: 5, feasibility: 4, risk: 2 });
     expect(fallbackIdeaScores(1, "L")).toEqual({ value: 3, feasibility: 2, risk: 4 });
-    const r = assessProcesses({ ...input([def({ quickCheck: 0 })], [rule("tms")]), ideaScores: { "scm-tms": { value: 4, feasibility: 4, risk: 2 } } });
-    expect(r.ideas[0]).toMatchObject({ value: 4, feasibility: 4, risk: 2, quadrant: "Quick win" });
+    const r = assessProcesses({ ...input([def({ quickCheck: 1 })], [rule("tms")]), ideaScores: { "scm-tms": { value: 4, feasibility: 4, risk: 2 } } });
+    expect(r.ideas[0]).toMatchObject({ value: 4, feasibility: 4, risk: 2, alignment: 2, dependencies: 1, quadrant: "Quick wins" });
     expect(r.ideas[0]!.priority).toBeGreaterThan(0);
+  });
+
+  it("scores ideas on the five criteria: alignment and dependencies come from context", () => {
+    const r = assessProcesses({
+      ...input([def({ quickCheck: 1 })], [rule("tms")]),
+      ideaScores: { "scm-tms": { value: 4, feasibility: 3, risk: 3 } },
+      ideaContext: { tms: { alignment: 5, dependencies: 4 } },
+    });
+    expect(r.ideas[0]).toMatchObject({ alignment: 5, dependencies: 4, quadrant: "Scale now" });
+  });
+
+  it("places ideas in the deck's matrix: value (x) × alignment (y)", () => {
+    expect(ideaQuadrant(4, 4)).toBe("Scale now");
+    expect(ideaQuadrant(2, 4)).toBe("Strategic bets");
+    expect(ideaQuadrant(4, 2)).toBe("Quick wins");
+    expect(ideaQuadrant(2, 2)).toBe("Reframe / defer");
+  });
+
+  it("weights the criteria 30/25/20/15/10, inverts risk and dependencies, and scales by gap", () => {
+    const best = ideaPriority({ gap: 3, value: 5, alignment: 5, feasibility: 5, risk: 1, dependencies: 1 });
+    expect(best).toBeCloseTo(100, 10);
+    const small = ideaPriority({ gap: 1, value: 5, alignment: 5, feasibility: 5, risk: 1, dependencies: 1 });
+    expect(small).toBeCloseTo(100 * (0.5 + 0.5 / 3), 10);
+    const risky = ideaPriority({ gap: 3, value: 5, alignment: 5, feasibility: 5, risk: 5, dependencies: 5 });
+    expect(risky).toBeCloseTo((100 * (1.5 + 1.25 + 1 + 0.15 + 0.1)) / 5, 10);
+  });
+
+  it("derives dependency load from upstream ideas and data prerequisites", () => {
+    expect(dependencyLoad(0, 0)).toBe(1);
+    expect(dependencyLoad(1, 3)).toBe(4);
+    expect(dependencyLoad(4, 4)).toBe(5);
   });
 
   it("marks a gap with nothing planned as a whitespace, and planned work with a big gap as speed up", () => {
     const planned = { id: "i1", functionId: "supply-chain" as const, title: "TMS", status: "planned" as const, mapsTo: ["scm-tms"] };
-    expect(scoreProcess(def({ quickCheck: 1 }), 3).alignment).toBe("WHITESPACE");
-    expect(scoreProcess(def({ quickCheck: 0, initiatives: [planned] }), 3).alignment).toBe("ACCELERATE");
+    expect(scoreProcess(def({ quickCheck: 2 }), 3).alignment).toBe("WHITESPACE");
+    expect(scoreProcess(def({ quickCheck: 1, initiatives: [planned] }), 3).alignment).toBe("ACCELERATE");
     expect(scoreProcess(def({ quickCheck: 3 }), 3).alignment).toBe("AT_TARGET");
   });
 
   it("carries the 2025 self level per process and for the function", () => {
     const r = assessProcesses(input([def({ quickCheck: 1, selfScores: [3] }), def({ id: "b", name: "B", quickCheck: 1 })]));
-    expect(r.processes[0]!.self).toBe(2.5);
+    expect(r.processes[0]!.self).toBe(3);
     expect(r.processes[1]!.self).toBeNull();
-    expect(r.self).toBe(2.5);
+    expect(r.self).toBe(3);
   });
 });
 
@@ -226,13 +271,13 @@ describe("questionnaire answers (§11.1)", () => {
       def({
         quickCheck: 1,
         answers: [
-          { questionId: "q1", text: "Bank question", value: 0, weight: 3, custom: false },
+          { questionId: "q1", text: "Bank question", value: 1, weight: 3, custom: false },
           { questionId: "cq", text: "My question", value: 4, weight: 1, custom: true },
         ],
       }),
       3,
     );
-    expect(p.suggested).toBeCloseTo((1 * 2.55 + 0 * 2.55 + 4 * 0.85) / (2.55 + 2.55 + 0.85), 10);
+    expect(p.suggested).toBeCloseTo((1 * 2.55 + 1 * 2.55 + 4 * 0.85) / (2.55 + 2.55 + 0.85), 10);
     expect(p.indicators.filter((i) => i.kind === "question")).toHaveLength(2);
     const onlyAnswers = scoreProcess(def({ answers: [{ questionId: "q1", text: "", value: 2, weight: 2, custom: false }] }), 3);
     expect(onlyAnswers.level).toBe(2);

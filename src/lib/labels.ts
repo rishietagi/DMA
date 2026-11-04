@@ -49,6 +49,6 @@ export const ALIGNMENT_LABEL: Record<AlignmentStatus, string> = {
 
 export const PHASE_LABEL: Record<Phase, string> = {
   Now: "Now · 0–6 months",
-  Next: "Next · 6–12 months",
-  Later: "Later · 12–24 months",
+  Next: "Next · 6–18 months",
+  Later: "Beyond · 18–36 months",
 };

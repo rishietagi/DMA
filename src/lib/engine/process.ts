@@ -1,26 +1,45 @@
 /**
- * Process ladder scoring (SCORING_ENGINE.md §11): each L1 process of one function gets a level on
- * the KPMG 0–5 ladder (Digitized → Autonomous) from three kinds of indicator — the quick-check
- * answer, mapped evidence and the 2025 self score — then gaps to target and phased ideas. Pure.
+ * Process maturity scoring (SCORING_ENGINE.md §11): each L1 process of one function gets a stage on
+ * the KPMG 1–5 scale (Initiated → Intelligent) from four kinds of indicator — the quick-check answer,
+ * questionnaire answers, mapped evidence and the 2025 self score — then gaps to its target and
+ * ideas scored on the five prioritisation criteria and phased. Pure.
  */
-import type { FunctionId, Initiative, UseCaseRule } from "@/lib/schema";
+import type { FunctionId, Initiative, UseCaseCharter, UseCasePortfolio, UseCaseRule } from "@/lib/schema";
 import { CONFIDENCE, SOURCE_RELIABILITY } from "./config";
 import { clamp, mean, stdev, weightedMean } from "./math";
-import { alignmentFor, priorityScore, quadrantFor } from "./prioritise";
+import { alignmentFor } from "./prioritise";
 import { topoSort } from "./usecases";
-import type { AlignmentStatus, EvidenceItem, Phase, Quadrant } from "./types";
+import type { AlignmentStatus, EvidenceItem, Phase } from "./types";
 
-export type LadderLevel = 0 | 1 | 2 | 3 | 4 | 5;
-export const LADDER_LEVELS: readonly LadderLevel[] = [0, 1, 2, 3, 4, 5];
+export type LadderLevel = 1 | 2 | 3 | 4 | 5;
+export const LADDER_LEVELS: readonly LadderLevel[] = [1, 2, 3, 4, 5];
 
-export const LADDER: Record<LadderLevel, { name: string; short: string; meaning: string }> = {
-  0: { name: "Digitized processes", short: "Digitized", meaning: "Runs in systems, but steps between them are manual (Excel, email)" },
-  1: { name: "Connected systems", short: "Connected", meaning: "Systems are linked, so there are few manual hand-offs" },
-  2: { name: "Real-time data capture", short: "Real-time", meaning: "Data is captured live from systems, partners and the floor" },
-  3: { name: "Visibility & transparency", short: "Visibility", meaning: "Live dashboards show what is happening and why" },
-  4: { name: "Predictive & intelligent", short: "Predictive", meaning: "Forecasts and alerts show what will happen next" },
-  5: { name: "Autonomous & adaptive", short: "Autonomous", meaning: "AI decides and acts; people handle the exceptions" },
+/** The client's digital maturity levels (approach note, "Digital maturity levels"). */
+export const LADDER: Record<LadderLevel, { name: string; short: string; headline: string; meaning: string }> = {
+  1: { name: "Initiated", short: "Initiated", headline: "Core processes and technologies are being established", meaning: "Manual, fragmented and dependent on individual effort" },
+  2: { name: "Tested", short: "Tested", headline: "Performance measures and digital solutions are being piloted", meaning: "Point digitization with limited scale or integration" },
+  3: { name: "Scaled", short: "Scaled", headline: "Proven processes and technologies are implemented at scale", meaning: "Integrated execution with consistent adoption" },
+  4: { name: "Optimized", short: "Optimized", headline: "Processes and technology are optimized across the enterprise", meaning: "Automated, predictive and continuously improved" },
+  5: { name: "Intelligent", short: "Intelligent", headline: "Performance is visible and continuously enhanced", meaning: "Adaptive, autonomous and AI-enabled" },
 };
+
+export type Criticality = "High" | "Medium" | "Low";
+
+/** The deck's prioritisation matrix: business value (x) × strategic alignment (y). */
+export type IdeaQuadrant = "Scale now" | "Quick wins" | "Strategic bets" | "Reframe / defer";
+
+/** §11.4 prioritisation criteria weights (sum 1) and the matrix threshold. */
+export const IDEA_CRITERIA = {
+  wValue: 0.3,
+  wAlignment: 0.25,
+  wFeasibility: 0.2,
+  wRisk: 0.15,
+  wDependencies: 0.1,
+  /** value / alignment at or above the scale's midpoint sit in the upper half of the matrix */
+  threshold: 3,
+  /** alignment when nothing is known about the rule */
+  defaultAlignment: 2,
+} as const;
 
 /** §11.1 weights and thresholds */
 export const PROCESS = {
@@ -29,27 +48,27 @@ export const PROCESS = {
   selfWeight: 1,
   /** distinct sources (documents + the quick check) for full coverage */
   expectedSources: 3,
-  /** spread (max − min, ladder units) between non-self indicators that raises "Sources disagree" */
-  inconsistentSpread: 2.5,
-  /** stdev divisor for agreement, in ladder units (the engine's 2 × 1.25) */
-  stdevDivisor: 2.5,
+  /** spread (max − min, in levels) between non-self indicators that raises "Sources disagree" */
+  inconsistentSpread: 2,
+  /** stdev divisor for agreement, in levels */
+  stdevDivisor: 2,
   minIdeaGap: 1,
   maxIdeas: 6,
 } as const;
 
-/** §11.2 crosswalk: engine level 1–5 → ladder 0–5, linear, full precision. */
+/** §11.2 the capability engine and the process scale are both 1–5: a level passes through, clamped. */
 export function toLadder(engineLevel: number): number {
-  return clamp((engineLevel - 1) * 1.25, 0, 5);
+  return clamp(engineLevel, 1, 5);
 }
 
-/** How a ladder level is written in the UI — "Stage", so it never reads like the L0 / L1 process hierarchy. */
+/** How a level is written in the UI — "Stage", so it never reads like the L0 / L1 process hierarchy. */
 export function stageLabel(level: number): string {
   return `Stage ${level}`;
 }
 
-/** The ladder level a score sits on (whole level, half rounds up). */
+/** The level a score sits on (whole level, half rounds up). */
 export function ladderLevel(score: number): LadderLevel {
-  return clamp(Math.round(score + 1e-9), 0, 5) as LadderLevel;
+  return clamp(Math.round(score + 1e-9), 1, 5) as LadderLevel;
 }
 
 export interface ProcessValidation {
@@ -65,7 +84,7 @@ export interface ProcessValidation {
 export interface QuestionAnswer {
   questionId: string;
   text: string;
-  /** ladder 0–5 */
+  /** level 1–5 */
   value: number;
   weight: number;
   custom: boolean;
@@ -84,6 +103,9 @@ export interface ProcessDef {
   validation?: ProcessValidation;
   /** 2026-27 roadmap initiatives mapped to the process's capabilities */
   initiatives?: readonly Initiative[];
+  /** this process's own target; else the function's */
+  target?: LadderLevel;
+  criticality?: Criticality;
 }
 
 /** Value / feasibility / risk (1–5) of a capability, from the capability engine (§6.2). */
@@ -100,6 +122,13 @@ export interface ProcessInput {
   rules: readonly UseCaseRule[];
   /** by capability id; ideas without one fall back to gap and effort (§11.5) */
   ideaScores?: Readonly<Record<string, IdeaScoreInput>>;
+  /** strategic alignment and dependency load (1–5) by rule id (§11.4) */
+  ideaContext?: Readonly<Record<string, IdeaContext>>;
+}
+
+export interface IdeaContext {
+  alignment: number;
+  dependencies: number;
 }
 
 export type ProcessIndicator =
@@ -127,6 +156,9 @@ export interface ProcessResult {
   /** up to 3 quotes, strongest first */
   quotes: EvidenceItem[];
   documents: number;
+  /** this process's target */
+  target: LadderLevel;
+  criticality: Criticality | null;
   /** whole levels to target; null when unscored */
   gap: number | null;
   /** 2025 self-assessment of the owned capabilities, on the ladder; null when none */
@@ -144,23 +176,34 @@ export interface ProcessIdea {
   kpis: string[];
   effort: "S" | "M" | "L";
   dependsOn: string[];
+  dataPrerequisites: string[];
+  /** theme, value pool, layer and value range, when the rule carries them */
+  portfolio?: UseCasePortfolio;
+  charter?: UseCaseCharter;
   processId: string;
   processName: string;
   gap: number;
   phase: Phase;
+  /** the five prioritisation criteria, each 1–5 (§11.4) */
   value: number;
+  alignment: number;
   feasibility: number;
   risk: number;
-  /** 0–100 (§6.3) */
+  /** dependency load: higher = more platforms, data and ownership to sort first */
+  dependencies: number;
+  /** 0–100 (§11.4) */
   priority: number;
-  quadrant: Quadrant;
+  quadrant: IdeaQuadrant;
   /** the process's current score, for colouring */
   processScore: number | null;
 }
 
 export interface FunctionProcessResult {
   functionId: FunctionId;
+  /** the function's ambition (default target) */
   target: LadderLevel;
+  /** mean of the processes' own targets */
+  targetMean: number;
   processes: ProcessResult[];
   /** mean of effective process scores */
   overall: number | null;
@@ -169,7 +212,7 @@ export interface FunctionProcessResult {
   self: number | null;
   validated: number;
   ideas: ProcessIdea[];
-  /** processes on each level L0…L5 */
+  /** processes on each level 1…5 */
   distribution: number[];
 }
 
@@ -180,7 +223,7 @@ function indicatorsFor(p: ProcessDef): ProcessIndicator[] {
   for (const a of p.answers ?? [])
     out.push({
       kind: "question",
-      value: clamp(a.value, 0, 5),
+      value: clamp(a.value, 1, 5),
       weight: a.weight,
       reliability: SOURCE_RELIABILITY.questionnaire,
       questionId: a.questionId,
@@ -201,7 +244,8 @@ function band(value: number): ProcessResult["band"] {
 }
 
 /** Score one process: weighted mean, confidence, flags, quotes. */
-export function scoreProcess(p: ProcessDef, target: LadderLevel): ProcessResult {
+export function scoreProcess(p: ProcessDef, functionTarget: LadderLevel): ProcessResult {
+  const target = p.target ?? functionTarget;
   const indicators = indicatorsFor(p);
   const suggested = weightedMean(indicators.map((i) => ({ value: i.value, weight: i.weight * i.reliability })));
   const evidence = indicators.filter((i): i is Extract<ProcessIndicator, { kind: "evidence" }> => i.kind === "evidence");
@@ -249,6 +293,8 @@ export function scoreProcess(p: ProcessDef, target: LadderLevel): ProcessResult 
     flags,
     quotes,
     documents,
+    target,
+    criticality: p.criticality ?? null,
     gap,
     self: p.selfScores.length ? mean(p.selfScores.map(toLadder)) : null,
     initiatives: [...(p.initiatives ?? [])],
@@ -265,10 +311,10 @@ export function indicatorShares(p: Pick<ProcessResult, "indicators">): { indicat
   });
 }
 
-/** How many processes sit on each level, L0…L5. */
+/** How many processes sit on each level, 1…5 (index 0 = level 1). */
 export function levelDistribution(processes: readonly Pick<ProcessResult, "level">[]): number[] {
-  const out = [0, 0, 0, 0, 0, 0];
-  for (const p of processes) if (p.level !== null) out[p.level]!++;
+  const out = [0, 0, 0, 0, 0];
+  for (const p of processes) if (p.level !== null) out[p.level - 1]!++;
   return out;
 }
 
@@ -279,6 +325,27 @@ export function fallbackIdeaScores(gap: number, effort: ProcessIdea["effort"]): 
     feasibility: effort === "S" ? 4 : effort === "M" ? 3 : 2,
     risk: effort === "S" ? 2 : effort === "M" ? 3 : 4,
   };
+}
+
+/** §11.4 dependency load from a rule: each upstream idea and every two data prerequisites add one. */
+export function dependencyLoad(dependsOn: number, dataPrerequisites: number): number {
+  return clamp(1 + dependsOn + Math.ceil(dataPrerequisites / 2), 1, 5);
+}
+
+/** §11.4 priority 0–100: the five criteria (risk and dependencies inverted), scaled by the gap. */
+export function ideaPriority(c: { gap: number; value: number; alignment: number; feasibility: number; risk: number; dependencies: number }): number {
+  const W = IDEA_CRITERIA;
+  const criteria =
+    W.wValue * c.value + W.wAlignment * c.alignment + W.wFeasibility * c.feasibility + W.wRisk * (6 - c.risk) + W.wDependencies * (6 - c.dependencies);
+  const gapFactor = 0.5 + (0.5 * Math.min(3, Math.max(0, c.gap))) / 3;
+  return (100 * gapFactor * criteria) / 5;
+}
+
+/** §11.4 matrix quadrant: business value (x) × strategic alignment (y). */
+export function ideaQuadrant(value: number, alignment: number): IdeaQuadrant {
+  const hiV = value >= IDEA_CRITERIA.threshold;
+  const hiA = alignment >= IDEA_CRITERIA.threshold;
+  return hiV && hiA ? "Scale now" : hiA ? "Strategic bets" : hiV ? "Quick wins" : "Reframe / defer";
 }
 
 const PHASE_ORDER: Record<Phase, number> = { Now: 0, Next: 1, Later: 2 };
@@ -292,13 +359,14 @@ export function ideaPhase(gap: number, effort: ProcessIdea["effort"]): Phase {
 
 /**
  * §11.4 ideas: a rule belongs to a process through its capabilities or a named step. It fires when
- * that process is at least one level short of target. An idea never lands before a dependency.
+ * that process is at least one level short of target. An idea lands a horizon after its dependencies.
  */
 export function ideasFor(
   processes: readonly ProcessResult[],
   defs: readonly ProcessDef[],
   rules: readonly UseCaseRule[],
   ideaScores: Readonly<Record<string, IdeaScoreInput>> = {},
+  ideaContext: Readonly<Record<string, IdeaContext>> = {},
 ): ProcessIdea[] {
   const raw: (Omit<ProcessIdea, "phase"> & { order: number })[] = [];
   for (const rule of rules) {
@@ -314,6 +382,9 @@ export function ideasFor(
     const u = rule.useCase;
     const capScore = rule.when.capabilityIds.map((c) => ideaScores[c]).find((x) => x !== undefined);
     const sc = capScore ?? fallbackIdeaScores(best.gap!, u.effort);
+    const ctx = ideaContext[rule.id];
+    const alignment = clamp(ctx?.alignment ?? IDEA_CRITERIA.defaultAlignment, 1, 5);
+    const dependencies = clamp(ctx?.dependencies ?? dependencyLoad(u.dependsOn.length, u.dataPrerequisites.length), 1, 5);
     raw.push({
       id: rule.id,
       title: u.title,
@@ -322,14 +393,19 @@ export function ideasFor(
       kpis: u.kpis,
       effort: u.effort,
       dependsOn: u.dependsOn,
+      dataPrerequisites: u.dataPrerequisites,
+      portfolio: rule.portfolio,
+      charter: rule.charter,
       processId: best.id,
       processName: best.name,
       gap: best.gap!,
       value: sc.value,
+      alignment,
       feasibility: sc.feasibility,
       risk: sc.risk,
-      priority: priorityScore(Math.min(4, best.gap!), sc.value, sc.feasibility, sc.risk),
-      quadrant: quadrantFor(sc.value, sc.feasibility),
+      dependencies,
+      priority: ideaPriority({ gap: best.gap!, value: sc.value, alignment, feasibility: sc.feasibility, risk: sc.risk, dependencies }),
+      quadrant: ideaQuadrant(sc.value, alignment),
       processScore: best.effective,
       order: best.gap! * 10 - (u.effort === "L" ? 2 : u.effort === "M" ? 1 : 0),
     });
@@ -338,7 +414,8 @@ export function ideasFor(
   const sorted = topoSort(raw.map((i) => ({ ...i, priority: i.order, score: i.priority })));
   const phase = new Map<string, number>();
   for (const i of sorted) {
-    const deps = i.dependsOn.map((d) => phase.get(d)).filter((x): x is number => x !== undefined);
+    // an idea starts the horizon after the ideas it depends on (capped at the last horizon)
+    const deps = i.dependsOn.map((d) => phase.get(d)).filter((x): x is number => x !== undefined).map((d) => Math.min(2, d + 1));
     phase.set(i.id, Math.max(PHASE_ORDER[ideaPhase(i.gap, i.effort)], ...deps));
   }
   return sorted
@@ -360,12 +437,13 @@ export function assessProcesses(input: ProcessInput): FunctionProcessResult {
   return {
     functionId: input.functionId,
     target: input.target,
+    targetMean: processes.length ? mean(processes.map((p) => p.target)) : input.target,
     processes,
     overall,
     overallLevel: overall === null ? null : ladderLevel(overall),
     self: selfs.length ? mean(selfs) : null,
     validated: processes.filter((p) => p.status !== "suggested").length,
-    ideas: ideasFor(processes, input.processes, input.rules, input.ideaScores),
+    ideas: ideasFor(processes, input.processes, input.rules, input.ideaScores, input.ideaContext),
     distribution: levelDistribution(processes),
   };
 }

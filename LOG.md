@@ -13,8 +13,9 @@ AI, people) as an evidence-based tool. Documents and interviews go in, a **deter
 scores with reasons, a consultant accepts or overrides, and the app produces gaps, use cases, a roadmap and
 an executive summary.
 
-**Since 2026-11-02 the UI is a 4-step demo** (Scope → Gather inputs → Review levels → Results) that rates the
-L1 processes of one function on the client's **Level 0–5 ladder**. The capability engine still runs underneath.
+**Since 2026-11-02 the UI is a 4-step demo** (now Define & Focus → Assess & Validate → Diagnose → Prioritize &
+Roadmap) that rates the L1 processes of one function on the client's **1–5 maturity levels** (Initiated →
+Intelligent, since 2026-11-04). The capability engine still runs underneath, on the same 1–5 scale.
 
 - **No real AI or LLM calls.** All "AI" is rules plus scripted narration behind an `AIProvider` interface.
   A "Demo mode · simulated AI" badge is always visible.
@@ -27,8 +28,8 @@ L1 processes of one function on the client's **Level 0–5 ladder**. The capabil
   4 steps** on the client's Level 0–5 ladder. The 10-screen workbench is gone; old URLs redirect.
 - **Tests:** all green.
   - typecheck, lint, `seed:check`;
-  - 145 Vitest unit tests (capability engine untouched, plus process ladder, mapping and demo-pack acceptance);
-  - 8 Playwright e2e tests (Export PDF downloads a real report, add / rename / delete your own process, upload lowers Transportation, change needs a reason and reaches Results, every
+  - 166 Vitest unit tests (capability engine untouched, plus process ladder, mapping and demo-pack acceptance);
+  - 9 Playwright e2e tests (per-process targets, Export PDF downloads a real report, add / rename / delete your own process, upload lowers Transportation, change needs a reason and reaches Results, every
     step's visuals + details sheet, questionnaire + own question move the level, old links redirect, guided demo);
   - Lighthouse accessibility 100 on all 4 routes in light and dark;
   - 0 console errors in dev.
@@ -100,17 +101,17 @@ public/demo-evidence/  12 synthetic docs (strategy, e-com SOP, supply-chain ops 
 
 ## 5. Screens (what each does)
 
-One function at a time (L0, Supply chain by default), assessed through its **L1 processes** on the **0–5 ladder**
-from the client slide. Maturity levels are written **"Stage 0–5"** (Digitized · Connected · Real-time ·
-Visibility · Predictive · Autonomous) so they never read like the L0 / L1 hierarchy. **MDM is hidden** in
+One function at a time (L0, Supply chain by default), assessed through its **L1 processes** on the client's
+**1–5 maturity levels**, written **"Stage 1–5"** (Initiated · Tested · Scaled · Optimized · Intelligent) so they
+never read like the L0 / L1 hierarchy. Each process has a criticality and its own target. **MDM is hidden** in
 supply chain (`HIDDEN_CAPABILITIES`).
 
 | Step | Route | What it shows |
 |---|---|---|
-| 1 Define & Focus | `/` | "Where are we today?" (2025 self-assessment per capability on the ladder) and "What matters in 2026 (focus areas)" with roadmap items; function cards (bar + "2025 baseline"); priority process cards (capability count, names only when selected) plus **your own processes** ("+ Add a process": name + optional words that point to it; edit / delete with undo; "Added by you"); target maturity level (full width, horizon 2–3 years); KPI strip; maturity ladder |
+| 1 Define & Focus | `/` | "Where are we today?" (2025 self-assessment per capability on the ladder) and "What matters in 2026 (focus areas)" with roadmap items; function cards (bar + "2025 baseline"); priority process cards (capability count, names only when selected) plus **your own processes** ("+ Add a process": name + optional words that point to it; edit / delete with undo; "Added by you"); target maturity level (function ambition, horizon 2–3 years) with a **criticality and target per process** (suggested, editable); KPI strip; the five maturity levels as deck-style cards |
 | 2 Assess & Validate | `/inputs` | Context line (function · processes in scope · target). Tabs: **Evidence** (drop zone, "Load sample documents" with hover note, document list, coverage matrix: Process · Systems (application) · Data · Policies · KPIs). **Assess** (questionnaire per process: name + stage, why on hover; bank questions; your own questions). **AI insights** (per process: AI stage, evidence references, quick-check dropdown). **Interviews** (upload transcript, **Load sample transcript**, or paste notes; strengths / pain points board) |
 | 3 Diagnose | `/review` | Title "Validate maturity findings". Context line + "n/n reviewed"; **validation summary** (evidence conflicts · not enough evidence · reviewer adjustments · confirmed, reconciliation warning, **Confirm all remaining (n)**); per process: status tag, "Stage n · name", source breakdown (Interview · Questionnaire · Documents · Baseline), Sources, **Review evidence** (details sheet), Change (reason required), **Confirm level**; reviewed cards show "Validated by … · time" + Undo; audit trail |
-| 4 Prioritize & Roadmap | `/results` | Headline "Function \| Current maturity x → Target y" + strip (current · target · avg. gap · below target) + current→target slider + **3 AI insights** (strength, critical gap, priority); **diagnostic table** (overall · process · people · data & analytics heatmap + gap to target, "nothing planned" marked); 2025 self assessment vs our findings bars; value × ease idea matrix + detail; roadmap swimlanes; all functions compared; **Export PDF** downloads a designed A4 report (see below) |
+| 4 Prioritize & Roadmap | `/results` | Tabs. **Executive story** (output 1: headline, 4 KPIs current · target · ambition gap · priority themes, slider, maturity by process, 4-point leadership narrative; output 2: criticality × maturity 2×2; output 3: detailed heatmap with criticality, process · data · tech & AI · people · overall, gap; 2025 vs findings; functions compared). **Opportunities** (prioritization matrix value × alignment + 5 scoring criteria; idea detail; output 6 charter sheet; output 4 portfolio by theme × Now / Next / Beyond + foundations). **Roadmap** (output 5 by layer; by-process swimlanes). **Activation** (output 7: KPIs, portfolio health RAG, decisions required). Scope toggle All functions / this function. **Export PDF**: 7-page A4 report |
 
 Old routes redirect: `/scope` → `/`; `/evidence`, `/interviews`, `/process` → `/inputs`; `/scoring`,
 `/compare` → `/review`; `/opportunities`, `/roadmap`, `/synthesis` → `/results`.
@@ -310,4 +311,21 @@ or `when.steps`.
     own `fixed`; Helvetica is WinAnsi-only, so `t()` maps → ₹ ≥ ≤ × and strips other non-Latin characters.
   - `scripts/print-results.mjs` now downloads the report. Results-only print CSS removed.
   - Verified: typecheck, lint, 145 unit, 8 e2e, a11y 100 on /results, build (/results first load 325 kB).
+
+- **2026-11-04 — session 4: approach deck alignment** (user shared the approach / indicative-output slides; asked
+  for a comparison first, then "make your own decisions and build" sections 1 (levels), 3 (prioritisation) and 4
+  (outputs). The approach itself (4 steps) was **not** changed — the user asked to be consulted first.)
+  - **Levels:** client 1–5 scale (Initiated → Intelligent), "Stage N" kept, deck colours (`--level-N`, `-soft`,
+    `-ink`, dark mode), ladder cards in the deck style. Quick-check seed values kept (already fit the new
+    meanings). Persist v5 resets stored quick checks / validations / own-question answers / process settings.
+  - **Criticality and targets** per process on Define & Focus (`ProcessTargets`, `processSettings` in the store).
+  - **Prioritisation:** five criteria, value × alignment matrix with the deck's quadrants, scoring-criteria
+    panel, Beyond horizon; dependents start a horizon later (spec §11.4 change).
+  - **Outputs 1–7** on Prioritize & Roadmap (tabs Executive story · Opportunities · Roadmap · Activation) and in
+    the PDF (7 pages). Pure `src/lib/portfolio.ts` (+ tests).
+  - **Decisions I made (tell the user):** Stage label kept; output 2 follows the slide's legend (its quadrant
+    labels contradict it); Tech & AI column restored as in output 3; matrix y = strategic alignment; enterprise
+    views default to All functions; value ranges and charters are Illustrative seed data.
+  - Verified: typecheck, lint, 166 unit, 9 e2e, seed check, a11y 100 × 8, PDF pages rendered and checked,
+    production build. Open: confirm criticality rule, target offsets and value ranges with the deck owner.
 

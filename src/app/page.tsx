@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/misc";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/overlays";
 import { BaselineBars } from "@/components/dma/charts";
 import { AddProcessTile, ProcessForm } from "@/components/dma/custom-process";
+import { ProcessTargets } from "@/components/dma/process-targets";
 import { KpiStrip } from "@/components/dma/kpi-strip";
-import { LadderChart, ladderStyle } from "@/components/dma/ladder";
+import { LadderChart, levelColor } from "@/components/dma/ladder";
 import { Page, PageHeader } from "@/components/dma/page-header";
 import { StepNav } from "@/components/shell/step-nav";
 import { LADDER, LADDER_LEVELS, mean, stageLabel, toLadder, type LadderLevel } from "@/lib/engine";
@@ -50,7 +51,7 @@ function FunctionCards({ value, onChange }: { value: FunctionId; onChange: (fn: 
               {on && <Check className="size-4 shrink-0 text-primary" aria-hidden />}
             </span>
             <span className="h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden>
-              <span className="block h-full rounded-full" style={{ width: `${((self ?? 0) / 5) * 100}%`, background: ladderStyle(self).background }} />
+              <span className="block h-full rounded-full" style={{ width: `${((self ?? 0) / 5) * 100}%`, background: levelColor(self) }} />
             </span>
             <span className="text-[11px] text-muted-foreground tabular">2025 baseline {self === null ? "—" : self.toFixed(1)}</span>
           </button>
@@ -246,26 +247,31 @@ export default function ScopePage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="flex flex-col gap-3 pt-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <Label htmlFor="target" className="text-sm font-semibold">
-              Target maturity level
-            </Label>
-            <p className="mt-0.5 text-xs text-muted-foreground">Target horizon 2–3 years</p>
+      <Card data-tour="targets">
+        <CardContent className="flex flex-col gap-4 pt-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <Label htmlFor="target" className="text-sm font-semibold">
+                Target maturity level
+              </Label>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Target horizon 2–3 years. The function&apos;s ambition; each process then moves up or down by its business criticality.
+              </p>
+            </div>
+            <Select value={String(target)} onValueChange={(v) => setTarget(Number(v) as LadderLevel)}>
+              <SelectTrigger id="target" className="w-full sm:w-72">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {LADDER_LEVELS.map((l) => (
+                  <SelectItem key={l} value={String(l)}>
+                    {stageLabel(l)} · {LADDER[l].short}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <Select value={String(target)} onValueChange={(v) => setTarget(Number(v) as LadderLevel)}>
-            <SelectTrigger id="target" className="w-full sm:w-72">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {LADDER_LEVELS.map((l) => (
-                <SelectItem key={l} value={String(l)}>
-                  {stageLabel(l)} · {LADDER[l].short}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <ProcessTargets />
         </CardContent>
       </Card>
 
@@ -280,7 +286,7 @@ export default function ScopePage() {
       <Card>
         <CardHeader>
           <CardTitle>Maturity ladder</CardTitle>
-          <p className="text-[13px] text-muted-foreground">Each process is rated on these six levels.</p>
+          <p className="text-[13px] text-muted-foreground">Each process is rated on these five levels. Current maturity is evidence-based; targets differ by strategic importance and value, rather than Stage 5 for every process.</p>
         </CardHeader>
         <CardContent>
           <LadderChart target={target} />

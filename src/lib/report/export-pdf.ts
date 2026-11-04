@@ -4,6 +4,9 @@ import { createElement } from "react";
 import type { FunctionProcessResult } from "@/lib/engine";
 import type { AreaScores } from "@/lib/process-areas";
 import type { EvidenceDoc } from "@/lib/store/types";
+import { capabilityLabel } from "@/lib/labels";
+import { capabilitiesForStep } from "@/lib/process-input";
+import { seed } from "@/lib/seed";
 import { buildReport, type ReportSource } from "./report-data";
 
 export function reportSources(documents: readonly EvidenceDoc[]): ReportSource[] {
@@ -26,6 +29,8 @@ export async function exportReportPdf(args: {
     functionName: args.functionName,
     date: now.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
     sources: reportSources(args.documents),
+    initiatives: seed.roadmap.initiatives.filter((i) => i.functionId === args.result.functionId),
+    capabilitiesFor: (step) => capabilitiesForStep(args.result.functionId, step).map(capabilityLabel),
   });
   const [{ pdf }, { ResultsReport }] = await Promise.all([import("@react-pdf/renderer"), import("@/components/report/results-report")]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- react-pdf types expect a <Document> element

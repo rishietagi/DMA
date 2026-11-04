@@ -32,11 +32,12 @@ export function ProcessProvider({ children }: { children: React.ReactNode }) {
   const responses = useSession((s) => s.responses);
   const customQuestions = useSession((s) => s.customQuestions);
   const customProcesses = useSession((s) => s.customProcesses);
+  const processSettings = useSession((s) => s.processSettings);
 
   const caps = React.useMemo(() => assess(capabilityInput(evidence, documents, responses)), [evidence, documents, responses]);
   const all = React.useMemo(
-    () => assessAllFunctions({ evidence, quickCheck, target, responses, customQuestions, customProcesses }, ai.assessProcesses),
-    [evidence, quickCheck, target, responses, customQuestions, customProcesses],
+    () => assessAllFunctions({ evidence, quickCheck, target, responses, customQuestions, customProcesses, processSettings }, ai.assessProcesses),
+    [evidence, quickCheck, target, responses, customQuestions, customProcesses, processSettings],
   );
 
   const value = React.useMemo<Ctx>(() => {
@@ -49,11 +50,12 @@ export function ProcessProvider({ children }: { children: React.ReactNode }) {
       responses,
       customQuestions,
       customProcesses,
+      processSettings,
       processValidations: validations,
       ideaScores: ideaScoresFrom(caps),
     });
     return { input, result: ai.assessProcesses(input), caps, all };
-  }, [functionId, processes, target, evidence, quickCheck, responses, customQuestions, customProcesses, validations, caps, all]);
+  }, [functionId, processes, target, evidence, quickCheck, responses, customQuestions, customProcesses, processSettings, validations, caps, all]);
 
   return <ProcessContext.Provider value={value}>{children}</ProcessContext.Provider>;
 }

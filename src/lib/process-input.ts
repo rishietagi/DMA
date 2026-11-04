@@ -4,8 +4,8 @@
  * answers. Seed lookups live here so the engine stays pure.
  */
 import { matchCues } from "@/lib/classifier/classify";
-import { toLadder, type EvidenceItem, type FunctionProcessResult, type LadderLevel, type ProcessDef, type ProcessInput, type ProcessValidation, type QuestionAnswer } from "@/lib/engine";
-import { FUNCTION_IDS, type Dimension, type FunctionId, type Question, type QuestionnaireResponse } from "@/lib/schema";
+import { dependencyLoad, toLadder, type Criticality, type EvidenceItem, type FunctionProcessResult, type IdeaContext, type LadderLevel, type ProcessDef, type ProcessInput, type ProcessValidation, type QuestionAnswer } from "@/lib/engine";
+import { FUNCTION_IDS, type Dimension, type FunctionId, type Question, type QuestionnaireResponse, type UseCaseRule } from "@/lib/schema";
 import { seed } from "@/lib/seed";
 
 const capById = new Map(seed.baseline.capabilities.map((c) => [c.id, c]));
@@ -121,6 +121,72 @@ export function initiativesFor(capabilityIds: readonly string[]) {
   return seed.roadmap.initiatives.filter((i) => i.mapsTo.some((c) => capabilityIds.includes(c) && !isHiddenCapability(c)));
 }
 
+/** Capabilities named by the 2026 focus areas (baseline priorities). */
+const FOCUS = new Set(seed.baseline.priorities2026.flatMap((p) => p.capabilityIds));
+
+/** The consultant's per-process choices on Define & Focus. */
+export interface ProcessSetting {
+  criticality?: Criticality;
+  target?: LadderLevel;
+}
+
+/**
+ * Business criticality of a process (§11.6): High when it owns a capability named by a 2026 focus
+ * area, Medium when it owns a capability or a roadmap initiative, else Low.
+ */
+export function suggestedCriticality(functionId: FunctionId, step: string): Criticality {
+  const caps = capabilitiesForStep(functionId, step);
+  if (caps.some((c) => FOCUS.has(c))) return "High";
+  if (caps.length || initiativesFor(caps).length) return "Medium";
+  return "Low";
+}
+
+/** Target by strategic importance: the function's ambition +1 for High, −1 for Low (§11.6). */
+export function suggestedTarget(ambition: LadderLevel, criticality: Criticality): LadderLevel {
+  const t = ambition + (criticality === "High" ? 1 : criticality === "Low" ? -1 : 0);
+  return Math.min(5, Math.max(1, t)) as LadderLevel;
+}
+
+export function criticalityOf(functionId: FunctionId, step: string, settings: Readonly<Record<string, ProcessSetting>> = {}): Criticality {
+  return settings[processKey(functionId, step)]?.criticality ?? suggestedCriticality(functionId, step);
+}
+
+export function targetOf(
+  functionId: FunctionId,
+  step: string,
+  ambition: LadderLevel,
+  settings: Readonly<Record<string, ProcessSetting>> = {},
+): LadderLevel {
+  return settings[processKey(functionId, step)]?.target ?? suggestedTarget(ambition, criticalityOf(functionId, step, settings));
+}
+
+/** The processes a rule speaks to: its named steps and the steps of its capabilities. */
+export function stepsForRule(functionId: FunctionId, rule: { when: { capabilityIds: string[]; steps?: string[] } }, custom: readonly CustomProcess[] = []): string[] {
+  const chain = l1Processes(functionId, custom);
+  const fromCaps = rule.when.capabilityIds.map((c) => stepForCapability(functionId, c)).filter((x): x is string => !!x);
+  return [...new Set([...(rule.when.steps ?? []), ...fromCaps])].filter((x) => chain.includes(x));
+}
+
+/**
+ * §11.4 strategic alignment and dependency load per rule: alignment starts at 2, +2 when the rule
+ * hits a 2026 focus-area capability, +1 when a process it serves is High criticality.
+ */
+export function ideaContextFor(
+  functionId: FunctionId,
+  rules: readonly UseCaseRule[],
+  settings: Readonly<Record<string, ProcessSetting>> = {},
+  custom: readonly CustomProcess[] = [],
+): Record<string, IdeaContext> {
+  return Object.fromEntries(
+    rules.map((r) => {
+      const focus = r.when.capabilityIds.some((c) => FOCUS.has(c));
+      const high = stepsForRule(functionId, r, custom).some((st) => criticalityOf(functionId, st, settings) === "High");
+      const alignment = Math.min(5, 2 + (focus ? 2 : 0) + (high ? 1 : 0));
+      return [r.id, { alignment, dependencies: dependencyLoad(r.useCase.dependsOn.length, r.useCase.dataPrerequisites.length) }];
+    }),
+  );
+}
+
 export interface ProcessSession {
   functionId: FunctionId;
   processes: string[];
@@ -131,13 +197,14 @@ export interface ProcessSession {
   responses?: readonly QuestionnaireResponse[];
   customQuestions?: readonly CustomQuestion[];
   customProcesses?: readonly CustomProcess[];
+  processSettings?: Readonly<Record<string, ProcessSetting>>;
   /** capability value / feasibility / risk from the capability engine, when available */
   ideaScores?: ProcessInput["ideaScores"];
 }
 
 /** Every function on the ladder with all its processes, same evidence (cross-function view). */
 export function assessAllFunctions(
-  s: Pick<ProcessSession, "evidence" | "quickCheck" | "target" | "responses" | "customQuestions" | "customProcesses">,
+  s: Pick<ProcessSession, "evidence" | "quickCheck" | "target" | "responses" | "customQuestions" | "customProcesses" | "processSettings">,
   assess: (input: ProcessInput) => FunctionProcessResult,
 ): FunctionProcessResult[] {
   return FUNCTION_IDS.map((functionId) =>
@@ -175,9 +242,19 @@ export function buildProcessInput(s: ProcessSession): ProcessInput {
       answers: answersForStep(s.functionId, step, s.responses ?? [], s.customQuestions ?? []),
       validation: s.processValidations[id],
       initiatives: initiativesFor(capabilityIds),
+      criticality: criticalityOf(s.functionId, step, s.processSettings),
+      target: targetOf(s.functionId, step, s.target, s.processSettings),
     };
   });
-  return { functionId: s.functionId, target: s.target, processes, rules: seed.useCaseRules.rules, ideaScores: s.ideaScores };
+  const rules = seed.useCaseRules.rules;
+  return {
+    functionId: s.functionId,
+    target: s.target,
+    processes,
+    rules,
+    ideaScores: s.ideaScores,
+    ideaContext: ideaContextFor(s.functionId, rules, s.processSettings, custom),
+  };
 }
 
 /** The session fields keyed by process. */
@@ -187,6 +264,7 @@ export interface ProcessKeyed {
   validations: Record<string, ProcessValidation>;
   customQuestions: CustomQuestion[];
   audit: { processId: string }[];
+  processSettings?: Record<string, ProcessSetting>;
 }
 
 /**
@@ -212,5 +290,6 @@ export function renameProcessKeys<T extends ProcessKeyed>(s: T, functionId: Func
       q.functionId !== functionId || q.step !== from ? [q] : to === null ? [] : [{ ...q, step: to }],
     ),
     audit: s.audit.map((a) => (a.processId === oldKey && newKey ? { ...a, processId: newKey } : a)),
+    ...(s.processSettings ? { processSettings: move(s.processSettings) } : {}),
   } as Pick<T, keyof ProcessKeyed>;
 }

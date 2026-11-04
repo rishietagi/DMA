@@ -3,16 +3,16 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { classifyDocument } from "@/lib/classifier";
-import { assess, assessProcesses, type EvidenceItem } from "@/lib/engine";
+import { assess, assessProcesses, ideaQuadrant, type EvidenceItem } from "@/lib/engine";
 import { processInsights, processNarrative } from "@/lib/narrative";
 import { sourceBreakdown } from "@/lib/process-why";
-import { buildReport, ladderHex } from "@/lib/report/report-data";
+import { buildReport, ladderHex, LEVEL_HEX } from "@/lib/report/report-data";
 import { processAreas } from "@/lib/process-areas";
 import { processLens } from "@/lib/process-lens";
 import { capabilityInput } from "@/lib/store/build-input";
 import { DEMO_DOCS, SAMPLE_TRANSCRIPT, withoutRetiredSamples } from "@/lib/demo-evidence";
 import { parseText } from "@/lib/parse-text";
-import { answersForStep, assessAllFunctions, buildProcessInput, capabilitiesForStep, capabilitiesOf, type CustomProcess, type CustomQuestion, l1Processes, processKey, renameProcessKeys, stepForEvidence, stepKeywords } from "@/lib/process-input";
+import { answersForStep, assessAllFunctions, buildProcessInput, capabilitiesForStep, capabilitiesOf, criticalityOf, ideaContextFor, suggestedCriticality, suggestedTarget, targetOf, type CustomProcess, type CustomQuestion, l1Processes, processKey, renameProcessKeys, stepForEvidence, stepKeywords } from "@/lib/process-input";
 import { seed } from "@/lib/seed";
 
 const FN = "supply-chain" as const;
@@ -78,19 +78,22 @@ describe("demo pack acceptance (Illustrative)", () => {
     }
   });
 
-  it("drops Transportation to L0 once the SOP and interviews are read", () => {
-    expect(byName(before, "Transportation").level).toBe(1);
-    expect(byName(after, "Transportation").level).toBe(0);
+  it("keeps Transportation at Stage 1 (Initiated) and lowers it further once the SOP and interviews are read", () => {
+    expect(byName(after, "Transportation").level).toBe(1);
+    expect(byName(after, "Transportation").effective!).toBeLessThan(byName(before, "Transportation").effective!);
   });
 
-  it("keeps Order fulfilment on target and flags the IBP contradiction", () => {
-    expect(byName(after, "Order fulfilment & fill rate").gap).toBe(0);
+  it("puts Order fulfilment one level below its higher target and flags the IBP contradiction", () => {
+    expect(byName(after, "Order fulfilment & fill rate").level).toBe(3);
+    expect(byName(after, "Order fulfilment & fill rate").target).toBe(4);
+    expect(byName(after, "Order fulfilment & fill rate").gap).toBe(1);
     expect(byName(after, "Demand planning / IBP").flags).toContain("INCONSISTENT");
   });
 
-  it("rates supply chain at Level 1 with a warehousing idea in Now", () => {
-    expect(after.overallLevel).toBe(1);
-    expect(after.ideas.find((i) => i.id === "uc-wms-visibility")?.phase).toBe("Now");
+  it("rates supply chain at Stage 2 (Tested) with transport optimisation in Now", () => {
+    expect(after.overallLevel).toBe(2);
+    expect(after.ideas.find((i) => i.id === "uc-tms-optimiser")?.phase).toBe("Now");
+    expect(after.ideas.find((i) => i.id === "uc-wms-visibility")?.phase).toBe("Next");
   });
 
   it("lowers Transportation when an uploaded note says transport is planned by phone", () => {
@@ -135,8 +138,8 @@ describe("results helpers on the demo pack", () => {
 
   it("writes a summary that names the weakest process and the ideas to start now", () => {
     const lines = processNarrative(r, "Supply Chain");
-    expect(lines[0]).toMatch(/^Supply Chain sits at stage 1/);
-    expect(lines.join(" ")).toMatch(/Transportation is furthest behind at stage 0, with nothing on the 2026-27 roadmap/);
+    expect(lines[0]).toMatch(/^Supply Chain sits at stage 2/);
+    expect(lines.join(" ")).toMatch(/Transportation is furthest behind at stage 1, with nothing on the 2026-27 roadmap/);
     expect(lines.join(" ")).toMatch(/Start now with/);
   });
 
@@ -177,7 +180,7 @@ describe("questionnaire answers and custom questions (§11.1)", () => {
   it("turns bank answers into ladder values and skips don't-know", () => {
     const responses = [...seed.demoResponses.responses.filter((r) => r.questionId !== "scm-q07"), { questionId: "scm-q07", functionId: FN, level: null }];
     const answers = answersForStep(FN, "Transportation", responses, []);
-    expect(answers.map((a) => [a.questionId, a.value])).toEqual([["scm-q06", 0]]);
+    expect(answers.map((a) => [a.questionId, a.value])).toEqual([["scm-q06", 1]]);
   });
 
   it("counts a custom question only for its own function and step", () => {
@@ -325,13 +328,24 @@ describe("PDF report model", () => {
     processValidations: {},
   });
   const areas = processAreas(input.processes, assess(capabilityInput(evidence, [])));
-  const m = buildReport(r, areas, { functionName: "Supply Chain", date: "3 November 2026", sources: [{ title: "SOP", kind: "Document", sentences: 10 }] });
+  const inits = seed.roadmap.initiatives.filter((i) => i.functionId === FN);
+  const m = buildReport(r, areas, { functionName: "Supply Chain", date: "3 November 2026", sources: [{ title: "SOP", kind: "Document", sentences: 10 }], initiatives: inits });
 
-  it("carries the engine's headline numbers and three insights", () => {
+  it("carries the engine's headline numbers and the four-point leadership narrative", () => {
     expect(m.headline.current).toBe(r.overall);
-    expect(m.headline.target).toBe(3);
+    expect(m.headline.target).toBe(r.targetMean);
+    expect(m.headline.ambitionGap).toBeCloseTo(r.targetMean - r.overall!, 10);
     expect(m.headline.below).toBe(r.processes.filter((p) => (p.gap ?? 0) > 0).length);
-    expect(m.insights).toHaveLength(3);
+    expect(m.narrative).toHaveLength(4);
+  });
+
+  it("carries the 2×2, the portfolio by theme and layer, a charter and the governance view", () => {
+    expect(m.portfolio).toHaveLength(r.processes.length);
+    expect(m.themes.length).toBeGreaterThan(0);
+    expect(m.layers.map((l) => l.layer)).toEqual(["Business experiences", "Operations", "Data, AI & platforms", "Operating model"]);
+    expect(m.charter?.title).toBe([...r.ideas].sort((a, b) => b.priority - a.priority)[0]!.title);
+    expect(m.governance.inDelivery).toBe(inits.filter((i) => i.status === "in_progress").length);
+    expect(m.diagnostic[0]).toHaveProperty("ai");
   });
 
   it("keeps process order in the diagnostic table and marks unplanned gaps", () => {
@@ -354,14 +368,54 @@ describe("PDF report model", () => {
       expect(p.status).toMatch(/^(AI suggested|Validated by|Changed by)/);
       expect(p.quotes.length).toBeLessThanOrEqual(2);
     }
-    expect(m.ladder.filter((l) => l.isTarget).map((l) => l.stage)).toEqual(["Stage 3"]);
+    expect(m.ladder.map((l) => l.name)).toEqual(["Initiated", "Tested", "Scaled", "Optimized", "Intelligent"]);
   });
 
-  it("colours the ladder like the app and keeps text readable", () => {
+  it("colours each stage with its own tint and ink, like the app", () => {
     expect(ladderHex(null).fill).toBe("#f1f1f3");
-    expect(ladderHex(0).fill).toBe("#eef4fc");
-    expect(ladderHex(5).fill).toBe("#2d47a8");
-    expect(ladderHex(5).text).toBe("#ffffff");
-    expect(ladderHex(1).text).toBe("#18181b");
+    expect(ladderHex(1)).toEqual({ fill: LEVEL_HEX[1].soft, text: LEVEL_HEX[1].ink });
+    expect(ladderHex(2.6)).toEqual({ fill: LEVEL_HEX[3].soft, text: LEVEL_HEX[3].ink });
+    expect(ladderHex(5).fill).toBe(LEVEL_HEX[5].soft);
   });
 });
+
+describe("criticality, targets and strategic alignment (§11.4, §11.6)", () => {
+  it("rates processes on 2026 focus areas High, ones with capabilities Medium, the rest Low", () => {
+    expect(suggestedCriticality(FN, "Demand planning / IBP")).toBe("High");
+    expect(suggestedCriticality(FN, "Order fulfilment & fill rate")).toBe("High");
+    expect(suggestedCriticality(FN, "Transportation")).toBe("Medium");
+    expect(suggestedCriticality(FN, "Warehousing")).toBe("Low");
+  });
+
+  it("sets targets by importance around the function's ambition, clamped to 1–5", () => {
+    expect(suggestedTarget(3, "High")).toBe(4);
+    expect(suggestedTarget(3, "Medium")).toBe(3);
+    expect(suggestedTarget(3, "Low")).toBe(2);
+    expect(suggestedTarget(5, "High")).toBe(5);
+    expect(suggestedTarget(1, "Low")).toBe(1);
+  });
+
+  it("lets the consultant override criticality and target per process", () => {
+    const key = processKey(FN, "Warehousing");
+    expect(criticalityOf(FN, "Warehousing", { [key]: { criticality: "High" } })).toBe("High");
+    expect(targetOf(FN, "Warehousing", 3, { [key]: { criticality: "High" } })).toBe(4);
+    expect(targetOf(FN, "Warehousing", 3, { [key]: { target: 5 } })).toBe(5);
+  });
+
+  it("aligns ideas that hit a 2026 focus area and serve a High process", () => {
+    const ctx = ideaContextFor(FN, seed.useCaseRules.rules);
+    expect(ctx["uc-ml-forecast"]!.alignment).toBe(5);
+    expect(ctx["uc-tms-optimiser"]!.alignment).toBe(2);
+    const raised = ideaContextFor(FN, seed.useCaseRules.rules, { [processKey(FN, "Transportation")]: { criticality: "High" } });
+    expect(raised["uc-tms-optimiser"]!.alignment).toBe(3);
+  });
+
+  it("places the demo ideas on the deck's matrix: transport a quick win, ML demand sensing scale now", () => {
+    const r = run([...workshop, ...demo]);
+    for (const i of r.ideas) expect(i.quadrant).toBe(ideaQuadrant(i.value, i.alignment));
+    expect(r.ideas.find((i) => i.id === "uc-tms-optimiser")!.quadrant).toBe("Quick wins");
+    expect(r.ideas.find((i) => i.id === "uc-ml-forecast")!.quadrant).toBe("Scale now");
+    expect(r.targetMean).toBeGreaterThan(2.9);
+  });
+});
+

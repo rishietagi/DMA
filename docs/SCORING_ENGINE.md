@@ -279,18 +279,22 @@ Each item below is a decision the spec left open or a deliberate change, with th
 | 18 | Process ladder (2026-11-02) | The UI now rates **L1 processes of one function on the client's 0–5 ladder** (§11) instead of showing capability scores. The capability engine (§1–6) and its tests are unchanged and still feed the classifier and use-case library. | The user asked for a 4-step demo on the slide's Level 0–5 scale ("Digitized" → "Autonomous"), one function at a time, L0 → L1 only. |
 | 19 | Classifier: function-only items | A sentence that names its own function and carries a level cue, but matches no capability, is kept with `capabilityId: null`. Capability scoring ignores it; the process ladder places it by L1 keywords. | Warehousing has no scored capability; without this its SOP sentences were dropped. |
 
-## 11. Process ladder (`src/lib/engine/process.ts`)
+## 11. Process maturity (`src/lib/engine/process.ts`)
 
-The 4-step flow rates each selected **L1 process** of one **L0 function** on the KPMG digital maturity ladder:
+The 4-step flow rates each selected **L1 process** of one **L0 function** on the client's five digital maturity
+levels (approach note, "Digital maturity levels"; written "Stage N" in the UI):
 
-| Level | Name | Meaning |
-|---|---|---|
-| 0 | Digitized processes | Runs in systems, but steps between them are manual |
-| 1 | Connected systems | Systems are linked; few manual hand-offs |
-| 2 | Real-time data capture | Data is captured live from systems and partners |
-| 3 | Visibility & transparency | Live dashboards show what is happening |
-| 4 | Predictive & intelligent | Forecasts and alerts show what will happen |
-| 5 | Autonomous & adaptive | AI decides and acts; people handle exceptions |
+| Stage | Name | What it means | How it shows |
+|---|---|---|---|
+| 1 | Initiated | Core processes and technologies are being established | Manual, fragmented and dependent on individual effort |
+| 2 | Tested | Performance measures and digital solutions are being piloted | Point digitization with limited scale or integration |
+| 3 | Scaled | Proven processes and technologies are implemented at scale | Integrated execution with consistent adoption |
+| 4 | Optimized | Processes and technology are optimized across the enterprise | Automated, predictive and continuously improved |
+| 5 | Intelligent | Performance is visible and continuously enhanced | Adaptive, autonomous and AI-enabled |
+
+*Changed 2026-11-04:* the earlier 0–5 ladder (Digitized → Autonomous) is replaced by these levels at the user's
+request. Scoring principle (deck): current maturity is evidence-based; targets are differentiated by strategic
+importance and value (§11.6), rather than Stage 5 for every process.
 
 ### 11.1 Indicators and score
 Per process, three kinds of indicator, each with `weight × reliability`:
@@ -313,11 +317,11 @@ quality = weight-averaged reliability. **Flags:** `LACKS_EVIDENCE` ("No document
 speaks to the process; `INCONSISTENT` ("Sources disagree") when non-self indicators span ≥ 2.5 levels (the
 engine's 2-level rule × 1.25).
 
-### 11.2 Crosswalk (engine 1–5 → ladder 0–5)
-`ladder = (e − 1) × 1.25`: 1 → 0, 2 → 1.25, 3 → 2.5, 4 → 3.75, 5 → 5. Linear keeps the ends aligned
-(Excel/manual = the floor; autonomous = the top) and, after rounding, places the rubric's "Digitized" at L1,
-"Integrated" (dashboards, governed feeds) at L3 and "Automated & predictive" at L4, which matches the ladder's
-meanings closely enough for a deterministic demo.
+### 11.2 One scale
+The capability engine and the process scale are both 1–5, so `toLadder` is the identity (clamped 1–5) and
+rubric / questionnaire levels count as given. `ladderLevel` rounds half up and clamps to 1–5. The
+disagreement flag and the agreement stdev use 2 levels (the engine's 2-level rule) — previously 2.5 on the 0–5
+ladder.
 
 ### 11.3 Mapping (`src/lib/process-input.ts`)
 - **Capabilities → process:** a capability belongs to the L1 step of the first question that scores it
@@ -332,11 +336,27 @@ meanings closely enough for a deterministic demo.
   and their sentences. Renaming moves every process-keyed record (`renameProcessKeys`); deleting drops them,
   except the audit trail.
 
-### 11.4 Ideas and phasing
+### 11.4 Ideas, prioritisation criteria and phasing
 A use-case rule belongs to a process through its capabilities or `when.steps`; it fires when that process is
-≥ 1 level short of target (taking the process with the largest gap). Base phase: gap ≥ 2 → Now, else Next;
-effort L moves one phase later. An idea never lands before a dependency in the set (topological order, floor
-rule). At most 6 ideas are shown.
+≥ 1 level short of **its own target** (taking the process with the largest gap). At most 6 ideas are shown.
+
+**Five criteria (approach deck), each 1–5:** business value and feasibility and risk come from the capability
+engine's §6.2 scores for the rule's first capability (else `fallbackIdeaScores`); **strategic alignment** =
+2, +2 when the rule names a capability of a 2026 focus area, +1 when a process it serves is High criticality
+(clamped 1–5); **dependencies** = `dependencyLoad` = clamp(1 + upstream ideas + ⌈data prerequisites / 2⌉, 1, 5).
+Alignment and dependencies are computed in `process-input.ts` (`ideaContextFor`) and passed in, so the engine
+stays pure.
+
+**Priority 0–100** = 100 × gapFactor × (0.30·value + 0.25·alignment + 0.20·feasibility + 0.15·(6 − risk) +
+0.10·(6 − dependencies)) / 5, with gapFactor = 0.5 + 0.5 · min(gap, 3) / 3.
+
+**Matrix (deck):** business value (x) × strategic alignment (y), split at the scale midpoint 3 (≥ 3 = upper half):
+Scale now (high, high) · Strategic bets (low value, high alignment) · Quick wins (high value, low alignment) ·
+Reframe / defer (low, low).
+
+**Horizons:** Now 0–6 months · Next 6–18 · Beyond 18–36 (the engine's `Later`). Base: gap ≥ 2 → Now, else Next;
+effort L one horizon later. *Changed 2026-11-04:* an idea now starts **one horizon after** each idea it depends
+on (capped at Beyond); previously "never before" (same horizon allowed).
 
 ### 11.5 Explainability and results helpers
 - `indicatorShares(p)` — each signal's share of the score (`w·r / Σ w·r`) and contribution (`share × value`);
@@ -360,6 +380,28 @@ rule). At most 6 ideas are shown.
   highest-priority Now idea.
 - **Hidden capabilities:** `HIDDEN_CAPABILITIES` (`mdm`) are left out of the process view — no step, no
   self score, no ideas, no initiatives — while the capability engine still scores them.
-- **Wording:** levels on this ladder are shown as "Stage 0–5" (`stageLabel`), never "L0–L5".
+- **Wording:** levels are shown as "Stage 1–5" (`stageLabel`), never "L1–L5".
 - **Cross-function view:** every function assessed with all its L1 processes, the same evidence and quick-check
   answers, and no validations.
+
+### 11.6 Criticality, targets and the portfolio outputs (`src/lib/portfolio.ts`)
+- **Criticality** per process (`suggestedCriticality`): High when it owns a capability named by a 2026 focus area,
+  Medium when it owns a capability or a roadmap initiative, else Low. The consultant can change it.
+- **Target** per process (`suggestedTarget`): the function's ambition +1 for High, −1 for Low, clamped 1–5; the
+  consultant can change it. Gaps use each process's own target; the function's target maturity is their mean.
+- **Criticality × maturity 2×2** (deck output 2, following its legend): criticality High 4.3 / Medium 3.2 /
+  Low 1.8 on the y axis (≥ 3 = business-critical), maturity ≥ 3 = higher. Transform now · Sustain & differentiate
+  · Scale selectively · Rationalize / monitor.
+- **Leadership narrative:** strongest starting point · largest gap · data constraint (sources disagree, else gaps
+  with nothing planned) · portfolio mix by quadrant.
+- **Portfolio** (outputs 4, 5): each rule carries an Illustrative `portfolio` (theme, value pool, layer, value
+  range in INR crore); ideas are grouped theme × horizon and layer × horizon. Across functions a rule is kept
+  once, at its highest priority. Foundations = Data, AI & platforms ideas, then the most-shared data prerequisites.
+- **Charter** (output 6): the rule's Illustrative `charter` where present; else the process's strongest pain
+  quote as the problem, the idea as the outcome, KPIs as success measures and a standard first 90 days.
+- **Governance** (output 7): RAG per idea — red if its process's sources disagree or feasibility ≤ 2 with
+  dependencies ≥ 4; amber if feasibility ≤ 2, dependencies ≥ 4 or risk ≥ 4; else green. Initiatives = ideas +
+  open roadmap initiatives; in delivery = roadmap initiatives in progress; value = sum of ranges. Up to four
+  decisions: fund the first Now pilot, resolve data ownership where sources disagree, confirm the platform
+  pattern for the first platform idea, nominate an owner for the first gap with nothing planned.
+

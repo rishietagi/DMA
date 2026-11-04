@@ -24,7 +24,7 @@ export interface TourStep {
 const FN = "supply-chain" as const;
 const TRANSPORT = processKey(FN, "Transportation");
 export const TRANSPORT_RATIONALE =
-  "Site visit: SAP creates a shipment document for every load, so systems are partly connected even without a TMS.";
+  "Site visit: SAP creates a shipment document for every load, so transport is point-digitized (Tested) even without a TMS.";
 
 export const TOUR_STEPS: TourStep[] = [
   {
@@ -71,12 +71,12 @@ export const TOUR_STEPS: TourStep[] = [
       const s = useSession.getState();
       const r = liveResult();
       const p = r.processes.find((x) => x.id === TRANSPORT);
-      if (p && p.status === "suggested" && p.suggested !== null) s.change(TRANSPORT, p.suggested, 1, TRANSPORT_RATIONALE);
+      if (p && p.status === "suggested" && p.suggested !== null) s.change(TRANSPORT, p.suggested, 2, TRANSPORT_RATIONALE);
       const pending = liveResult().processes.filter((x) => x.status === "suggested" && x.suggested !== null);
       s.acceptAll(pending.map((x) => ({ processId: x.id, score: x.suggested! })));
     },
     outro: () => [
-      "The consultant moves it to stage 1 and records why; the before and after are kept. The rest are accepted in one click.",
+      `The consultant moves it to stage 2 · ${LADDER[2].short} and records why; the before and after are kept. The rest are confirmed in one click.`,
     ],
   },
   {

@@ -10,10 +10,10 @@ const ROWS: { kind: ProcessIndicator["kind"]; label: string; color: string }[] =
 const W = 520;
 const ROW_H = 34;
 const PAD = { l: 82, r: 16, t: 10, b: 26 };
-const x = (v: number) => PAD.l + (v / 5) * (W - PAD.l - PAD.r);
+const x = (v: number) => PAD.l + ((Math.min(5, Math.max(1, v)) - 1) / 4) * (W - PAD.l - PAD.r);
 
 /**
- * Every signal behind a process level as a dot on the 0–5 ladder: one row per source, dot size by
+ * Every signal behind a process level as a dot on the 1–5 scale: one row per source, dot size by
  * weight × reliability, the suggested level as a line. Dots at the same level fan out.
  */
 export function SignalPlot({ indicators, suggested, effective }: { indicators: readonly ProcessIndicator[]; suggested: number | null; effective: number | null }) {
@@ -23,12 +23,12 @@ export function SignalPlot({ indicators, suggested, effective }: { indicators: r
       viewBox={`0 0 ${W} ${H}`}
       className="w-full"
       role="img"
-      aria-label={`Signals on the 0 to 5 ladder: ${ROWS.map((r) => {
+      aria-label={`Signals on the 1 to 5 scale: ${ROWS.map((r) => {
         const vs = indicators.filter((i) => i.kind === r.kind).map((i) => `stage ${ladderLevel(i.value)}`);
         return `${r.label} ${vs.length ? vs.join(", ") : "none"}`;
       }).join("; ")}. Suggested ${suggested === null ? "none" : suggested.toFixed(1)}.`}
     >
-      {[0, 1, 2, 3, 4, 5].map((l) => (
+      {[1, 2, 3, 4, 5].map((l) => (
         <g key={l}>
           <line x1={x(l)} x2={x(l)} y1={PAD.t} y2={H - PAD.b} stroke="var(--border)" />
           <text x={x(l)} y={H - 8} textAnchor="middle" className="fill-muted-foreground text-[11px] tabular">

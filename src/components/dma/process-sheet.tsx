@@ -67,7 +67,7 @@ export function ProcessSheet({ process: p, onOpenChange }: { process: ProcessRes
               </div>
             </SheetHeader>
 
-            <Section title="Every signal on the ladder" note="Bigger dots weigh more. The dashed line is the AI's suggestion; a solid green line is the consultant's level.">
+            <Section title="Every signal on the 1–5 scale" note="Bigger dots weigh more. The dashed line is the AI's suggestion; a solid green line is the consultant's level.">
               <SignalPlot indicators={p.indicators} suggested={p.suggested} effective={p.effective} />
             </Section>
 

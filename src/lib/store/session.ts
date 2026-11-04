@@ -6,7 +6,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { EvidenceItem, LadderLevel, ProcessValidation } from "@/lib/engine";
-import { l1Processes, processKey, renameProcessKeys, type CustomProcess, type CustomQuestion } from "@/lib/process-input";
+import { l1Processes, processKey, renameProcessKeys, type CustomProcess, type CustomQuestion, type ProcessSetting } from "@/lib/process-input";
 import type { FunctionId, Level, QuestionnaireResponse } from "@/lib/schema";
 import { withoutRetiredSamples } from "@/lib/demo-evidence";
 import { seed } from "@/lib/seed";
@@ -54,7 +54,7 @@ export interface SessionState {
   /** selected L1 processes, as process keys */
   processes: string[];
   target: LadderLevel;
-  /** quick-check answers on the 0–5 ladder, by process key */
+  /** quick-check answers on the 1–5 scale, by process key */
   quickCheck: Record<string, number>;
   /** question-bank answers (1–5 rubric levels) */
   responses: QuestionnaireResponse[];
@@ -62,6 +62,8 @@ export interface SessionState {
   customQuestions: CustomQuestion[];
   /** processes the consultant added to a function */
   customProcesses: CustomProcess[];
+  /** criticality and target the consultant set per process (else suggested) */
+  processSettings: Record<string, ProcessSetting>;
   documents: EvidenceDoc[];
   evidence: EvidenceItem[];
   validations: Record<string, ProcessValidation>;
@@ -78,6 +80,8 @@ export interface SessionState {
   addQuestion: (q: Omit<CustomQuestion, "id">) => void;
   answerQuestion: (id: string, answer: LadderLevel | null) => void;
   removeQuestion: (id: string) => void;
+  /** null clears that field back to the suggestion */
+  setProcessSetting: (key: string, patch: { criticality?: ProcessSetting["criticality"] | null; target?: ProcessSetting["target"] | null }) => void;
   addProcess: (functionId: FunctionId, name: string, keywords: string[]) => void;
   updateProcess: (id: string, name: string, keywords: string[]) => void;
   /** deletes a process; returns a function that puts it (and everything keyed on it) back */
@@ -110,6 +114,7 @@ const initial = () => ({
   responses: [...seed.demoResponses.responses],
   customQuestions: [] as CustomQuestion[],
   customProcesses: [] as CustomProcess[],
+  processSettings: {} as Record<string, ProcessSetting>,
   documents: workshopDocs(),
   evidence: workshopEvidence(),
   validations: {} as Record<string, ProcessValidation>,
@@ -145,6 +150,18 @@ export const useSession = create<SessionState>()(
       answerQuestion: (id, answer) =>
         set((s) => ({ customQuestions: s.customQuestions.map((q) => (q.id === id ? { ...q, answer } : q)) })),
       removeQuestion: (id) => set((s) => ({ customQuestions: s.customQuestions.filter((q) => q.id !== id) })),
+      setProcessSetting: (key, patch) =>
+        set((s) => {
+          const next: ProcessSetting = { ...s.processSettings[key] };
+          for (const k of ["criticality", "target"] as const) {
+            if (patch[k] === null) delete next[k];
+            else if (patch[k] !== undefined) (next as Record<string, unknown>)[k] = patch[k];
+          }
+          const processSettings = { ...s.processSettings };
+          if (Object.keys(next).length) processSettings[key] = next;
+          else delete processSettings[key];
+          return { processSettings };
+        }),
       addProcess: (functionId, name, keywords) =>
         set((s) => ({
           customProcesses: [...s.customProcesses, { id: uid("cp"), functionId, name, keywords }],
@@ -257,11 +274,21 @@ export const useSession = create<SessionState>()(
     }),
     {
       name: "himalaya-dma-session-v2",
-      version: 4,
+      version: 5,
       migrate: (state, version) => {
         const s = state as Partial<SessionState>;
         if (version < 3) s.customProcesses = [];
         if (version < 4 && s.documents && s.evidence) Object.assign(s, withoutRetiredSamples({ documents: s.documents, evidence: s.evidence }));
+        if (version < 5) {
+          // the scale moved from 0–5 to the client's 1–5 levels: levels stored on the old scale no longer mean the same
+          Object.assign(s, {
+            quickCheck: { ...seed.demoResponses.quickCheck },
+            validations: {},
+            target: DEFAULT_TARGET,
+            customQuestions: (s.customQuestions ?? []).map((q) => ({ ...q, answer: null })),
+            processSettings: {},
+          });
+        }
         return s as SessionState;
       },
       storage: createJSONStorage(() => localStorage),

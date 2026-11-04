@@ -15,7 +15,7 @@ import {
 import { LADDER, type FunctionProcessResult, type LadderLevel, type ProcessResult } from "@/lib/engine";
 import { FUNCTION_SHORT } from "@/lib/labels";
 import { cn } from "@/lib/utils";
-import { ladderStyle } from "./ladder";
+import { levelColor } from "./ladder";
 
 const TOOLTIP = {
   contentStyle: { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12, color: "var(--popover-foreground)" },
@@ -56,7 +56,7 @@ export function SelfVsToday({ processes }: { processes: readonly ProcessResult[]
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} layout="vertical" margin={{ left: 8, right: 36, top: 4, bottom: 4 }} barGap={3}>
             <CartesianGrid horizontal={false} stroke="var(--border)" />
-            <XAxis type="number" domain={[0, 5]} ticks={[0, 1, 2, 3, 4, 5]} tick={TICK} tickFormatter={(v) => `Stage ${v}`} />
+            <XAxis type="number" domain={[0, 5]} ticks={[1, 2, 3, 4, 5]} tick={TICK} tickFormatter={(v) => `Stage ${v}`} />
             <YAxis type="category" dataKey="name" width={190} tick={TICK} />
             <Tooltip {...TOOLTIP} formatter={fmt} />
             <Bar dataKey="self" name="2025" fill="var(--chart-4)" radius={[0, 3, 3, 0]} barSize={14} isAnimationActive={false} />
@@ -86,13 +86,13 @@ export function FunctionCompare({ all, current, target }: { all: readonly Functi
     <div
       className="h-[260px]"
       role="img"
-      aria-label={`Bar chart of functions on the ladder: ${data.map((d) => `${d.name} ${fmt(d.level)}`).join(", ")}`}
+      aria-label={`Bar chart of functions on the 1–5 scale: ${data.map((d) => `${d.name} ${fmt(d.level)}`).join(", ")}`}
     >
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ left: -16, right: 8, top: 16, bottom: 4 }}>
           <CartesianGrid vertical={false} stroke="var(--border)" />
           <XAxis dataKey="name" tick={TICK} interval={0} angle={-25} textAnchor="end" height={54} />
-          <YAxis domain={[0, 5]} ticks={[0, 1, 2, 3, 4, 5]} tick={TICK} tickFormatter={(v) => `Stage ${v}`} width={64} />
+          <YAxis domain={[0, 5]} ticks={[1, 2, 3, 4, 5]} tick={TICK} tickFormatter={(v) => `Stage ${v}`} width={64} />
           <Tooltip {...TOOLTIP} formatter={fmt} />
           <ReferenceLine y={target} stroke="var(--foreground)" strokeOpacity={0.5} strokeDasharray="5 4" label={{ value: "Target", position: "right", fill: "var(--muted-foreground)", fontSize: 10 }} />
           <Bar dataKey="level" name="Overall stage" radius={[3, 3, 0, 0]} isAnimationActive={false}>
@@ -107,7 +107,7 @@ export function FunctionCompare({ all, current, target }: { all: readonly Functi
   );
 }
 
-/** 2025 self level per capability (crosswalked to the ladder). */
+/** 2025 self level per capability, on the 1–5 scale. */
 export function BaselineBars({ items }: { items: { id: string; name: string; level: number }[] }) {
   return (
     <ul className="flex flex-col gap-1.5" aria-label="2025 self-assessment by capability">
@@ -117,7 +117,7 @@ export function BaselineBars({ items }: { items: { id: string; name: string; lev
             {c.name}
           </span>
           <span className="h-2.5 overflow-hidden rounded-full bg-muted">
-            <span className="block h-full rounded-full" style={{ width: `${(c.level / 5) * 100}%`, background: ladderStyle(c.level).background }} />
+            <span className="block h-full rounded-full" style={{ width: `${(c.level / 5) * 100}%`, background: levelColor(c.level) }} />
           </span>
           <span className="text-right tabular text-muted-foreground">{c.level.toFixed(1)}</span>
         </li>
@@ -130,13 +130,13 @@ export function BaselineBars({ items }: { items: { id: string; name: string; lev
 export function LevelDistribution({ distribution, className }: { distribution: readonly number[]; className?: string }) {
   const max = Math.max(1, ...distribution);
   return (
-    <div className={cn("flex items-end gap-1.5", className)} role="img" aria-label={`Processes per stage: ${distribution.map((n, l) => `stage ${l}: ${n}`).join(", ")}`}>
-      {distribution.map((n, l) => (
-        <div key={l} className="flex flex-1 flex-col items-center gap-1">
+    <div className={cn("flex items-end gap-1.5", className)} role="img" aria-label={`Processes per stage: ${distribution.map((n, i) => `stage ${i + 1}: ${n}`).join(", ")}`}>
+      {distribution.map((n, i) => (
+        <div key={i} className="flex flex-1 flex-col items-center gap-1">
           <span className="text-[10px] tabular text-muted-foreground">{n || ""}</span>
-          <span className="w-full rounded-sm" style={{ height: 4 + (n / max) * 40, background: n ? ladderStyle(l).background : "var(--muted)" }} />
-          <span className="text-[10px] font-medium tabular text-muted-foreground" title={LADDER[l as LadderLevel].name}>
-            {l}
+          <span className="w-full rounded-sm" style={{ height: 4 + (n / max) * 40, background: n ? levelColor(i + 1) : "var(--muted)" }} />
+          <span className="text-[10px] font-medium tabular text-muted-foreground" title={LADDER[(i + 1) as LadderLevel].name}>
+            {i + 1}
           </span>
         </div>
       ))}

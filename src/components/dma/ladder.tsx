@@ -4,11 +4,16 @@ import { LADDER, LADDER_LEVELS, ladderLevel, stageLabel, type LadderLevel, type 
 import { cn } from "@/lib/utils";
 import { maturityStyle } from "./maturity";
 
-/** Ladder colour: the 0–5 ladder spread over the single-hue maturity ramp. */
+/** Level colour: the soft tint of the level a score sits on, with its ink for text. */
 export function ladderStyle(score: number | null | undefined): React.CSSProperties {
-  if (score === null || score === undefined) return maturityStyle(null);
-  return maturityStyle(1 + Math.min(5, Math.max(0, score)) * 0.8);
+  if (score === null || score === undefined || Number.isNaN(score)) return maturityStyle(null);
+  const l = ladderLevel(score);
+  return { background: `var(--level-${l}-soft)`, color: `var(--level-${l}-ink)` };
 }
+
+/** The strong hue of a level (bars, markers, the ladder's number circles). */
+export const levelColor = (score: number | null | undefined) =>
+  score === null || score === undefined ? "var(--muted-foreground)" : `var(--level-${ladderLevel(score)})`;
 
 type Provenance = "ai" | "validated" | "plain";
 
@@ -36,6 +41,7 @@ export function LevelChip({
         size === "sm" && "h-5 min-w-7 px-1.5 text-[11px]",
         size === "md" && "h-6 min-w-8 px-2 text-xs",
         size === "lg" && "h-10 min-w-12 px-3 text-lg",
+        "ring-inset",
         provenance === "ai" && "ring-1 ring-ai/60 ring-offset-1 ring-offset-card",
         provenance === "validated" && "ring-1 ring-validated ring-offset-1 ring-offset-card",
         className,
@@ -55,8 +61,8 @@ function StatusIcon({ status }: { status: ProcessResult["status"] }) {
 }
 
 /**
- * The slide's staircase: six ascending steps, L0 → L5. With processes, each sits on its level and
- * the target step is marked; without, each step shows what the level means.
+ * The client's five maturity levels as cards: numbered circle, name, what it means, how it shows.
+ * With processes, each sits on its level; the target level is marked.
  */
 export function LadderChart({
   processes,
@@ -70,44 +76,50 @@ export function LadderChart({
   const withProcesses = processes !== undefined;
   return (
     <ol
-      aria-label="Maturity ladder, Stage 0 to Stage 5"
-      className={cn("grid grid-cols-2 items-end gap-2 sm:grid-cols-3 lg:grid-cols-6 print:grid-cols-6", className)}
+      aria-label="Digital maturity levels, Stage 1 Initiated to Stage 5 Intelligent"
+      className={cn("grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5 print:grid-cols-5", className)}
     >
       {LADDER_LEVELS.map((l) => {
         const here = processes?.filter((p) => p.level === l) ?? [];
         const isTarget = target === l;
         return (
-          <li key={l} className="flex h-full flex-col justify-end">
-            <div
-              data-ladder-step
-              className={cn(
-                "flex flex-col gap-2 rounded-lg p-3",
-                isTarget && "ring-2 ring-foreground/70 ring-offset-2 ring-offset-background",
-              )}
-              style={{ ...ladderStyle(l), minHeight: withProcesses ? 96 + l * 26 : 72 + l * 14 }}
+          <li
+            key={l}
+            data-ladder-step
+            className={cn(
+              "relative flex flex-col items-center gap-2 rounded-xl border-[1.5px] bg-card px-3 pt-4 pb-3 text-center",
+              isTarget && "ring-2 ring-foreground/70 ring-offset-2 ring-offset-background",
+            )}
+            style={{ borderColor: `var(--level-${l})`, background: l === 5 ? "var(--level-5-soft)" : undefined }}
+          >
+            {isTarget && (
+              <span className="absolute top-2 right-2 rounded bg-foreground px-1.5 py-0.5 text-[10px] font-semibold text-background">Target</span>
+            )}
+            <span
+              className="grid size-11 place-items-center rounded-full text-lg font-bold text-white tabular shadow-sm"
+              style={{ background: `var(--level-${l})` }}
+              aria-hidden
             >
-              <div className="flex items-baseline justify-between gap-2">
-                <p className="text-[11px] font-semibold tabular opacity-80">Stage {l}</p>
-                {isTarget && (
-                  <span className="rounded bg-background/90 px-1.5 py-0.5 text-[10px] font-semibold text-foreground">Target</span>
-                )}
-              </div>
-              <p className="text-[13px] leading-tight font-semibold">{LADDER[l].name}</p>
-              {!withProcesses && <p className="text-[11px] leading-snug opacity-85">{LADDER[l].meaning}</p>}
-              {here.length > 0 && (
-                <ul className="mt-auto flex flex-col gap-1" aria-label={`Processes at stage ${l}`}>
-                  {here.map((p) => (
-                    <li
-                      key={p.id}
-                      className="flex items-center gap-1.5 rounded-md bg-card px-2 py-1 text-[12px] leading-tight text-card-foreground shadow-xs"
-                    >
-                      <StatusIcon status={p.status} />
-                      <span className="min-w-0">{p.name}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+              {l}
+            </span>
+            <p className="text-[15px] font-semibold">
+              <span className="sr-only">{stageLabel(l)}: </span>
+              {LADDER[l].name}
+            </p>
+            <p className="text-[12px] leading-snug text-muted-foreground">{LADDER[l].headline}</p>
+            <span className="h-0.5 w-3/5 rounded" style={{ background: `var(--level-${l})` }} aria-hidden />
+            <p className="text-[11px] leading-snug text-muted-foreground">{LADDER[l].meaning}</p>
+            {withProcesses && (
+              <ul className="mt-1 flex w-full flex-col gap-1 text-left" aria-label={`Processes at stage ${l}`}>
+                {here.map((p) => (
+                  <li key={p.id} className="flex items-center gap-1.5 rounded-md border bg-background px-2 py-1 text-[12px] leading-tight">
+                    <StatusIcon status={p.status} />
+                    <span className="min-w-0">{p.name}</span>
+                  </li>
+                ))}
+                {!here.length && <li className="text-center text-[11px] text-muted-foreground">—</li>}
+              </ul>
+            )}
           </li>
         );
       })}
@@ -115,14 +127,14 @@ export function LadderChart({
   );
 }
 
-/** Current → target on one 0–5 track: the gap at a glance. */
+/** Current → target on one 1–5 track: the gap at a glance. */
 export function MaturitySlider({ current, target, className }: { current: number | null; target: number; className?: string }) {
-  const pct = (v: number) => `${(Math.min(5, Math.max(0, v)) / 5) * 100}%`;
-  const now = current ?? 0;
+  const pct = (v: number) => `${((Math.min(5, Math.max(1, v)) - 1) / 4) * 100}%`;
+  const now = current ?? 1;
   return (
     <div
       role="img"
-      aria-label={`Current maturity ${current === null ? "not rated" : now.toFixed(1)}, target ${target.toFixed(1)}, on the 0 to 5 scale`}
+      aria-label={`Current maturity ${current === null ? "not rated" : now.toFixed(1)}, target ${target.toFixed(1)}, on the 1 to 5 scale`}
       className={cn("flex items-center gap-4", className)}
     >
       <p className="shrink-0 text-sm">
@@ -133,7 +145,7 @@ export function MaturitySlider({ current, target, className }: { current: number
         <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-muted" />
         <div
           className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-gradient-to-r from-ai/30 to-ai"
-          style={{ left: pct(Math.min(now, target)), width: `calc(${pct(Math.abs(target - now))})` }}
+          style={{ left: pct(Math.min(now, target)), width: `calc(${pct(1 + Math.abs(target - now))})` }}
         />
         {LADDER_LEVELS.map((l) => (
           <span key={l} className="absolute bottom-0 -translate-x-1/2 text-[10px] text-muted-foreground tabular" style={{ left: pct(l) }}>

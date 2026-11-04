@@ -28,6 +28,22 @@
   --ring: oklch(0.55 0.19 268);
   --sidebar: oklch(0.975 0.002 286);
 
+  /* client maturity levels 1–5 (Initiated → Intelligent): strong hue, soft tint, ink on the tint */
+  --level-1: oklch(0.55 0.2 27);
+  --level-2: oklch(0.68 0.17 50);
+  --level-3: oklch(0.38 0.13 262);
+  --level-4: oklch(0.55 0.1 195);
+  --level-5: oklch(0.55 0.15 140);
+  --level-1-soft: oklch(0.94 0.04 20);
+  --level-2-soft: oklch(0.945 0.05 62);
+  --level-3-soft: oklch(0.93 0.035 255);
+  --level-4-soft: oklch(0.94 0.04 190);
+  --level-5-soft: oklch(0.94 0.05 140);
+  --level-1-ink: oklch(0.45 0.17 25);
+  --level-2-ink: oklch(0.47 0.13 48);
+  --level-3-ink: oklch(0.34 0.12 262);
+  --level-4-ink: oklch(0.39 0.08 195);
+  --level-5-ink: oklch(0.39 0.11 140);
   /* maturity ramp (blue) */
   --maturity-1: oklch(0.955 0.022 248);
   --maturity-2: oklch(0.885 0.055 248);
@@ -94,6 +110,21 @@
   --ring: oklch(0.7 0.15 270);
   --sidebar: oklch(0.155 0.004 285.885);
 
+  --level-1: oklch(0.65 0.19 27);
+  --level-2: oklch(0.74 0.15 55);
+  --level-3: oklch(0.62 0.13 262);
+  --level-4: oklch(0.7 0.1 195);
+  --level-5: oklch(0.7 0.15 140);
+  --level-1-soft: oklch(0.33 0.07 25);
+  --level-2-soft: oklch(0.35 0.06 55);
+  --level-3-soft: oklch(0.33 0.07 262);
+  --level-4-soft: oklch(0.34 0.05 195);
+  --level-5-soft: oklch(0.34 0.06 140);
+  --level-1-ink: oklch(0.9 0.06 25);
+  --level-2-ink: oklch(0.91 0.06 60);
+  --level-3-ink: oklch(0.9 0.05 262);
+  --level-4-ink: oklch(0.91 0.05 195);
+  --level-5-ink: oklch(0.91 0.06 140);
   --maturity-1: oklch(0.29 0.035 255);
   --maturity-2: oklch(0.37 0.065 255);
   --maturity-3: oklch(0.47 0.1 255);

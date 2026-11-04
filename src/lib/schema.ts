@@ -245,8 +245,33 @@ export type QuestionBank = z.infer<typeof questionBankSchema>;
 
 export const effortSchema = z.enum(["S", "M", "L"]);
 
+export const PORTFOLIO_THEMES = ["Grow & engage", "Plan & fulfil", "Innovate & assure", "Run & enable"] as const;
+export const VALUE_POOLS = ["Revenue / experience", "Efficiency / service", "Speed / control"] as const;
+export const ROADMAP_LAYERS = ["Business experiences", "Operations", "Data, AI & platforms", "Operating model"] as const;
+
+/** Where an initiative sits in the opportunity portfolio and roadmap (Illustrative). */
+export const useCasePortfolioSchema = z.object({
+  theme: z.enum(PORTFOLIO_THEMES),
+  valuePool: z.enum(VALUE_POOLS),
+  layer: z.enum(ROADMAP_LAYERS),
+  /** INR crore, [min, max] */
+  valuePotentialCr: z.tuple([z.number().min(0), z.number().min(0)]),
+});
+export type UseCasePortfolio = z.infer<typeof useCasePortfolioSchema>;
+
+/** One-page initiative charter content (Illustrative); the rest is derived from the assessment. */
+export const useCaseCharterSchema = z.object({
+  problem: z.string(),
+  outcome: z.string(),
+  valueHypothesis: z.string(),
+  first90: z.array(z.string()),
+});
+export type UseCaseCharter = z.infer<typeof useCaseCharterSchema>;
+
 export const useCaseRuleSchema = z.object({
   id: z.string(),
+  portfolio: useCasePortfolioSchema.optional(),
+  charter: useCaseCharterSchema.optional(),
   when: z.object({
     capabilityIds: z.array(z.string()),
     /** L1 process names the rule also applies to (process ladder, SCORING_ENGINE.md §11.4) */
@@ -311,8 +336,8 @@ export const demoResponsesSchema = z.object({
   meta: z.object({ label: z.literal("Illustrative"), note: z.string() }),
   responses: z.array(questionnaireResponseSchema),
   evidence: z.array(seededEvidenceSchema),
-  /** quick-check answers on the 0–5 process ladder, keyed "<functionId>:<L1 process>" */
-  quickCheck: z.record(z.string(), z.number().int().min(0).max(5)).default({}),
+  /** quick-check answers on the 1–5 maturity scale, keyed "<functionId>:<L1 process>" */
+  quickCheck: z.record(z.string(), z.number().int().min(1).max(5)).default({}),
 });
 export type DemoResponses = z.infer<typeof demoResponsesSchema>;
 

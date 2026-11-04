@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { LevelChip } from "./ladder";
 
 const PHASES: Phase[] = ["Now", "Next", "Later"];
-const PHASE_SUB: Record<Phase, string> = { Now: "0–6 months", Next: "6–12 months", Later: "12–24 months" };
+const PHASE_SUB: Record<Phase, string> = { Now: "0–6 months", Next: "6–18 months", Later: "18–36 months" };
 const STATUS_DOT: Record<Initiative["status"], string> = {
   completed: "bg-status-completed",
   in_progress: "bg-status-progress",
@@ -23,7 +23,7 @@ interface Edge {
 
 /**
  * Process swimlanes: what the 2026-27 roadmap already plans (with accelerate / revisit flags and
- * gaps with nothing planned) next to the ideas phased Now / Next / Later. Dependency arrows are drawn
+ * gaps with nothing planned) next to the ideas phased Now / Next / Beyond. Dependency arrows are drawn
  * after layout; hovering an idea highlights its chain.
  */
 export function ProcessRoadmap({
@@ -135,7 +135,7 @@ export function ProcessRoadmap({
           </div>
           {PHASES.map((p) => (
             <div key={p} className="border-b pb-2 text-xs font-medium">
-              {p}
+              {p === "Later" ? "Beyond" : p}
               <p className="text-[11px] font-normal text-muted-foreground">{PHASE_SUB[p]}</p>
             </div>
           ))}

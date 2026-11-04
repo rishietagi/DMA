@@ -1,6 +1,7 @@
 {
   "meta": {
-    "note": "Full rule library — 28 rules covering every function. when fields are ANDed; capabilityIds OR-matched; score uses the effective dimension score."
+    "note": "Full rule library — 28 rules covering every function. when fields are ANDed; capabilityIds OR-matched; score uses the effective dimension score.",
+    "portfolio": "Illustrative theme, value pool, layer and value potential (INR crore, range) per rule; charters for supply-chain rules are Illustrative."
   },
   "rules": [
     {
@@ -30,6 +31,15 @@
         "dependsOn": [
           "uc-platform-po-integration"
         ]
+      },
+      "portfolio": {
+        "theme": "Grow & engage",
+        "valuePool": "Efficiency / service",
+        "layer": "Operations",
+        "valuePotentialCr": [
+          3,
+          5
+        ]
       }
     },
     {
@@ -56,6 +66,15 @@
         ],
         "effort": "M",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Grow & engage",
+        "valuePool": "Speed / control",
+        "layer": "Data, AI & platforms",
+        "valuePotentialCr": [
+          2,
+          4
+        ]
       }
     },
     {
@@ -83,6 +102,15 @@
         "effort": "S",
         "dependsOn": [
           "uc-platform-po-integration"
+        ]
+      },
+      "portfolio": {
+        "theme": "Grow & engage",
+        "valuePool": "Efficiency / service",
+        "layer": "Operations",
+        "valuePotentialCr": [
+          1,
+          2
         ]
       }
     },
@@ -112,6 +140,27 @@
         "dependsOn": [
           "uc-mdm-quality"
         ]
+      },
+      "portfolio": {
+        "theme": "Plan & fulfil",
+        "valuePool": "Efficiency / service",
+        "layer": "Data, AI & platforms",
+        "valuePotentialCr": [
+          6,
+          9
+        ]
+      },
+      "charter": {
+        "problem": "Fragmented inputs and manual overrides create forecast volatility and slow response, especially on quick commerce.",
+        "outcome": "A single demand signal by SKU, channel and region, with exception-led planning across priority channels.",
+        "valueHypothesis": "Forecast accuracy +8–12 pts · inventory days −5–8% · planning effort −20–30%",
+        "first90": [
+          "Confirm sponsor",
+          "Baseline forecast accuracy and bias",
+          "Assess demand and distributor data",
+          "Select pilot channel and SKUs",
+          "Finalise MVP architecture and squad"
+        ]
       }
     },
     {
@@ -139,6 +188,27 @@
         "dependsOn": [
           "uc-ml-forecast"
         ]
+      },
+      "portfolio": {
+        "theme": "Plan & fulfil",
+        "valuePool": "Revenue / experience",
+        "layer": "Operations",
+        "valuePotentialCr": [
+          3,
+          5
+        ]
+      },
+      "charter": {
+        "problem": "Fill-rate misses are explained after the fact and root causes are traced by hand.",
+        "outcome": "Every cut explained by reason code within a day, with recommended fixes for planners.",
+        "valueHypothesis": "Fill rate +2–3 pts · root-cause time −50%",
+        "first90": [
+          "Confirm owner",
+          "Baseline fill rate and reason codes",
+          "Assess order and stock data",
+          "Pilot on top customers",
+          "Agree weekly review"
+        ]
       }
     },
     {
@@ -163,6 +233,27 @@
         ],
         "effort": "S",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Run & enable",
+        "valuePool": "Speed / control",
+        "layer": "Data, AI & platforms",
+        "valuePotentialCr": [
+          1,
+          2
+        ]
+      },
+      "charter": {
+        "problem": "Duplicate and incomplete material masters break the forecast hierarchy and reporting.",
+        "outcome": "Master data checked and corrected at entry, with ownership by domain.",
+        "valueHypothesis": "Duplicate materials −80% · forecast hierarchy breaks eliminated",
+        "first90": [
+          "Name data owners",
+          "Profile material master",
+          "Agree data standards",
+          "Pilot on one category",
+          "Set data-quality KPIs"
+        ]
       }
     },
     {
@@ -192,6 +283,15 @@
         "dependsOn": [
           "uc-dam-ai-tagging"
         ]
+      },
+      "portfolio": {
+        "theme": "Grow & engage",
+        "valuePool": "Revenue / experience",
+        "layer": "Business experiences",
+        "valuePotentialCr": [
+          2,
+          4
+        ]
       }
     },
     {
@@ -216,6 +316,15 @@
         ],
         "effort": "S",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Grow & engage",
+        "valuePool": "Efficiency / service",
+        "layer": "Data, AI & platforms",
+        "valuePotentialCr": [
+          0.5,
+          1
+        ]
       }
     },
     {
@@ -244,6 +353,15 @@
         "dependsOn": [
           "uc-mis-automation"
         ]
+      },
+      "portfolio": {
+        "theme": "Grow & engage",
+        "valuePool": "Revenue / experience",
+        "layer": "Data, AI & platforms",
+        "valuePotentialCr": [
+          3,
+          6
+        ]
       }
     },
     {
@@ -269,6 +387,15 @@
         ],
         "effort": "S",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Run & enable",
+        "valuePool": "Efficiency / service",
+        "layer": "Operations",
+        "valuePotentialCr": [
+          1,
+          2
+        ]
       }
     },
     {
@@ -293,6 +420,15 @@
         ],
         "effort": "M",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Run & enable",
+        "valuePool": "Speed / control",
+        "layer": "Operating model",
+        "valuePotentialCr": [
+          1,
+          2
+        ]
       }
     },
     {
@@ -321,6 +457,15 @@
         "dependsOn": [
           "uc-mdm-quality"
         ]
+      },
+      "portfolio": {
+        "theme": "Run & enable",
+        "valuePool": "Efficiency / service",
+        "layer": "Data, AI & platforms",
+        "valuePotentialCr": [
+          4,
+          7
+        ]
       }
     },
     {
@@ -346,6 +491,15 @@
         ],
         "effort": "S",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Innovate & assure",
+        "valuePool": "Speed / control",
+        "layer": "Operations",
+        "valuePotentialCr": [
+          1,
+          2
+        ]
       }
     },
     {
@@ -372,6 +526,15 @@
         ],
         "effort": "M",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Grow & engage",
+        "valuePool": "Revenue / experience",
+        "layer": "Business experiences",
+        "valuePotentialCr": [
+          5,
+          8
+        ]
       }
     },
     {
@@ -397,6 +560,15 @@
         ],
         "effort": "S",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Grow & engage",
+        "valuePool": "Revenue / experience",
+        "layer": "Operations",
+        "valuePotentialCr": [
+          2,
+          4
+        ]
       }
     },
     {
@@ -422,6 +594,15 @@
         ],
         "effort": "S",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Grow & engage",
+        "valuePool": "Speed / control",
+        "layer": "Operations",
+        "valuePotentialCr": [
+          2,
+          3
+        ]
       }
     },
     {
@@ -447,6 +628,15 @@
         ],
         "effort": "M",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Grow & engage",
+        "valuePool": "Revenue / experience",
+        "layer": "Business experiences",
+        "valuePotentialCr": [
+          2,
+          4
+        ]
       }
     },
     {
@@ -472,6 +662,15 @@
         ],
         "effort": "M",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Grow & engage",
+        "valuePool": "Revenue / experience",
+        "layer": "Data, AI & platforms",
+        "valuePotentialCr": [
+          2,
+          3
+        ]
       }
     },
     {
@@ -498,6 +697,27 @@
         ],
         "effort": "M",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Plan & fulfil",
+        "valuePool": "Efficiency / service",
+        "layer": "Operations",
+        "valuePotentialCr": [
+          4,
+          6
+        ]
+      },
+      "charter": {
+        "problem": "Loads are planned by phone and Excel with each transporter; there is no TMS, so truck fill and freight cost are not managed.",
+        "outcome": "Every load planned and tendered in a TMS integrated with SAP, with in-transit tracking and digital proof of delivery.",
+        "valueHypothesis": "Freight cost −6–9% · truck fill +8–12 pts · on-time delivery +5 pts",
+        "first90": [
+          "Confirm sponsor and logistics owner",
+          "Baseline freight cost and truck fill",
+          "Map transporter and lane data",
+          "Select pilot lanes and depot",
+          "Finalise TMS shortlist and squad"
+        ]
       }
     },
     {
@@ -523,6 +743,27 @@
         ],
         "effort": "S",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Innovate & assure",
+        "valuePool": "Speed / control",
+        "layer": "Data, AI & platforms",
+        "valuePotentialCr": [
+          0.5,
+          1
+        ]
+      },
+      "charter": {
+        "problem": "Emissions, energy and water data are collected from plant spreadsheets and consolidated manually.",
+        "outcome": "Plant ESG data captured automatically, with BRSR disclosures drafted from one source.",
+        "valueHypothesis": "Reporting effort −60% · audit-ready ESG data",
+        "first90": [
+          "Confirm ESG owner",
+          "List metering points",
+          "Assess plant data feeds",
+          "Pilot two plants",
+          "Choose the ESG data platform"
+        ]
       }
     },
     {
@@ -550,6 +791,27 @@
         "dependsOn": [
           "uc-ml-forecast"
         ]
+      },
+      "portfolio": {
+        "theme": "Plan & fulfil",
+        "valuePool": "Efficiency / service",
+        "layer": "Operations",
+        "valuePotentialCr": [
+          3,
+          5
+        ]
+      },
+      "charter": {
+        "problem": "Sales and finance still keep parallel plan versions in Excel that are reconciled before the executive review.",
+        "outcome": "One IBP plan with supply-demand scenarios and gap-closure options generated for the monthly cycle.",
+        "valueHypothesis": "Plan cycle time −30% · one agreed number across sales, supply and finance",
+        "first90": [
+          "Confirm IBP process owner",
+          "Retire one parallel plan version",
+          "Define scenario levers",
+          "Pilot on one category",
+          "Agree the decision cadence"
+        ]
       }
     },
     {
@@ -575,6 +837,15 @@
         ],
         "effort": "S",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Run & enable",
+        "valuePool": "Efficiency / service",
+        "layer": "Operations",
+        "valuePotentialCr": [
+          1,
+          2
+        ]
       }
     },
     {
@@ -600,6 +871,15 @@
         ],
         "effort": "M",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Run & enable",
+        "valuePool": "Speed / control",
+        "layer": "Data, AI & platforms",
+        "valuePotentialCr": [
+          1,
+          2
+        ]
       }
     },
     {
@@ -627,6 +907,15 @@
         "dependsOn": [
           "uc-mis-automation"
         ]
+      },
+      "portfolio": {
+        "theme": "Run & enable",
+        "valuePool": "Speed / control",
+        "layer": "Operations",
+        "valuePotentialCr": [
+          1,
+          3
+        ]
       }
     },
     {
@@ -653,6 +942,15 @@
         ],
         "effort": "S",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Run & enable",
+        "valuePool": "Speed / control",
+        "layer": "Operations",
+        "valuePotentialCr": [
+          0.5,
+          1
+        ]
       }
     },
     {
@@ -679,6 +977,15 @@
         ],
         "effort": "M",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Innovate & assure",
+        "valuePool": "Speed / control",
+        "layer": "Operations",
+        "valuePotentialCr": [
+          2,
+          3
+        ]
       }
     },
     {
@@ -704,6 +1011,15 @@
         ],
         "effort": "M",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Innovate & assure",
+        "valuePool": "Speed / control",
+        "layer": "Operations",
+        "valuePotentialCr": [
+          1,
+          2
+        ]
       }
     },
     {
@@ -730,6 +1046,15 @@
         ],
         "effort": "S",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Run & enable",
+        "valuePool": "Efficiency / service",
+        "layer": "Operating model",
+        "valuePotentialCr": [
+          0.5,
+          1
+        ]
       }
     },
     {
@@ -757,6 +1082,27 @@
         ],
         "effort": "M",
         "dependsOn": []
+      },
+      "portfolio": {
+        "theme": "Plan & fulfil",
+        "valuePool": "Efficiency / service",
+        "layer": "Operations",
+        "valuePotentialCr": [
+          3,
+          5
+        ]
+      },
+      "charter": {
+        "problem": "Cycle counts are on paper and keyed into Excel; there is no live view of stock by depot or bin.",
+        "outcome": "Handheld scanning for receipts, picks and counts in a WMS linked to SAP, giving live stock by depot and bin.",
+        "valueHypothesis": "Inventory accuracy to 98%+ · count effort −40% · stock-outs at depots −15%",
+        "first90": [
+          "Confirm sponsor and depot leads",
+          "Baseline inventory accuracy",
+          "Assess bin and SKU master data",
+          "Pick two pilot depots",
+          "Select WMS and scanning hardware"
+        ]
       }
     }
   ]
